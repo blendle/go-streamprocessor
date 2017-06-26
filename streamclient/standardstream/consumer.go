@@ -2,21 +2,31 @@ package standardstream
 
 import (
 	"bufio"
+	"bytes"
 	"os"
 
 	"github.com/blendle/go-streamprocessor/stream"
 )
 
+const maxCapacity = 512 * 1024
+
 // NewConsumer returns a consumer that can iterate over messages on a stream.
 func (c *Client) NewConsumer() stream.Consumer {
+	var b []byte
 	consumer := &Consumer{messages: make(chan *stream.Message)}
 
-	scanner := bufio.NewScanner(os.Stdin)
+	f, _ := os.Open(c.config.ConsumerFD.Name())
+
+	scanner := bufio.NewScanner(f)
+	buf := make([]byte, 0, maxCapacity)
+	scanner.Buffer(buf, maxCapacity)
+
 	go func() {
+		defer close(consumer.messages)
 		for scanner.Scan() {
-			consumer.messages <- &stream.Message{Value: scanner.Bytes()}
+			b = scanner.Bytes()
+			consumer.messages <- &stream.Message{Value: bytes.TrimSpace(b)}
 		}
-		close(consumer.messages)
 	}()
 
 	return consumer

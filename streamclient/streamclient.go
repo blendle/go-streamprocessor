@@ -10,7 +10,7 @@ import (
 
 // NewStandardStreamClient returns a new standardstream client.
 func NewStandardStreamClient() stream.Client {
-	return standardstream.NewClient()
+	return standardstream.NewClient(&standardstream.ClientConfig{})
 }
 
 // NewKafkaClient returns a new Kafka client.
@@ -27,20 +27,26 @@ func NewKafkaClient() stream.Client {
 // The producer will be of the Kafka client by default, unless the `DRY_RUN`
 // environment variable is defined, in which case it will be from the
 // standardstream client.
-func NewConsumerAndProducer() (stream.Consumer, stream.Producer) {
+func NewConsumerAndProducer(ssc *standardstream.ClientConfig) (stream.Consumer, stream.Producer) {
 	var k stream.Client
 	var s stream.Client
 
 	var c stream.Consumer
 	var p stream.Producer
 
-	// Check for any data on Stdin. If there is any, use the standardstream
-	// client for the consumer.
+	// Set the file descriptor to `os.Stdin` by default, unless another fd is
+	// already provided.
+	if ssc.ConsumerFD == nil {
+		ssc.ConsumerFD = os.Stdin
+	}
+
+	// Check for any data on the provided file descriptor. If there is any, use
+	// the standardstream client for the consumer.
 	//
-	// If no data is being piped to Stdin, use the default Kafka client.
-	stat, _ := os.Stdin.Stat()
+	// If the fd contains no data, use the default Kafka client.
+	stat, _ := ssc.ConsumerFD.Stat()
 	if stat.Size() > 0 {
-		s = standardstream.NewClient()
+		s = standardstream.NewClient(ssc)
 		c = s.NewConsumer()
 	} else {
 		k = kafka.NewClient()
@@ -55,7 +61,7 @@ func NewConsumerAndProducer() (stream.Consumer, stream.Producer) {
 	// Tries to reuse an existing client, if it exists.
 	if os.Getenv("DRY_RUN") != "" {
 		if s == nil {
-			s = standardstream.NewClient()
+			s = standardstream.NewClient(ssc)
 		}
 
 		p = s.NewProducer()

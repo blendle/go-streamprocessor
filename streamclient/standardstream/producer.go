@@ -1,13 +1,12 @@
 package standardstream
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/blendle/go-streamprocessor/stream"
 )
 
-// NewProducer returns a consumer that can iterate over messages on a stream.
+// NewProducer returns a producer that outputs messages to stdout.
 func (c *Client) NewProducer() stream.Producer {
 	ch := make(chan *stream.Message)
 	producer := &Producer{messages: ch}
@@ -16,7 +15,7 @@ func (c *Client) NewProducer() stream.Producer {
 	go func() {
 		defer producer.wg.Done()
 		for msg := range ch {
-			fmt.Print(string(msg.Value))
+			c.config.ProducerFD.Write(append(msg.Value, "\n"...))
 		}
 	}()
 
@@ -30,8 +29,7 @@ type Producer struct {
 	keyFunc  func(*stream.Message) []byte
 }
 
-// Messages returns the read channel for the messages that are returned by the
-// stream.
+// Messages returns the write channel for messages to be produced.
 func (p *Producer) Messages() chan<- *stream.Message {
 	return p.messages
 }
