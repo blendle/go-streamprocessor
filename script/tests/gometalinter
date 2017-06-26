@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# script/tests/gometalinter: Run linters and static analysis
+
+set -e
+
+cd "$(dirname "$0")/../.."
+
+[ -z "$CI" ] || cd "$GOPATH/src/github.com/blendle/go-streamprocessor"
+
+matches=$(grep \
+  --ignore-case \
+  --recursive \
+  --exclude-dir vendor \
+  '^// [a-z]* \.\.\.$' . || true)
+
+if [ -n "$matches" ]; then
+  >&2 echo "Invalid code comments detected:"
+  >&2 echo
+  >&2 echo "$matches"
+  >&2 echo
+  exit 1
+fi
+
+gometalinter \
+  --vendor \
+  --tests \
+  --aggregate \
+  --line-length=100 \
+  --deadline=300s \
+  --exclude='error return value not checked.*(Close|Log|Print).*\(errcheck\)$' \
+  --exclude='.*_test\.go:.*error return value not checked.*\(errcheck\)$' \
+  --enable-all \
+  --disable=gotype \
+  --disable=gas \
+  --disable=lll \
+  --disable=gocyclo \
+  --disable=dupl \
+  ./...
