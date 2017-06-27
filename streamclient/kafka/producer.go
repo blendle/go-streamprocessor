@@ -19,8 +19,9 @@ func (c *Client) NewProducer() stream.Producer {
 		panic(err)
 	}
 
+	producer.wg.Add(1)
 	go func() {
-		producer.wg.Add(1)
+		defer producer.wg.Done()
 		for msg := range ch {
 			message := sarama.ProducerMessage{
 				Timestamp: msg.Timestamp,
@@ -34,8 +35,6 @@ func (c *Client) NewProducer() stream.Producer {
 
 			producer.sp.Input() <- &message
 		}
-
-		producer.wg.Done()
 	}()
 
 	go func() {
@@ -80,13 +79,13 @@ func (p *Producer) Close() error {
 	// process any messages still in the buffer.
 	close(p.messages)
 
-	// Wait for all messages to be comitted to the AsyncProducer, or else we might
-	// trigger a `sarama.ErrShuttingDown` error, causing one or more messages to
-	// be lost.
+	// Wait for all messages to be committed to the AsyncProducer, or else we
+	// might trigger a `sarama.ErrShuttingDown` error, causing one or more
+	// messages to be lost.
 	p.wg.Wait()
 
-	// Shut down the Sarama AsyncProducer, which will block untill all messages
-	// are processed, before shutting down.
+	// Shut down the Sarama AsyncProducer, which will block until all messages are
+	// processed, before shutting down.
 	return p.sp.Close()
 }
 

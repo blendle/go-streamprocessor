@@ -32,9 +32,7 @@ func TestConsumer_Messages(t *testing.T) {
 	client := standardstream.NewClient(config)
 
 	c := client.NewConsumer()
-
-	var msg *stream.Message
-	msg = <-c.Messages()
+	msg := <-c.Messages()
 
 	expected := "hello world"
 	actual := string(msg.Value)
@@ -52,7 +50,7 @@ func TestConsumer_Messages(t *testing.T) {
 
 	_, ok := <-c.Messages()
 
-	if ok != false {
+	if ok {
 		t.Errorf("Channel is not closed")
 	}
 }

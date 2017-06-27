@@ -12,7 +12,7 @@ type Client struct {
 	config *ClientConfig
 }
 
-// ClientConfig contians the configuration for the client
+// ClientConfig contains the configuration for the client
 type ClientConfig struct {
 	// ConsumerFD is the file descriptor to consume messages from. If undefined,
 	// the `os.Stdin` descriptor will be used.

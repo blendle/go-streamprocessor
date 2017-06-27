@@ -106,7 +106,7 @@ func TestNewConsumerAndProducer_StandardstreamConsumerAndKafkaProducer(t *testin
 	f.Write([]byte("a"))
 	defer os.Remove(f.Name())
 
-	// Set the streamclient file descriptor to a temprary file, simulating
+	// Set the streamclient file descriptor to a temporary file, simulating
 	// received data in the Stdin fd.
 	config := &standardstream.ClientConfig{ConsumerFD: f}
 
@@ -132,7 +132,7 @@ func TestNewConsumerAndProducer_StandardstreamConsumerAndStandardstreamProducer(
 	f.Write([]byte("a"))
 	defer os.Remove(f.Name())
 
-	// Set the streamclient file descriptor to a temprary file, simulating
+	// Set the streamclient file descriptor to a temporary file, simulating
 	// received data in the Stdin fd.
 	config := &standardstream.ClientConfig{ConsumerFD: f}
 
