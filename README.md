@@ -1,4 +1,4 @@
-# go-streamprocessor
+# go-streamprocessor [![Build Status](https://ci.blendle.io/buildStatus/icon?job=blendle/go-streamprocessor/master)](https://ci.blendle.io/job/blendle/job/go-streamprocessor/job/master/)
 
 This package contains shared logic for Go-based stream processors.
 
