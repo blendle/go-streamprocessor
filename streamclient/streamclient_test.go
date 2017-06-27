@@ -9,6 +9,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstream"
+	"github.com/blendle/go-streamprocessor/test"
 )
 
 func TestNewStandardStreamClient(t *testing.T) {
@@ -30,6 +31,10 @@ func TestNewKafkaClient(t *testing.T) {
 }
 
 func TestNewConsumerAndProducer(t *testing.T) {
+	if !*test.Kafka {
+		t.Skip()
+	}
+
 	c, p := streamclient.NewConsumerAndProducer(&standardstream.ClientConfig{})
 
 	_, ok := c.(stream.Consumer)
@@ -44,6 +49,10 @@ func TestNewConsumerAndProducer(t *testing.T) {
 }
 
 func TestNewConsumerAndProducer_KafkaConsumerAndKafkaProducer(t *testing.T) {
+	if !*test.Kafka {
+		t.Skip()
+	}
+
 	c, p := streamclient.NewConsumerAndProducer(&standardstream.ClientConfig{})
 
 	expected := "*kafka.Consumer"
@@ -62,6 +71,10 @@ func TestNewConsumerAndProducer_KafkaConsumerAndKafkaProducer(t *testing.T) {
 }
 
 func TestNewConsumerAndProducer_KafkaConsumerAndStandardstreamProducer(t *testing.T) {
+	if !*test.Kafka {
+		t.Skip()
+	}
+
 	// Set the DRY_RUN environment variable to trigger standardstream as the
 	// producer client
 	os.Setenv("DRY_RUN", "true")
@@ -85,6 +98,10 @@ func TestNewConsumerAndProducer_KafkaConsumerAndStandardstreamProducer(t *testin
 }
 
 func TestNewConsumerAndProducer_StandardstreamConsumerAndKafkaProducer(t *testing.T) {
+	if !*test.Kafka {
+		t.Skip()
+	}
+
 	f, _ := ioutil.TempFile("", "")
 	f.Write([]byte("a"))
 	defer os.Remove(f.Name())

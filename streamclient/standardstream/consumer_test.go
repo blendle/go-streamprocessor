@@ -10,6 +10,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstream"
+	_ "github.com/blendle/go-streamprocessor/test"
 )
 
 func TestNewConsumer(t *testing.T) {
