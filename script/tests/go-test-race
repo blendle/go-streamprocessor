@@ -8,4 +8,4 @@ cd "$(dirname "$0")/../.."
 
 [ -z "$CI" ] || cd "$GOPATH/src/github.com/blendle/go-streamprocessor"
 
-go test -race $(glide nv) -kafka
+go test -cpu=1,2,4 -race $(glide nv) -kafka
