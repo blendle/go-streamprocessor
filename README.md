@@ -69,7 +69,7 @@ This stream client's consumer listens to stdin, while the producer sends
 messages to stdout.
 
 ```golang
-cient := standardstream.NewClient(&standardstream.ClientConfig{})
+client := standardstream.NewClient(&standardstream.ClientConfig{})
 consumer := client.NewConsumer()
 producer := client.NewProducer()
 ```
@@ -79,7 +79,7 @@ producer := client.NewProducer()
 This stream client's consumer and producer listen and produce to Kafka streams.
 
 ```golang
-cient := kafka.NewClient()
+client := kafka.NewClient()
 consumer := client.NewConsumer()
 producer := client.NewProducer()
 ```
