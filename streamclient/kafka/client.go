@@ -15,6 +15,7 @@ type Client struct {
 	SaramaConfig  *sarama.Config
 	Brokers       []string
 	Topics        []string
+	ConsumerGroup string
 }
 
 // NewClient returns a new kafka client.
@@ -38,6 +39,7 @@ func NewClient() stream.Client {
 
 	c.Brokers = []string{"127.0.0.1:9092"}
 	c.Topics = []string{"test-topic"}
+	c.ConsumerGroup = "test-consumer-group"
 
 	return c
 }

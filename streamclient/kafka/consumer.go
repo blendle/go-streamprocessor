@@ -7,7 +7,7 @@ import (
 
 // NewConsumer returns a consumer that can iterate over messages on a stream.
 func (c *Client) NewConsumer() stream.Consumer {
-	kafkaconsumer, err := cluster.NewConsumer(c.Brokers, "my-consumer-group", c.Topics, c.ClusterConfig)
+	kafkaconsumer, err := cluster.NewConsumer(c.Brokers, c.ConsumerGroup, c.Topics, c.ClusterConfig)
 	if err != nil {
 		panic(err)
 	}
