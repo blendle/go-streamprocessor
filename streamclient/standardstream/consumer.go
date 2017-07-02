@@ -15,7 +15,7 @@ func (c *Client) NewConsumer() stream.Consumer {
 	var b []byte
 	consumer := &Consumer{messages: make(chan *stream.Message)}
 
-	f, _ := os.Open(c.config.ConsumerFD.Name())
+	f, _ := os.Open(c.ConsumerFD.Name())
 
 	scanner := bufio.NewScanner(f)
 	buf := make([]byte, 0, maxCapacity)

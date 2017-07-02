@@ -7,7 +7,13 @@ import (
 
 // NewConsumer returns a consumer that can iterate over messages on a stream.
 func (c *Client) NewConsumer() stream.Consumer {
-	kafkaconsumer, err := cluster.NewConsumer(c.Brokers, c.ConsumerGroup, c.Topics, c.ClusterConfig)
+	kafkaconsumer, err := cluster.NewConsumer(
+		c.ConsumerBrokers,
+		c.ConsumerGroup,
+		c.ConsumerTopics,
+		c.ClusterConfig,
+	)
+
 	if err != nil {
 		panic(err)
 	}
@@ -18,6 +24,7 @@ func (c *Client) NewConsumer() stream.Consumer {
 	}
 
 	go func() {
+		defer kafkaconsumer.Close()
 		var message stream.Message
 
 		for msg := range kafkaconsumer.Messages() {
@@ -28,7 +35,6 @@ func (c *Client) NewConsumer() stream.Consumer {
 
 			consumer.messages <- &message
 		}
-		defer kafkaconsumer.Close()
 	}()
 
 	return consumer

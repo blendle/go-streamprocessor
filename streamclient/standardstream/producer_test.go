@@ -13,7 +13,7 @@ import (
 )
 
 func TestNewProducer(t *testing.T) {
-	client := standardstream.NewClient(&standardstream.ClientConfig{})
+	client := standardstream.NewClient()
 	c := client.NewProducer()
 
 	_, ok := c.(stream.Producer)
@@ -26,9 +26,11 @@ func TestProducer_Messages(t *testing.T) {
 	var b bytes.Buffer
 	writer := bufio.NewWriter(&b)
 
-	config := &standardstream.ClientConfig{ProducerFD: writer}
-	client := standardstream.NewClient(config)
+	options := func(c *standardstream.Client) {
+		c.ProducerFD = writer
+	}
 
+	client := standardstream.NewClient(options)
 	c := client.NewProducer()
 
 	msg := &stream.Message{Value: []byte("hello world")}
@@ -49,13 +51,15 @@ func BenchmarkProducer_Messages1000(b *testing.B) {
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
-	config := &standardstream.ClientConfig{ProducerFD: writer}
-	client := standardstream.NewClient(config)
+	options := func(c *standardstream.Client) {
+		c.ProducerFD = writer
+	}
 
-	producer := client.NewProducer()
+	client := standardstream.NewClient(options)
+	p := client.NewProducer()
 
 	for n := 1; n < b.N; n++ {
-		producer.Messages() <- &stream.Message{Value: []byte(fmt.Sprintf(content, n))}
+		p.Messages() <- &stream.Message{Value: []byte(fmt.Sprintf(content, n))}
 	}
 
 	writer.Flush()

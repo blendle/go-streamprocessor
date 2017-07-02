@@ -14,7 +14,7 @@ import (
 )
 
 func TestNewConsumer(t *testing.T) {
-	client := standardstream.NewClient(&standardstream.ClientConfig{})
+	client := standardstream.NewClient()
 	c := client.NewConsumer()
 
 	_, ok := c.(stream.Consumer)
@@ -28,8 +28,11 @@ func TestConsumer_Messages(t *testing.T) {
 	f.Write([]byte("hello world\nhello universe"))
 	defer os.Remove(f.Name())
 
-	config := &standardstream.ClientConfig{ConsumerFD: f}
-	client := standardstream.NewClient(config)
+	options := func(c *standardstream.Client) {
+		c.ConsumerFD = f
+	}
+
+	client := standardstream.NewClient(options)
 
 	c := client.NewConsumer()
 	msg := <-c.Messages()
@@ -68,13 +71,16 @@ func BenchmarkConsumer_Messages1000(b *testing.B) {
 		f.WriteString(fmt.Sprintf(content, n))
 	}
 
-	config := &standardstream.ClientConfig{ConsumerFD: f}
-	c := standardstream.NewClient(config)
+	options := func(c *standardstream.Client) {
+		c.ConsumerFD = f
+	}
+
+	client := standardstream.NewClient(options)
 
 	b.ResetTimer()
 
 	i := 0
-	consumer := c.NewConsumer()
+	consumer := client.NewConsumer()
 	for msg := range consumer.Messages() {
 		i = i + 1
 		m := bytes.Split(msg.Value, []byte(`"number":`))

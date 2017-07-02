@@ -8,6 +8,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient"
+	"github.com/blendle/go-streamprocessor/streamclient/kafka"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstream"
 	"github.com/blendle/go-streamprocessor/test"
 )
@@ -35,7 +36,7 @@ func TestNewConsumerAndProducer(t *testing.T) {
 		t.Skip()
 	}
 
-	c, p := streamclient.NewConsumerAndProducer(&standardstream.ClientConfig{})
+	c, p := streamclient.NewConsumerAndProducer()
 
 	_, ok := c.(stream.Consumer)
 	if !ok {
@@ -53,7 +54,7 @@ func TestNewConsumerAndProducer_KafkaConsumerAndKafkaProducer(t *testing.T) {
 		t.Skip()
 	}
 
-	c, p := streamclient.NewConsumerAndProducer(&standardstream.ClientConfig{})
+	c, p := streamclient.NewConsumerAndProducer()
 
 	expected := "*kafka.Consumer"
 	actual := reflect.TypeOf(c).String()
@@ -80,7 +81,7 @@ func TestNewConsumerAndProducer_KafkaConsumerAndStandardstreamProducer(t *testin
 	os.Setenv("DRY_RUN", "true")
 	defer os.Unsetenv("DRY_RUN")
 
-	c, p := streamclient.NewConsumerAndProducer(&standardstream.ClientConfig{})
+	c, p := streamclient.NewConsumerAndProducer()
 
 	expected := "*kafka.Consumer"
 	actual := reflect.TypeOf(c).String()
@@ -108,9 +109,11 @@ func TestNewConsumerAndProducer_StandardstreamConsumerAndKafkaProducer(t *testin
 
 	// Set the streamclient file descriptor to a temporary file, simulating
 	// received data in the Stdin fd.
-	config := &standardstream.ClientConfig{ConsumerFD: f}
+	options := func(s *standardstream.Client, _ *kafka.Client) {
+		s.ConsumerFD = f
+	}
 
-	c, p := streamclient.NewConsumerAndProducer(config)
+	c, p := streamclient.NewConsumerAndProducer(options)
 
 	expected := "*standardstream.Consumer"
 	actual := reflect.TypeOf(c).String()
@@ -134,14 +137,16 @@ func TestNewConsumerAndProducer_StandardstreamConsumerAndStandardstreamProducer(
 
 	// Set the streamclient file descriptor to a temporary file, simulating
 	// received data in the Stdin fd.
-	config := &standardstream.ClientConfig{ConsumerFD: f}
+	options := func(s *standardstream.Client, _ *kafka.Client) {
+		s.ConsumerFD = f
+	}
 
 	// Set the DRY_RUN environment variable to trigger standardstream as the
 	// producer client
 	os.Setenv("DRY_RUN", "true")
 	defer os.Unsetenv("DRY_RUN")
 
-	c, p := streamclient.NewConsumerAndProducer(config)
+	c, p := streamclient.NewConsumerAndProducer(options)
 
 	expected := "*standardstream.Consumer"
 	actual := reflect.TypeOf(c).String()
