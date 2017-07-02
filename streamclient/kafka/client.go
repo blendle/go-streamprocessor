@@ -33,10 +33,6 @@ type Client struct {
 func NewClient(options ...func(*Client)) stream.Client {
 	c := &Client{}
 
-	if len(c.ConsumerBrokers) == 0 || len(c.ProducerBrokers) == 0 {
-		c.autoPopulateKafkaConfig()
-	}
-
 	c.ClusterConfig = cluster.NewConfig()
 	c.ClusterConfig.Consumer.Return.Errors = true
 	c.ClusterConfig.Group.Return.Notifications = true
@@ -52,6 +48,10 @@ func NewClient(options ...func(*Client)) stream.Client {
 
 	for _, option := range options {
 		option(c)
+	}
+
+	if len(c.ConsumerBrokers) == 0 || len(c.ProducerBrokers) == 0 {
+		c.autoPopulateKafkaConfig()
 	}
 
 	if c.Logger == nil {
