@@ -9,11 +9,6 @@ import (
 
 // Client provides access to the streaming capabilities.
 type Client struct {
-	config *ClientConfig
-}
-
-// ClientConfig contains the configuration for the client
-type ClientConfig struct {
 	// ConsumerFD is the file descriptor to consume messages from. If undefined,
 	// the `os.Stdin` descriptor will be used.
 	ConsumerFD *os.File
@@ -24,16 +19,22 @@ type ClientConfig struct {
 }
 
 // NewClient returns a new standardstream client.
-func NewClient(c *ClientConfig) stream.Client {
-	if c.ConsumerFD == nil {
-		c.ConsumerFD = os.Stdin
+func NewClient(options ...func(*Client)) stream.Client {
+	client := &Client{}
+
+	for _, option := range options {
+		option(client)
 	}
 
-	if c.ProducerFD == nil {
-		c.ProducerFD = os.Stdout
+	if client.ConsumerFD == nil {
+		client.ConsumerFD = os.Stdin
 	}
 
-	return &Client{config: c}
+	if client.ProducerFD == nil {
+		client.ProducerFD = os.Stdout
+	}
+
+	return client
 }
 
 // NewConsumerAndProducer is a convenience method that returns both a consumer

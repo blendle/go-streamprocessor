@@ -4,18 +4,31 @@ import (
 	"os"
 
 	"github.com/blendle/go-streamprocessor/stream"
+	"github.com/blendle/go-streamprocessor/streamclient/inmem"
 	"github.com/blendle/go-streamprocessor/streamclient/kafka"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstream"
 )
 
+// Client is the overarching configuration for all stream clients.
+type Client struct {
+	Standardstream *standardstream.Client
+	Kafka          *kafka.Client
+	Inmem          *inmem.Client
+}
+
 // NewStandardStreamClient returns a new standardstream client.
-func NewStandardStreamClient() stream.Client {
-	return standardstream.NewClient(&standardstream.ClientConfig{})
+func NewStandardStreamClient(options ...func(*standardstream.Client)) stream.Client {
+	return standardstream.NewClient(options...)
 }
 
 // NewKafkaClient returns a new Kafka client.
-func NewKafkaClient() stream.Client {
-	return kafka.NewClient()
+func NewKafkaClient(options ...func(*kafka.Client)) stream.Client {
+	return kafka.NewClient(options...)
+}
+
+// NewInmemClient returns a new inmem client.
+func NewInmemClient(options ...func(*inmem.Client)) stream.Client {
+	return inmem.NewClient(options...)
 }
 
 // NewConsumerAndProducer returns the a consumer and producer, based on the
@@ -27,29 +40,42 @@ func NewKafkaClient() stream.Client {
 // The producer will be of the Kafka client by default, unless the `DRY_RUN`
 // environment variable is defined, in which case it will be from the
 // standardstream client.
-func NewConsumerAndProducer(ssc *standardstream.ClientConfig) (stream.Consumer, stream.Producer) {
+func NewConsumerAndProducer(options ...func(sc *standardstream.Client, kc *kafka.Client)) (stream.Consumer, stream.Producer) {
 	var k stream.Client
 	var s stream.Client
 
 	var c stream.Consumer
 	var p stream.Producer
 
-	// Set the file descriptor to `os.Stdin` by default, unless another fd is
-	// already provided.
-	if ssc.ConsumerFD == nil {
-		ssc.ConsumerFD = os.Stdin
+	sc := &standardstream.Client{}
+	kc := &kafka.Client{}
+
+	for _, option := range options {
+		option(sc, kc)
+	}
+
+	if sc.ConsumerFD == nil {
+		sc.ConsumerFD = os.Stdin
+	}
+
+	scopt := func(c *standardstream.Client) {
+		c = sc
+	}
+
+	kcopt := func(c *kafka.Client) {
+		c = kc
 	}
 
 	// Check for any data on the provided file descriptor. If there is any, use
 	// the standardstream client for the consumer.
 	//
 	// If the fd contains no data, use the default Kafka client.
-	stat, _ := ssc.ConsumerFD.Stat()
+	stat, _ := sc.ConsumerFD.Stat()
 	if stat.Size() > 0 {
-		s = standardstream.NewClient(ssc)
+		s = standardstream.NewClient(scopt)
 		c = s.NewConsumer()
 	} else {
-		k = kafka.NewClient()
+		k = kafka.NewClient(kcopt)
 		c = k.NewConsumer()
 	}
 
@@ -61,13 +87,13 @@ func NewConsumerAndProducer(ssc *standardstream.ClientConfig) (stream.Consumer, 
 	// Tries to reuse an existing client, if it exists.
 	if os.Getenv("DRY_RUN") != "" {
 		if s == nil {
-			s = standardstream.NewClient(ssc)
+			s = standardstream.NewClient(scopt)
 		}
 
 		p = s.NewProducer()
 	} else {
 		if k == nil {
-			k = kafka.NewClient()
+			k = kafka.NewClient(kcopt)
 		}
 
 		p = k.NewProducer()

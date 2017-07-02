@@ -14,7 +14,7 @@ func (c *Client) NewProducer() stream.Producer {
 
 	ch := make(chan *stream.Message)
 	producer := &Producer{messages: ch}
-	producer.sp, err = sarama.NewAsyncProducer(c.Brokers, nil)
+	producer.sp, err = sarama.NewAsyncProducer(c.ProducerBrokers, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -25,12 +25,15 @@ func (c *Client) NewProducer() stream.Producer {
 		for msg := range ch {
 			message := sarama.ProducerMessage{
 				Timestamp: msg.Timestamp,
-				Topic:     c.Topics[0],
+				Topic:     c.ProducerTopics[0],
 				Value:     sarama.ByteEncoder(msg.Value),
 			}
 
-			if key := producer.keyFunc(msg); key != nil {
-				message.Key = sarama.ByteEncoder(producer.keyFunc(msg))
+			if producer.keyFunc != nil {
+				key := producer.keyFunc(msg)
+				if key != nil {
+					message.Key = sarama.ByteEncoder(key)
+				}
 			}
 
 			producer.sp.Input() <- &message

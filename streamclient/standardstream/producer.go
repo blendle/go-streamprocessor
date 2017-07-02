@@ -15,7 +15,7 @@ func (c *Client) NewProducer() stream.Producer {
 	go func() {
 		defer producer.wg.Done()
 		for msg := range ch {
-			c.config.ProducerFD.Write(append(msg.Value, "\n"...))
+			c.ProducerFD.Write(append(msg.Value, "\n"...))
 		}
 	}()
 

@@ -3,11 +3,10 @@ package main
 import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient"
-	"github.com/blendle/go-streamprocessor/streamclient/standardstream"
 )
 
 func main() {
-	consumer, producer := streamclient.NewConsumerAndProducer(&standardstream.ClientConfig{})
+	consumer, producer := streamclient.NewConsumerAndProducer()
 	defer producer.Close()
 
 	for msg := range consumer.Messages() {

@@ -10,14 +10,13 @@ Import in your `main.go`:
 import (
   "github.com/blendle/go-streamprocessor/stream"
   "github.com/blendle/go-streamprocessor/streamclient"
-  "github.com/blendle/go-streamprocessor/streamclient/standardstream"
 )
 ```
 
 Next, instantiate a new consumer and producer (or one of both):
 
 ```golang
-consumer, producer := streamclient.NewConsumerAndProducer(&standardstream.ClientConfig{})
+consumer, producer := streamclient.NewConsumerAndProducer()
 ```
 
 Don't forget to close the producer once you're done:
@@ -46,6 +45,8 @@ echo -e "hello\nworld" | env DRY_RUN=true go run main.go
 # processed: world
 ```
 
+You can find the above example in the [examples directory](examples/).
+
 ## Client implementations
 
 In the above example, we used the generic `streamclient.NewConsumerAndProducer`.
@@ -69,9 +70,21 @@ This stream client's consumer listens to stdin, while the producer sends
 messages to stdout.
 
 ```golang
-client := standardstream.NewClient(&standardstream.ClientConfig{})
+client := standardstream.NewClient()
 consumer := client.NewConsumer()
 producer := client.NewProducer()
+```
+
+You can tell the consumer or producer to listen or write to another file
+descriptor as well:
+
+```golang
+options := func(c *standardstream.Client) {
+  c.ConsumerFD, _ = os.Open("/var/my/file")
+  c.ProducerFD = os.Stderr
+}
+
+client := standardstream.NewClient(options)
 ```
 
 ### kafka
@@ -82,6 +95,72 @@ This stream client's consumer and producer listen and produce to Kafka streams.
 client := kafka.NewClient()
 consumer := client.NewConsumer()
 producer := client.NewProducer()
+```
+
+If you set the `KAFKA_CONSUMER_URL` and/or `KAFKA_PRODUCER_URL` environment
+variables, the client will configure the broker details using those values.
+
+For example:
+
+    KAFKA_CONSUMER_URL="kafka://localhost:9092/my-topic?group=my-group"
+    KAFKA_PRODUCER_URL="kafka://localhost:9092/my-other-topic"
+
+You can also define these values using client options:
+
+```golang
+options := func(c *kafka.Client) {
+  c.ConsumerBrokers = []string{"localhost"}
+  c.ConsumerTopics = []string{"my-topic"}
+  c.ConsumerGroup = "my-group"
+
+  c.ProducerBrokers = []string{"localhost"}
+  c.ProducerTopics  = []string{"my-other-topic"}
+}
+
+client := kafka.NewClient(options)
+```
+
+### Inmem
+
+This client receives the messages from an in-memory store, and produces it to
+the same (or another) in-memory store.
+
+This client is mostly useful during testing, so you reduce the dependency on
+file descriptors, or Kafka itself.
+
+```golang
+client := inmem.NewClient()
+consumer := client.NewConsumer()
+producer := client.NewProducer()
+```
+
+Here are some more use-cases:
+
+```golang
+// create a new inmemory store, so we can access it and pass it to our new inmem
+// client.
+store := inmem.NewStore()
+
+// create a new topic in the store
+topic := store.NewTopic("input-topic")
+
+// add a single message to the topic.
+topic.NewMessage([]byte("hello world!"), []byte("my-partition-key"))
+
+// set custom configuration.
+options := func(c *Client) {
+  c.ConsumerTopic = "input-topic"
+  c.ProducerTopic = "output-topic"
+}
+
+client := inmem.NewClientWithStore(store, options)
+consumer := client.NewConsumer()
+
+for msg := range consumer.Messages() {
+  fmt.Printf("received: %s", string(msg))
+}
+
+// received: hello world
 ```
 
 ## Messages

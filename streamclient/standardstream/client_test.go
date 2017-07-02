@@ -9,7 +9,7 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
-	c := standardstream.NewClient(&standardstream.ClientConfig{})
+	c := standardstream.NewClient()
 
 	_, ok := c.(stream.Client)
 	if !ok {
@@ -18,7 +18,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestNewConsumerAndProducer(t *testing.T) {
-	client := standardstream.NewClient(&standardstream.ClientConfig{})
+	client := standardstream.NewClient()
 	c, p := client.NewConsumerAndProducer()
 
 	_, ok := c.(stream.Consumer)
