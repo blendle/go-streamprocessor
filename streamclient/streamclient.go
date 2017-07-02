@@ -59,18 +59,29 @@ func NewConsumerAndProducer(options ...func(sc *standardstream.Client, kc *kafka
 	}
 
 	scopt := func(c *standardstream.Client) {
-		c = sc
+		c.ConsumerFD = sc.ConsumerFD
+		c.ProducerFD = sc.ProducerFD
+		c.Logger = sc.Logger
 	}
 
 	kcopt := func(c *kafka.Client) {
-		c = kc
+		c.ConsumerBrokers = kc.ConsumerBrokers
+		c.ConsumerGroup = kc.ConsumerGroup
+		c.ConsumerTopics = kc.ConsumerTopics
+		c.ProducerBrokers = kc.ProducerBrokers
+		c.ProducerTopics = kc.ProducerTopics
+		c.Logger = kc.Logger
 	}
 
 	// Check for any data on the provided file descriptor. If there is any, use
 	// the standardstream client for the consumer.
 	//
 	// If the fd contains no data, use the default Kafka client.
-	stat, _ := sc.ConsumerFD.Stat()
+	stat, err := sc.ConsumerFD.Stat()
+	if err != nil {
+		panic(err)
+	}
+
 	if stat.Size() > 0 {
 		s = standardstream.NewClient(scopt)
 		c = s.NewConsumer()
