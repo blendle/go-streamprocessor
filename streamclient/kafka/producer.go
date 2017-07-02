@@ -1,16 +1,22 @@
 package kafka
 
 import (
-	"log"
 	"sync"
 
 	"github.com/Shopify/sarama"
 	"github.com/blendle/go-streamprocessor/stream"
+	"go.uber.org/zap"
 )
 
 // NewProducer returns a producer that produces messages on a Kafka stream.
 func (c *Client) NewProducer() stream.Producer {
 	var err error
+
+	c.Logger.Info(
+		"Using provided Kafka producer configuration",
+		zap.Strings("brokers", c.ProducerBrokers),
+		zap.Strings("topics", c.ProducerTopics),
+	)
 
 	ch := make(chan *stream.Message)
 	producer := &Producer{messages: ch}
@@ -42,7 +48,7 @@ func (c *Client) NewProducer() stream.Producer {
 
 	go func() {
 		for err := range producer.sp.Errors() {
-			log.Println(err)
+			c.Logger.Error("Kafa producer received error.", zap.Error(err))
 		}
 	}()
 

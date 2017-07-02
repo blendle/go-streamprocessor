@@ -9,6 +9,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/blendle/go-streamprocessor/stream"
 	cluster "github.com/bsm/sarama-cluster"
+	"go.uber.org/zap"
 )
 
 // Client provides access to the streaming capabilities.
@@ -22,6 +23,10 @@ type Client struct {
 
 	ProducerBrokers []string
 	ProducerTopics  []string
+
+	// Logger is the configurable logger instance to log messages from this
+	// streamclient. If left undefined, a noop logger will be used.
+	Logger *zap.Logger
 }
 
 // NewClient returns a new kafka client.
@@ -47,6 +52,10 @@ func NewClient(options ...func(*Client)) stream.Client {
 
 	for _, option := range options {
 		option(c)
+	}
+
+	if c.Logger == nil {
+		c.Logger = zap.NewNop()
 	}
 
 	return c

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/blendle/go-streamprocessor/stream"
+	"go.uber.org/zap"
 )
 
 // Client provides access to the streaming capabilities.
@@ -16,6 +17,10 @@ type Client struct {
 	// ProducerFD is the file descriptor to produce messages to. If undefined, the
 	// `os.Stdout` descriptor will be used.
 	ProducerFD io.Writer
+
+	// Logger is the configurable logger instance to log messages from this
+	// streamclient. If left undefined, a noop logger will be used.
+	Logger *zap.Logger
 }
 
 // NewClient returns a new standardstream client.
@@ -32,6 +37,10 @@ func NewClient(options ...func(*Client)) stream.Client {
 
 	if client.ProducerFD == nil {
 		client.ProducerFD = os.Stdout
+	}
+
+	if client.Logger == nil {
+		client.Logger = zap.NewNop()
 	}
 
 	return client
