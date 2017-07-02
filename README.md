@@ -203,3 +203,7 @@ producer.PartitionKey(func(msg *stream.Message) []byte {
 
 In the above example, we implement our own `getKey` function that takes `[]byte`
 as its input, and returns the key string as `[]byte`.
+
+## TODO
+
+- [ ] add unit tests for Kafka streamclient (e.g. missing offset commit).
