@@ -42,6 +42,11 @@ func (c *Client) NewConsumer() stream.Consumer {
 			}
 
 			consumer.messages <- &message
+
+			// FIXME: we're comitting too soon here, since the message goes into
+			// 				another channel, and could still fail or not be processed at
+			// 				that point.
+			kafkaconsumer.MarkOffset(msg, "")
 		}
 	}()
 
