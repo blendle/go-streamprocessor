@@ -163,6 +163,19 @@ for msg := range consumer.Messages() {
 // received: hello world
 ```
 
+## Logging
+
+You can pass a pointer to a `zap.Logger` instance to each of the above described
+clients.
+
+```golang
+logger := func(c *kafka.Client) {
+  c.Logger, _ = zap.NewProduction()
+}
+
+client := kafka.NewClient(logger)
+```
+
 ## Messages
 
 A message is implemented as such:

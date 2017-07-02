@@ -2,3 +2,5 @@ package: github.com/blendle/go-streamprocessor
 import:
 - package: github.com/bsm/sarama-cluster
   version: ^2.1.8
+- package: go.uber.org/zap
+  version: ^1.4.1

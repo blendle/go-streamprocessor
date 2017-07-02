@@ -1,11 +1,16 @@
 package inmem
 
 import "github.com/blendle/go-streamprocessor/stream"
+import "go.uber.org/zap"
 
 // Client provides access to the streaming capabilities.
 type Client struct {
 	ConsumerTopic string
 	ProducerTopic string
+
+	// Logger is the configurable logger instance to log messages from this
+	// streamclient. If left undefined, a noop logger will be used.
+	Logger *zap.Logger
 
 	store *Store
 }
@@ -22,6 +27,10 @@ func NewClientWithStore(store *Store, options ...func(*Client)) stream.Client {
 
 	for _, option := range options {
 		option(client)
+	}
+
+	if client.Logger == nil {
+		client.Logger = zap.NewNop()
 	}
 
 	return client
