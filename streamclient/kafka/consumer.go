@@ -36,17 +36,8 @@ func (c *Client) NewConsumer() stream.Consumer {
 		var message stream.Message
 
 		for msg := range kafkaconsumer.Messages() {
-			message = stream.Message{
-				Value:     msg.Value,
-				Timestamp: msg.Timestamp,
-			}
-
+			message = stream.NewMessageFromKafka(msg, kafkaconsumer)
 			consumer.messages <- &message
-
-			// FIXME: we're comitting too soon here, since the message goes into
-			// 				another channel, and could still fail or not be processed at
-			// 				that point.
-			kafkaconsumer.MarkOffset(msg, "")
 		}
 	}()
 

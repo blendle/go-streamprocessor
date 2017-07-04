@@ -22,8 +22,6 @@ func (c *Client) NewConsumer() stream.Consumer {
 
 // Consumer implements the stream.Consumer interface for standardstream.
 type Consumer struct {
-	Topic string
-
 	messages chan *stream.Message
 }
 

@@ -29,13 +29,25 @@ Next, loop over consumed messages, and produce new messages:
 
 ```golang
 for msg := range consumer.Messages() {
+
+  // Initialize a new message.
   message := &stream.Message{}
 
+  // Set the value of the message to the consumed message, prepended with
+  // "processed: ".
   message.Value = append([]byte("processed: "), msg.Value...)
 
+  // Send message to the configured producer.
   producer.Messages() <- message
+
+  // Mark the consumed message as "done". This lets the client know it should
+  // not retry this message if the application is restarted.
+  msg.Done()
 }
 ```
+
+Don't forget to mark the consumed message as "done", or you might end up
+processing the message multiple times.
 
 Now, run your example in your terminal:
 
