@@ -6,10 +6,10 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-mkdir -p $GOPATH/bin $GOPATH/src
+mkdir -p "$GOPATH/bin" "$GOPATH/src"
 readonly srcDir="$GOPATH/src/github.com/blendle/go-streamprocessor"
-mkdir -p $srcDir
-cp -rp . $srcDir
-cd $srcDir
+mkdir -p "$srcDir"
+cp -rp . "$srcDir"
+cd "$srcDir"
 
 script/bootstrap
