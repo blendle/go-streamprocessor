@@ -46,9 +46,13 @@ func TestProducer_Messages(t *testing.T) {
 func BenchmarkProducer_Messages1000(b *testing.B) {
 	content := `{"number":%d}`
 
+	pt := func(c *inmem.Client) {
+		c.ProducerTopic = "test-topic"
+	}
+
 	store := inmem.NewStore()
 	topic := store.NewTopic("test-topic")
-	client := inmem.NewClientWithStore(store)
+	client := inmem.NewClientWithStore(store, pt)
 	producer := client.NewProducer()
 
 	for n := 1; n < b.N; n++ {

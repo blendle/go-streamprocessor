@@ -67,7 +67,11 @@ func BenchmarkConsumer_Messages1000(b *testing.B) {
 		topic.NewMessage([]byte(fmt.Sprintf(content, n)), nil)
 	}
 
-	c := inmem.NewClientWithStore(store)
+	ct := func(c *inmem.Client) {
+		c.ConsumerTopic = "test-topic"
+	}
+
+	c := inmem.NewClientWithStore(store, ct)
 
 	b.ResetTimer()
 
