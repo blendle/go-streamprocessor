@@ -6,7 +6,11 @@ import (
 )
 
 func main() {
-	consumer, producer := streamclient.NewConsumerAndProducer()
+	consumer, producer, err := streamclient.NewConsumerAndProducer()
+	if err != nil {
+		panic(err)
+	}
+
 	defer producer.Close()
 
 	for msg := range consumer.Messages() {

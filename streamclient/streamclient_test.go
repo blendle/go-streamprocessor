@@ -36,7 +36,10 @@ func TestNewConsumerAndProducer(t *testing.T) {
 		t.Skip()
 	}
 
-	c, p := streamclient.NewConsumerAndProducer()
+	c, p, err := streamclient.NewConsumerAndProducer()
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 
 	_, ok := c.(stream.Consumer)
 	if !ok {
@@ -54,7 +57,10 @@ func TestNewConsumerAndProducer_KafkaConsumerAndKafkaProducer(t *testing.T) {
 		t.Skip()
 	}
 
-	c, p := streamclient.NewConsumerAndProducer()
+	c, p, err := streamclient.NewConsumerAndProducer()
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 
 	expected := "*kafka.Consumer"
 	actual := reflect.TypeOf(c).String()
@@ -81,7 +87,10 @@ func TestNewConsumerAndProducer_KafkaConsumerAndStandardstreamProducer(t *testin
 	os.Setenv("DRY_RUN", "true")
 	defer os.Unsetenv("DRY_RUN")
 
-	c, p := streamclient.NewConsumerAndProducer()
+	c, p, err := streamclient.NewConsumerAndProducer()
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 
 	expected := "*kafka.Consumer"
 	actual := reflect.TypeOf(c).String()
@@ -113,7 +122,10 @@ func TestNewConsumerAndProducer_StandardstreamConsumerAndKafkaProducer(t *testin
 		s.ConsumerFD = f
 	}
 
-	c, p := streamclient.NewConsumerAndProducer(options)
+	c, p, err := streamclient.NewConsumerAndProducer(options)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 
 	expected := "*standardstream.Consumer"
 	actual := reflect.TypeOf(c).String()
@@ -146,7 +158,10 @@ func TestNewConsumerAndProducer_StandardstreamConsumerAndStandardstreamProducer(
 	os.Setenv("DRY_RUN", "true")
 	defer os.Unsetenv("DRY_RUN")
 
-	c, p := streamclient.NewConsumerAndProducer(options)
+	c, p, err := streamclient.NewConsumerAndProducer(options)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 
 	expected := "*standardstream.Consumer"
 	actual := reflect.TypeOf(c).String()

@@ -16,7 +16,10 @@ import (
 Next, instantiate a new consumer and producer (or one of both):
 
 ```golang
-consumer, producer := streamclient.NewConsumerAndProducer()
+consumer, producer, err := streamclient.NewConsumerAndProducer()
+if err != nil {
+  panic(err)
+}
 ```
 
 Don't forget to close the producer once you're done:
@@ -63,7 +66,7 @@ You can find the above example in the [examples directory](examples/).
 
 In the above example, we used the generic `streamclient.NewConsumerAndProducer`.
 This creates a consumer and producer, based on the environment you run the
-program in.
+program in (you can also call `NewConsumer` or `NewProducer` individually).
 
 In our example, we send data to the program over `stdin`, this triggered the
 application to initialize the `standardstream` consumer, which listens on the
