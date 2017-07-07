@@ -47,7 +47,7 @@ func NewClient(options ...func(*Client)) stream.Client {
 	c.ProducerConfig.Metadata.RefreshFrequency = 5 * time.Minute
 	c.ProducerConfig.Net.KeepAlive = 5 * time.Minute
 	c.ProducerConfig.Net.MaxOpenRequests = 64
-	c.ProducerConfig.Producer.Compression = sarama.CompressionGZIP
+	c.ProducerConfig.Producer.Compression = sarama.CompressionSnappy
 	c.ProducerConfig.Producer.Retry.Max = 10
 	c.ProducerConfig.Producer.Return.Errors = true
 	c.ProducerConfig.Version = sarama.V0_10_2_0
