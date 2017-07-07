@@ -26,8 +26,8 @@ gometalinter \
   --vendor \
   --tests \
   --aggregate \
-  --line-length=100 \
   --deadline=300s \
+  --vendored-linters \
   --exclude='error return value not checked.*(Close|Log|Print|Write).*\(errcheck\)$' \
   --exclude='.*_test\.go:.*error return value not checked.*\(errcheck\)$' \
   --enable-all \
