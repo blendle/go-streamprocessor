@@ -14,13 +14,12 @@ import (
 
 // Client provides access to the streaming capabilities.
 type Client struct {
-	ClusterConfig *cluster.Config
-	SaramaConfig  *sarama.Config
-
+	ConsumerConfig  *cluster.Config
 	ConsumerBrokers []string
 	ConsumerTopics  []string
 	ConsumerGroup   string
 
+	ProducerConfig  *sarama.Config
 	ProducerBrokers []string
 	ProducerTopics  []string
 
@@ -33,18 +32,25 @@ type Client struct {
 func NewClient(options ...func(*Client)) stream.Client {
 	c := &Client{}
 
-	c.ClusterConfig = cluster.NewConfig()
-	c.ClusterConfig.Consumer.Return.Errors = true
-	c.ClusterConfig.Group.Return.Notifications = true
-	c.ClusterConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
-	c.ClusterConfig.Version = sarama.V0_10_0_1
+	c.ConsumerConfig = cluster.NewConfig()
+	c.ConsumerConfig.Consumer.Fetch.Default = 1048576
+	c.ConsumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+	c.ConsumerConfig.Consumer.Retry.Backoff = time.Duration(1) * time.Second
+	c.ConsumerConfig.Consumer.Return.Errors = true
+	c.ConsumerConfig.Group.Return.Notifications = true
+	c.ConsumerConfig.Metadata.RefreshFrequency = 5 * time.Minute
+	c.ConsumerConfig.Net.KeepAlive = 5 * time.Minute
+	c.ConsumerConfig.Net.MaxOpenRequests = 64
+	c.ConsumerConfig.Version = sarama.V0_10_2_0
 
-	c.SaramaConfig = sarama.NewConfig()
-	c.SaramaConfig.Net.MaxOpenRequests = 64
-	c.SaramaConfig.Net.KeepAlive = 5 * time.Minute
-	c.SaramaConfig.Version = sarama.V0_10_0_1
-	c.SaramaConfig.Producer.Return.Errors = true
-	c.SaramaConfig.Producer.Retry.Max = 10
+	c.ProducerConfig = sarama.NewConfig()
+	c.ProducerConfig.Metadata.RefreshFrequency = 5 * time.Minute
+	c.ProducerConfig.Net.KeepAlive = 5 * time.Minute
+	c.ProducerConfig.Net.MaxOpenRequests = 64
+	c.ProducerConfig.Producer.Compression = sarama.CompressionGZIP
+	c.ProducerConfig.Producer.Retry.Max = 10
+	c.ProducerConfig.Producer.Return.Errors = true
+	c.ProducerConfig.Version = sarama.V0_10_2_0
 
 	for _, option := range options {
 		option(c)
