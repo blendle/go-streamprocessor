@@ -20,7 +20,7 @@ func (c *Client) NewProducer() stream.Producer {
 
 	ch := make(chan *stream.Message)
 	producer := &Producer{messages: ch}
-	producer.sp, err = sarama.NewAsyncProducer(c.ProducerBrokers, nil)
+	producer.sp, err = sarama.NewAsyncProducer(c.ProducerBrokers, c.ProducerConfig)
 	if err != nil {
 		panic(err)
 	}

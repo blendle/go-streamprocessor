@@ -12,7 +12,7 @@ func (c *Client) NewConsumer() stream.Consumer {
 		c.ConsumerBrokers,
 		c.ConsumerGroup,
 		c.ConsumerTopics,
-		c.ClusterConfig,
+		c.ConsumerConfig,
 	)
 
 	c.Logger.Info(
