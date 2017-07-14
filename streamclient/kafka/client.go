@@ -77,33 +77,37 @@ func (c *Client) autoPopulateKafkaConfig() {
 	var broker, group, topic string
 	var err error
 
-	if u := os.Getenv("KAFKA_CONSUMER_URL"); u != "" {
-		broker, group, topic, err = ParseKafkaURL(u)
-		if err != nil {
-			return
+	if len(c.ConsumerBrokers) == 0 {
+		if u := os.Getenv("KAFKA_CONSUMER_URL"); u != "" {
+			broker, group, topic, err = ParseKafkaURL(u)
+			if err != nil {
+				return
+			}
+		} else {
+			broker = "localhost:9092"
+			group = "test-group"
+			topic = "consumer-topic"
 		}
-	} else {
-		broker = "localhost:9092"
-		group = "test-group"
-		topic = "consumer-topic"
+
+		c.ConsumerBrokers = []string{broker}
+		c.ConsumerTopics = []string{topic}
+		c.ConsumerGroup = group
 	}
 
-	c.ConsumerBrokers = []string{broker}
-	c.ConsumerTopics = []string{topic}
-	c.ConsumerGroup = group
-
-	if u := os.Getenv("KAFKA_PRODUCER_URL"); u != "" {
-		broker, _, topic, err = ParseKafkaURL(u)
-		if err != nil {
-			return
+	if len(c.ProducerBrokers) == 0 {
+		if u := os.Getenv("KAFKA_PRODUCER_URL"); u != "" {
+			broker, _, topic, err = ParseKafkaURL(u)
+			if err != nil {
+				return
+			}
+		} else {
+			broker = "localhost:9092"
+			topic = "producer-topic"
 		}
-	} else {
-		broker = "localhost:9092"
-		topic = "producer-topic"
-	}
 
-	c.ProducerBrokers = []string{broker}
-	c.ProducerTopics = []string{topic}
+		c.ProducerBrokers = []string{broker}
+		c.ProducerTopics = []string{topic}
+	}
 }
 
 // ParseKafkaURL parses a Kafka URL and returns the relevant components.
