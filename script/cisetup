@@ -6,9 +6,12 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+[ -z "$CI" ] || export GOPATH=/home/jenkins/go
+
 mkdir -p "$GOPATH/bin" "$GOPATH/src"
 readonly srcDir="$GOPATH/src/github.com/blendle/go-streamprocessor"
 mkdir -p "$srcDir"
+
 cp -rp . "$srcDir"
 cd "$srcDir"
 

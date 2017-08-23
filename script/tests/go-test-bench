@@ -6,6 +6,9 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
-[ -z "$CI" ] || cd "$GOPATH/src/github.com/blendle/go-streamprocessor"
+[ -z "$CI" ] || {
+  cd "$GOPATH/src/github.com/blendle/go-streamprocessor"
+  export GOPATH=/home/jenkins/go
+}
 
 env KAFKA=true go test -benchmem -bench $(glide nv)
