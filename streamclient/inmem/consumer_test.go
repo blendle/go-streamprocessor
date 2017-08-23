@@ -63,7 +63,7 @@ func BenchmarkConsumer_Messages1000(b *testing.B) {
 	store := inmem.NewStore()
 	topic := store.NewTopic("test-topic")
 
-	for n := 1; n < b.N; n++ {
+	for n := 1; n <= b.N; n++ {
 		topic.NewMessage([]byte(fmt.Sprintf(content, n)), nil)
 	}
 
@@ -87,5 +87,9 @@ func BenchmarkConsumer_Messages1000(b *testing.B) {
 		if actual != expected {
 			b.Errorf("Unexpected return value, expected %s, got %s (message: %q)", expected, actual, msg.Value)
 		}
+	}
+
+	if i != b.N {
+		b.Errorf("Expected %d messages to be processed, got %d", b.N, i)
 	}
 }
