@@ -1,17 +1,18 @@
 package test
 
-import "flag"
+import "os"
 
-// Kafka is set to `true` if `go test` is run with the `-kafka` flag.
+// Kafka is set to `true` if the `KAFKA` environment variable is set to `true`.
 //
 // Use this to by-default skip tests that depend on a running Kafka instance:
 //
-//   if !*test.Kafka {
+//   if !test.Kafka {
 //     t.Skip()
 //   }
-var Kafka *bool
+var Kafka bool
 
 func init() {
-	Kafka = flag.Bool("kafka", false, "run tests with Kafka dependencies")
-	flag.Parse()
+	if os.Getenv("KAFKA") == "true" {
+		Kafka = true
+	}
 }
