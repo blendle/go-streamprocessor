@@ -1,4 +1,6 @@
 happyHackin {
+  debug = "test"
+
   image       = "eu.gcr.io/bnl-blendle/go-streamprocessor:ci"
   buildImages = [[file: 'Dockerfile', tag: 'ci', onBranch: 'master']]
 

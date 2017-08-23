@@ -21,5 +21,5 @@ Feature: Correctly process Kafka messages
     And the kafka consumer consumes from the "process-test" topic
     And the kafka consumer closes after 1 second
     And the kafka consumer consumes from the "process-test" topic
-    And no more messages are streamed into the "process-test" topic
+    And no more messages are streamed into the topic
     Then all messages should have been consumed

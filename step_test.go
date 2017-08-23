@@ -38,9 +38,8 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^(\d+) messages? exists? in topic "([^"]*)"$`, r.messagesExistInTopic)
 	s.Step(`^messages are continuously streamed into the "([^"]*)" topic$`, r.messagesAreContinuouslyStreamedIntoTheTopic)
 	s.Step(`^the kafka consumer closes after (\d+) seconds?$`, r.theKafkaConsumerClosesAfterSeconds)
-	s.Step(`^no more messages are streamed into the "([^"]*)" topic$`, r.noMoreMessagesAreStreamedIntoTheTopic)
+	s.Step(`^no more messages are streamed into the topic$`, r.noMoreMessagesAreStreamedIntoTheTopic)
 	s.Step(`^all messages should have been consumed$`, r.allMessagesShouldHaveBeenConsumed)
-
 }
 
 func (r *Run) theTopicExists(name string) error {
@@ -137,7 +136,7 @@ func (r *Run) theKafkaConsumerClosesAfterSeconds(seconds int) error {
 	return r.Consumer.Close()
 }
 
-func (r *Run) noMoreMessagesAreStreamedIntoTheTopic(arg1 string) error {
+func (r *Run) noMoreMessagesAreStreamedIntoTheTopic() error {
 	r.CloseProducer <- true
 	close(r.CloseProducer)
 
