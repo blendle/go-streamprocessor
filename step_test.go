@@ -93,7 +93,7 @@ Loop:
 			i++
 		case <-timeout.C:
 			break Loop
-		case <-time.After(30 * time.Second):
+		case <-time.After(1200 * time.Second):
 			return fmt.Errorf("timeout waiting for messages to be consumed")
 		}
 	}
