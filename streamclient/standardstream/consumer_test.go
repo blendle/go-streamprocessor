@@ -67,7 +67,7 @@ func BenchmarkConsumer_Messages1000(b *testing.B) {
 	f, _ := os.OpenFile(tmpfile.Name(), os.O_APPEND|os.O_WRONLY, 0600)
 	defer f.Close()
 
-	for n := 1; n < b.N; n++ {
+	for n := 1; n <= b.N; n++ {
 		f.WriteString(fmt.Sprintf(content, n))
 	}
 
@@ -91,5 +91,9 @@ func BenchmarkConsumer_Messages1000(b *testing.B) {
 		if actual != expected {
 			b.Errorf("Unexpected return value, expected %s, got %s (message: %q)", expected, actual, msg.Value)
 		}
+	}
+
+	if i != b.N {
+		b.Errorf("Expected %d messages to be processed, got %d", b.N, i)
 	}
 }

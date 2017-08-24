@@ -32,7 +32,7 @@ func TestNewKafkaClient(t *testing.T) {
 }
 
 func TestNewConsumerAndProducer(t *testing.T) {
-	if !*test.Kafka {
+	if !test.Kafka {
 		t.Skip()
 	}
 
@@ -53,7 +53,7 @@ func TestNewConsumerAndProducer(t *testing.T) {
 }
 
 func TestNewConsumerAndProducer_KafkaConsumerAndKafkaProducer(t *testing.T) {
-	if !*test.Kafka {
+	if !test.Kafka {
 		t.Skip()
 	}
 
@@ -78,7 +78,7 @@ func TestNewConsumerAndProducer_KafkaConsumerAndKafkaProducer(t *testing.T) {
 }
 
 func TestNewConsumerAndProducer_KafkaConsumerAndStandardstreamProducer(t *testing.T) {
-	if !*test.Kafka {
+	if !test.Kafka {
 		t.Skip()
 	}
 
@@ -108,7 +108,7 @@ func TestNewConsumerAndProducer_KafkaConsumerAndStandardstreamProducer(t *testin
 }
 
 func TestNewConsumerAndProducer_StandardstreamConsumerAndKafkaProducer(t *testing.T) {
-	if !*test.Kafka {
+	if !test.Kafka {
 		t.Skip()
 	}
 

@@ -42,3 +42,8 @@ type Consumer struct {
 func (c *Consumer) Messages() <-chan *stream.Message {
 	return c.messages
 }
+
+// Close closes the consumer connection.
+func (c *Consumer) Close() error {
+	return nil
+}

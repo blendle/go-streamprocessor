@@ -4,3 +4,6 @@ import:
   version: ^2.1.8
 - package: go.uber.org/zap
   version: ^1.4.1
+testImport:
+- package: github.com/DATA-DOG/godog
+  version: ^0.7.3

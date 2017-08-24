@@ -8,5 +8,7 @@ cd "$(dirname "$0")/.."
 
 command -v glide >/dev/null 2>&1 || curl https://glide.sh/get | sh
 command -v gometalinter >/dev/null 2>&1 || go get -u github.com/alecthomas/gometalinter
+command -v godog >/dev/null 2>&1 || go get -u github.com/DATA-DOG/godog/cmd/godog
+
 gometalinter --install --update
 glide install --strip-vendor --skip-test

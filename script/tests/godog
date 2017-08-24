@@ -2,13 +2,14 @@
 
 # script/tests/go-test-race: Run benchmark tests
 
-set -e
+set -aeu
 
 cd "$(dirname "$0")/../.."
 
 [ -z "$CI" ] || {
   cd "$GOPATH/src/github.com/blendle/go-streamprocessor"
-  export GOPATH=/home/jenkins/go
+  GOPATH=/home/jenkins/go
 }
 
-env KAFKA=true go test $(glide nv)
+TERM=xterm
+godog --random --strict --tags ~@wip "$@"
