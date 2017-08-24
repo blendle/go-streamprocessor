@@ -10,9 +10,9 @@ Feature: Correctly process Kafka messages
     Then 1 message should have been consumed
 
   Scenario: Consume a large amount of messages
-    Given 1000 messages exist in topic "process-test"
+    Given 100000 messages exist in topic "process-test"
     When the kafka consumer consumes from the "process-test" topic
-    Then 1000 messages should have been consumed
+    Then 100000 messages should have been consumed
 
   Scenario: Consume messages in multiple chunks
     Given messages are continuously streamed into the "process-test" topic
