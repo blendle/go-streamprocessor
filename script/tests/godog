@@ -11,4 +11,4 @@ cd "$(dirname "$0")/../.."
   export GOPATH=/home/jenkins/go
 }
 
-godog --random --concurrency 4 --format progress --strict --tags ~@wip
+godog --random --strict --tags ~@wip
