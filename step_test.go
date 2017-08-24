@@ -93,7 +93,7 @@ Loop:
 			i++
 		case <-timeout.C:
 			break Loop
-		case <-time.After(1200 * time.Second):
+		case <-time.After(30 * time.Second):
 			return fmt.Errorf("timeout waiting for messages to be consumed")
 		}
 	}
@@ -157,27 +157,35 @@ func (r *Run) addMessagesToTopic(count int, message, topic string) {
 	}
 
 	broker := newBroker()
-	request := sarama.ProduceRequest{}
-	request.RequiredAcks = sarama.WaitForAll
 
-	for i := 1; i <= count; i++ {
-		msg := message
-		if strings.Count(message, "%d") == 1 {
-			msg = fmt.Sprintf(message, i)
+	runs := 1
+	if count > 10000 {
+		runs = count / 1000
+		count = count / runs
+	}
+
+	for j := 0; j < runs; j++ {
+		request := sarama.ProduceRequest{}
+		request.RequiredAcks = sarama.WaitForLocal
+
+		for i := 1; i <= count; i++ {
+			msg := message
+			if strings.Count(message, "%d") == 1 {
+				msg = fmt.Sprintf(message, i+(10*j))
+			}
+
+			request.AddMessage(topic, 0, &sarama.Message{Codec: sarama.CompressionNone, Key: nil, Value: []byte(msg)})
+			r.msgCount++
 		}
 
-		request.AddMessage(topic, 0, &sarama.Message{Codec: sarama.CompressionNone, Key: nil, Value: []byte(msg)})
-		r.msgCount++
+		response, err := broker.Produce(&request)
+		if err != nil {
+			println(err.Error())
+		}
+		if response == nil {
+			println("Produce request without NoResponse got no response!")
+		}
 	}
-
-	response, err := broker.Produce(&request)
-	if err != nil {
-		println(err.Error())
-	}
-	if response == nil {
-		println("Produce request without NoResponse got no response!")
-	}
-
 }
 
 func newBroker() *sarama.Broker {
