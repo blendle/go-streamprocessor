@@ -1,6 +1,9 @@
 package inmem
 
-import "sort"
+import (
+	"sort"
+	"sync"
+)
 
 // DefaultStore is the global default store.
 var DefaultStore *Store
@@ -8,17 +11,20 @@ var DefaultStore *Store
 // Store hold the in-memory representation of a data storage service.
 type Store struct {
 	Topics map[string]*Topic
+	mutex  sync.RWMutex
 }
 
 // Topic contains all the messages
 type Topic struct {
 	Partitions map[string]*Partition
+	mutex      sync.RWMutex
 }
 
 // Partition is a single instance of a store, containing messages.
 type Partition struct {
 	offset   int
 	messages map[int][]byte
+	mutex    sync.RWMutex
 }
 
 // NewStore initializes a new empty in-memory store.
@@ -38,6 +44,9 @@ func NewStore() *Store {
 
 // NewTopic returns a new topic, or existing one, if it exists.
 func (s *Store) NewTopic(name string) *Topic {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
 	if _, ok := s.Topics[name]; !ok {
 		s.Topics[name] = &Topic{Partitions: make(map[string]*Partition)}
 	}
@@ -47,12 +56,18 @@ func (s *Store) NewTopic(name string) *Topic {
 
 // NewMessage creates a new message in a topic.
 func (t *Topic) NewMessage(msg []byte, key []byte) {
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+
 	p := t.getPartition(key)
 	p.store(msg)
 }
 
 // Messages returns all messages in all Partitions as a map.
 func (t *Topic) Messages() [][]byte {
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+
 	msgs := make([][]byte, 0)
 	for _, p := range t.Partitions {
 		msgs = append(msgs, p.Messages()...)
@@ -63,6 +78,9 @@ func (t *Topic) Messages() [][]byte {
 
 // Messages returns all messages in a partition.
 func (p *Partition) Messages() [][]byte {
+	p.mutex.RLock()
+	defer p.mutex.RUnlock()
+
 	msgs := make([][]byte, 0, len(p.messages))
 
 	var keys []int

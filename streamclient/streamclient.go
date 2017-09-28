@@ -71,7 +71,7 @@ func NewConsumer(options ...func(sc *standardstream.Client, kc *kafka.Client)) (
 		return consumer, err
 	}
 
-	if (stat.Mode() & os.ModeCharDevice) == 0 {
+	if stat.Size() > 0 {
 		c := standardstream.NewClient(scopt)
 		consumer = c.NewConsumer()
 	} else {

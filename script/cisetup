@@ -15,4 +15,5 @@ mkdir -p "$srcDir"
 cp -rp . "$srcDir"
 cd "$srcDir"
 
+go version
 script/bootstrap
