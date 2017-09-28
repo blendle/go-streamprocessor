@@ -230,7 +230,7 @@ func createKafkaTopic(name string) error {
 	err = kafkaCreateTopicCmd(name)
 
 	if err != nil && strings.Contains(err.Error(), fmt.Sprintf("Topic '%s' already exists", name)) {
-		createKafkaTopic(name)
+		err = createKafkaTopic(name)
 	}
 
 	return err
