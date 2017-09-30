@@ -65,7 +65,6 @@ func BenchmarkConsumer_Messages1000(b *testing.B) {
 	defer os.Remove(tmpfile.Name())
 
 	f, _ := os.OpenFile(tmpfile.Name(), os.O_APPEND|os.O_WRONLY, 0600)
-	defer f.Close()
 
 	for n := 1; n <= b.N; n++ {
 		f.WriteString(fmt.Sprintf(content, n))
@@ -79,8 +78,10 @@ func BenchmarkConsumer_Messages1000(b *testing.B) {
 
 	b.ResetTimer()
 
-	i := 0
 	consumer := client.NewConsumer()
+	defer consumer.Close()
+
+	i := 0
 	for msg := range consumer.Messages() {
 		i = i + 1
 		m := bytes.Split(msg.Value, []byte(`"number":`))
