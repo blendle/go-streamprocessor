@@ -2,7 +2,7 @@
 
 # script/tests/go-test-race: Run benchmark tests
 
-set -aeu
+set -ae
 
 cd "$(dirname "$0")/../.."
 

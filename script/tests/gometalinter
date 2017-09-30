@@ -40,4 +40,4 @@ gometalinter \
   --disable=lll \
   --disable=gocyclo \
   --disable=dupl \
-  ./...
+  ${@:-./...}

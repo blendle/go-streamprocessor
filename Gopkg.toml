@@ -1,0 +1,14 @@
+[[constraint]]
+  name = "github.com/DATA-DOG/godog"
+
+[[constraint]]
+  name = "github.com/Shopify/sarama"
+  version = "1.12.0"
+
+[[constraint]]
+  name = "github.com/bsm/sarama-cluster"
+  version = "2.1.8"
+
+[[constraint]]
+  name = "go.uber.org/zap"
+  version = "1.4"

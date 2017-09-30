@@ -16,4 +16,4 @@ cp -rp . "$srcDir"
 cd "$srcDir"
 
 go version
-script/bootstrap
+script/setup
