@@ -11,4 +11,4 @@ cd "$(dirname "$0")/../.."
   export GOPATH=/home/jenkins/go
 }
 
-env KAFKA=true go test $(glide nv)
+env KAFKA=true go test ${@:-./...}
