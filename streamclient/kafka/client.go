@@ -34,6 +34,7 @@ func NewClient(options ...func(*Client)) stream.Client {
 
 	c.ConsumerConfig = cluster.NewConfig()
 	c.ConsumerConfig.Consumer.Fetch.Default = 1048576
+	c.ConsumerConfig.Consumer.Offsets.CommitInterval = 250 * time.Millisecond
 	c.ConsumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
 	c.ConsumerConfig.Consumer.Retry.Backoff = time.Duration(1) * time.Second
 	c.ConsumerConfig.Consumer.Return.Errors = true
@@ -44,10 +45,12 @@ func NewClient(options ...func(*Client)) stream.Client {
 	c.ConsumerConfig.Version = sarama.V0_10_2_0
 
 	c.ProducerConfig = sarama.NewConfig()
+	c.ProducerConfig.ChannelBufferSize = 65536
 	c.ProducerConfig.Metadata.RefreshFrequency = 5 * time.Minute
 	c.ProducerConfig.Net.KeepAlive = 5 * time.Minute
 	c.ProducerConfig.Net.MaxOpenRequests = 64
 	c.ProducerConfig.Producer.Compression = sarama.CompressionSnappy
+	c.ProducerConfig.Producer.RequiredAcks = sarama.WaitForAll
 	c.ProducerConfig.Producer.Retry.Max = 10
 	c.ProducerConfig.Producer.Return.Errors = true
 	c.ProducerConfig.Version = sarama.V0_10_2_0
