@@ -21,6 +21,7 @@ type Run struct {
 	Consumer      stream.Consumer
 	CloseProducer chan bool
 	msgCount      int
+	msgTemplate   string
 }
 
 func FeatureContext(s *godog.Suite) {
@@ -29,6 +30,7 @@ func FeatureContext(s *godog.Suite) {
 	s.BeforeScenario(func(interface{}) {
 		r.Consumer = nil
 		r.msgCount = 0
+		r.msgTemplate = `hello from message %d!`
 	})
 
 	s.Step(`^the topic "([^"]*)" exists$`, r.theTopicExists)
@@ -40,6 +42,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^the kafka consumer closes after (\d+) seconds?$`, r.theKafkaConsumerClosesAfterSeconds)
 	s.Step(`^no more messages are streamed into the topic$`, r.noMoreMessagesAreStreamedIntoTheTopic)
 	s.Step(`^all messages should have been consumed$`, r.allMessagesShouldHaveBeenConsumed)
+	s.Step(`^the messages are consumed in the correct order$`, r.theMessagesAreCorrectlyOrdered)
 }
 
 func (r *Run) theTopicExists(name string) error {
@@ -66,8 +69,6 @@ func (r *Run) theKafkaConsumerConsumesFromTheTopic(topic string) error {
 	if debug() {
 		sarama.Logger = log.New(os.Stderr, "", log.LstdFlags)
 	}
-
-	// kafkaDeleteConsumerGroup("my-group")
 
 	client := kafka.NewClient(options)
 	r.Consumer = client.NewConsumer()
@@ -105,8 +106,39 @@ Loop:
 	return nil
 }
 
+func (r *Run) theMessagesAreCorrectlyOrdered() error {
+	defer r.Consumer.Close()
+
+	timeout := &time.Timer{}
+	i := 0
+Loop:
+	for {
+		select {
+		case msg := <-r.Consumer.Messages():
+			if i == 0 {
+				timeout = time.NewTimer(500 * time.Millisecond)
+			} else {
+				timeout.Reset(500 * time.Millisecond)
+			}
+
+			expected := fmt.Sprintf(r.msgTemplate, i+1)
+			if string(msg.Value) != expected {
+				return fmt.Errorf("unexpected message value: %s (expected %s)", string(msg.Value), expected)
+			}
+
+			i++
+		case <-timeout.C:
+			break Loop
+		case <-time.After(30 * time.Second):
+			return fmt.Errorf("timeout waiting for messages to be consumed")
+		}
+	}
+
+	return nil
+}
+
 func (r *Run) messagesExistInTopic(count int, topic string) error {
-	r.addMessagesToTopic(count, `hello from message %d!`, topic)
+	r.addMessagesToTopic(count, r.msgTemplate, topic)
 
 	return nil
 }
@@ -121,7 +153,7 @@ func (r *Run) messagesAreContinuouslyStreamedIntoTheTopic(topic string) error {
 			case <-r.CloseProducer:
 				break ProducerLoop
 			default:
-				r.addMessagesToTopic(1, fmt.Sprintf("hello from message %d!", i), topic)
+				r.addMessagesToTopic(1, fmt.Sprintf(r.msgTemplate, i), topic)
 				time.Sleep(100 * time.Millisecond)
 			}
 		}
@@ -153,7 +185,7 @@ func (r *Run) allMessagesShouldHaveBeenConsumed() error {
 
 func (r *Run) addMessagesToTopic(count int, message, topic string) {
 	if message == "" {
-		message = `hello from message %d!`
+		message = r.msgTemplate
 	}
 
 	broker := newBroker()

@@ -35,14 +35,12 @@ func (c *Client) NewConsumer() stream.Consumer {
 
 	go func() {
 		defer kafkaconsumer.Close()
-		var message stream.Message
-
 		for {
 			select {
 			case msg := <-kafkaconsumer.Messages():
-				message = stream.NewMessageFromKafka(msg, kafkaconsumer)
+				message := stream.NewMessageFromKafka(msg, kafkaconsumer)
 				select {
-				case consumer.messages <- &message:
+				case consumer.messages <- message:
 				case <-consumer.close:
 					consumer.closed <- true
 					return

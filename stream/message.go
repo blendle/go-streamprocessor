@@ -17,8 +17,8 @@ type Message struct {
 }
 
 // NewMessageFromKafka creates a new message with required Kafka metadata.
-func NewMessageFromKafka(msg *sarama.ConsumerMessage, c *cluster.Consumer) Message {
-	return Message{
+func NewMessageFromKafka(msg *sarama.ConsumerMessage, c *cluster.Consumer) *Message {
+	return &Message{
 		Value:         msg.Value,
 		Key:           msg.Key,
 		Timestamp:     msg.Timestamp,
