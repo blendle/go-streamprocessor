@@ -23,3 +23,8 @@ Feature: Correctly process Kafka messages
     And the kafka consumer consumes from the "process-test" topic
     And no more messages are streamed into the topic
     Then all messages should have been consumed
+
+  Scenario: Consume messages with correct values
+    Given 10 messages exist in topic "process-test"
+    When the kafka consumer consumes from the "process-test" topic
+    Then the messages are consumed in the correct order
