@@ -29,10 +29,14 @@ func (c *Client) NewProducer() stream.Producer {
 	go func() {
 		defer producer.wg.Done()
 		for msg := range ch {
+			// TODO: is this needed? It was for stream.NewMessageFromKafka, but here?
+			value := make([]byte, len(msg.Value))
+			copy(value, msg.Value)
+
 			message := sarama.ProducerMessage{
 				Timestamp: msg.Timestamp,
 				Topic:     c.ProducerTopics[0],
-				Value:     sarama.ByteEncoder(msg.Value),
+				Value:     sarama.ByteEncoder(value),
 			}
 
 			if producer.keyFunc != nil {

@@ -18,9 +18,18 @@ type Message struct {
 
 // NewMessageFromKafka creates a new message with required Kafka metadata.
 func NewMessageFromKafka(msg *sarama.ConsumerMessage, c *cluster.Consumer) *Message {
+
+	// TODO: This was needed to prevent message modifications to cross-contaminate
+	//       the next message. Haven't added test yet, but this fixes that issue.
+	value := make([]byte, len(msg.Value))
+	copy(value, msg.Value)
+
+	key := make([]byte, len(msg.Key))
+	copy(key, msg.Key)
+
 	return &Message{
-		Value:         msg.Value,
-		Key:           msg.Key,
+		Value:         value,
+		Key:           key,
 		Timestamp:     msg.Timestamp,
 		kafkaMessage:  msg,
 		kafkaConsumer: c,
