@@ -119,7 +119,7 @@ func (p *Producer) PartitionKey(f func(*stream.Message) []byte) {
 
 func (p *Producer) listenForInterrupts(l *zap.Logger) {
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Kill, os.Interrupt)
+	signal.Notify(signals, os.Interrupt)
 
 	s := <-signals
 
