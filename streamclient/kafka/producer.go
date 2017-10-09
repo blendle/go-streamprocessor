@@ -126,6 +126,6 @@ func (p *Producer) listenForInterrupts(l *zap.Logger) {
 	l.Info("Got interrupt signal, cleaning up.", zap.String("signal", s.String()))
 
 	if err := p.Close(); err != nil {
-		l.Error("Could close kafka consumer properly", zap.Error(err))
+		l.Error("Error while closing producer.", zap.Error(err))
 	}
 }
