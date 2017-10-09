@@ -1,6 +1,8 @@
 package kafka
 
 import (
+	"os"
+	"os/signal"
 	"sync"
 
 	"github.com/Shopify/sarama"
@@ -24,6 +26,8 @@ func (c *Client) NewProducer() stream.Producer {
 	if err != nil {
 		panic(err)
 	}
+
+	go producer.listenForInterrupts(c.Logger)
 
 	producer.wg.Add(1)
 	go func() {
@@ -111,4 +115,17 @@ func (p *Producer) Close() error {
 // key based on the message's value or other properties.
 func (p *Producer) PartitionKey(f func(*stream.Message) []byte) {
 	p.keyFunc = f
+}
+
+func (p *Producer) listenForInterrupts(l *zap.Logger) {
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Kill, os.Interrupt)
+
+	s := <-signals
+
+	l.Info("Got interrupt signal, cleaning up.", zap.String("signal", s.String()))
+
+	if err := p.Close(); err != nil {
+		l.Error("Could close kafka consumer properly", zap.Error(err))
+	}
 }

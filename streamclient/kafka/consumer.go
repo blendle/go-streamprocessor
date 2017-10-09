@@ -1,6 +1,9 @@
 package kafka
 
 import (
+	"os"
+	"os/signal"
+
 	"github.com/blendle/go-streamprocessor/stream"
 	cluster "github.com/bsm/sarama-cluster"
 	"go.uber.org/zap"
@@ -32,6 +35,8 @@ func (c *Client) NewConsumer() stream.Consumer {
 		closed:   make(chan bool),
 		close:    make(chan bool),
 	}
+
+	go consumer.listenForInterrupts(c.Logger)
 
 	go func() {
 		defer kafkaconsumer.Close()
@@ -105,4 +110,17 @@ func (c *Consumer) Close() error {
 	c.dead = true
 
 	return nil
+}
+
+func (c *Consumer) listenForInterrupts(l *zap.Logger) {
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Kill, os.Interrupt)
+
+	s := <-signals
+
+	l.Info("Got interrupt signal, cleaning up.", zap.String("signal", s.String()))
+
+	if err := c.Close(); err != nil {
+		l.Error("Could close kafka consumer properly", zap.Error(err))
+	}
 }
