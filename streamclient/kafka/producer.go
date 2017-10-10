@@ -82,6 +82,9 @@ type Producer struct {
 	// The `sync.WaitGroup` is used to wait for all messages to be processed, when
 	// the user calls `Producer.Close()`.
 	wg sync.WaitGroup
+
+	// Used to make sure Close is only called once.
+	once sync.Once
 }
 
 // Messages returns the read channel for the messages that are returned by the
@@ -91,19 +94,23 @@ func (p *Producer) Messages() chan<- *stream.Message {
 }
 
 // Close closes the producer connection.
-func (p *Producer) Close() error {
-	// Close the producer channel, rejecting any future messages, but continue to
-	// process any messages still in the buffer.
-	close(p.messages)
+func (p *Producer) Close() (err error) {
+	p.once.Do(func() {
+		// Close the producer channel, rejecting any future messages, but continue to
+		// process any messages still in the buffer.
+		close(p.messages)
 
-	// Wait for all messages to be committed to the AsyncProducer, or else we
-	// might trigger a `sarama.ErrShuttingDown` error, causing one or more
-	// messages to be lost.
-	p.wg.Wait()
+		// Wait for all messages to be committed to the AsyncProducer, or else we
+		// might trigger a `sarama.ErrShuttingDown` error, causing one or more
+		// messages to be lost.
+		p.wg.Wait()
 
-	// Shut down the Sarama AsyncProducer, which will block until all messages are
-	// processed, before shutting down.
-	return p.sp.Close()
+		// Shut down the Sarama AsyncProducer, which will block until all messages are
+		// processed, before shutting down.
+		err = p.sp.Close()
+	})
+
+	return err
 }
 
 // PartitionKey can be used to define the key to use for partitioning messages.

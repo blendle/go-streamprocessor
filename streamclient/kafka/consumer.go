@@ -3,6 +3,7 @@ package kafka
 import (
 	"os"
 	"os/signal"
+	"sync"
 
 	"github.com/blendle/go-streamprocessor/stream"
 	cluster "github.com/bsm/sarama-cluster"
@@ -78,7 +79,9 @@ type Consumer struct {
 	messages chan *stream.Message
 	close    chan bool
 	closed   chan bool
-	dead     bool
+
+	// Used to make sure Close is only called once.
+	once sync.Once
 }
 
 // Messages returns the read channel for the messages that are returned by the
@@ -88,28 +91,24 @@ func (c *Consumer) Messages() <-chan *stream.Message {
 }
 
 // Close closes the consumer connection.
-func (c *Consumer) Close() error {
-	if c.dead {
-		return nil
-	}
+func (c *Consumer) Close() (err error) {
+	c.once.Do(func() {
+		c.close <- true
 
-	c.close <- true
+		// Shut down the Sarama Consumer, which will block until all messages are
+		// processed, before shutting down.
+		err = c.cc.Close()
+		if err != nil {
+			return
+		}
 
-	// Shut down the Sarama Consumer, which will block until all messages are
-	// processed, before shutting down.
-	err := c.cc.Close()
-	if err != nil {
-		return err
-	}
+		<-c.closed
 
-	<-c.closed
+		// Close the consumer channel.
+		close(c.messages)
+	})
 
-	// Close the consumer channel.
-	close(c.messages)
-
-	c.dead = true
-
-	return nil
+	return err
 }
 
 func (c *Consumer) listenForInterrupts(l *zap.Logger) {
