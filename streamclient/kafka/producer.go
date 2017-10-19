@@ -37,10 +37,14 @@ func (c *Client) NewProducer() stream.Producer {
 			value := make([]byte, len(msg.Value))
 			copy(value, msg.Value)
 
+			key := make([]byte, len(msg.Key))
+			copy(key, msg.Key)
+
 			message := sarama.ProducerMessage{
 				Timestamp: msg.Timestamp,
 				Topic:     c.ProducerTopics[0],
 				Value:     sarama.ByteEncoder(value),
+				Key:       sarama.ByteEncoder(key),
 			}
 
 			if producer.keyFunc != nil {
