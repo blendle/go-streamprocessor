@@ -19,7 +19,11 @@ func (c *Client) NewProducer() stream.Producer {
 	go func() {
 		defer producer.wg.Done()
 		for msg := range ch {
-			key := producer.keyFunc(msg)
+			key := msg.Key
+
+			if producer.keyFunc != nil {
+				key = producer.keyFunc(msg)
+			}
 
 			c.store.NewTopic(c.ProducerTopic).NewMessage(msg.Value, key)
 		}
