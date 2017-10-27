@@ -42,7 +42,7 @@ func (c *Client) NewProducer() stream.Producer {
 
 			message := sarama.ProducerMessage{
 				Timestamp: msg.Timestamp,
-				Topic:     c.ProducerTopics[0],
+				Topic:     c.topicName(msg),
 				Value:     sarama.ByteEncoder(value),
 				Key:       sarama.ByteEncoder(key),
 			}
