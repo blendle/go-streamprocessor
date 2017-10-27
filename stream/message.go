@@ -11,6 +11,7 @@ import (
 type Message struct {
 	Value         []byte
 	Key           []byte
+	Topic         string
 	Timestamp     time.Time
 	kafkaMessage  *sarama.ConsumerMessage
 	kafkaConsumer *cluster.Consumer

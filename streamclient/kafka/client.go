@@ -113,6 +113,14 @@ func (c *Client) autoPopulateKafkaConfig() {
 	}
 }
 
+func (c *Client) topicName(msg *stream.Message) string {
+	if msg.Topic != "" {
+		return msg.Topic
+	}
+
+	return c.ProducerTopics[0]
+}
+
 // ParseKafkaURL parses a Kafka URL and returns the relevant components.
 func ParseKafkaURL(uri string) (string, string, string, error) {
 	u, err := url.Parse(uri)
