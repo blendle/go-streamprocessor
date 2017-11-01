@@ -37,7 +37,7 @@ func TestProducer_Messages(t *testing.T) {
 	c.Close()
 
 	expected := "hello world"
-	actual := string(topic.Messages()[0])
+	actual := string(topic.Messages()[0].Value)
 	if actual != expected {
 		t.Errorf("Expected %s to equal %s", actual, expected)
 	}
@@ -63,7 +63,7 @@ func BenchmarkProducer_Messages1000(b *testing.B) {
 
 	for i, msg := range topic.Messages() {
 		i = i + 1
-		m := bytes.Split(msg, []byte(`{"number":`))
+		m := bytes.Split(msg.Value, []byte(`{"number":`))
 		m = bytes.Split(m[1], []byte(`}`))
 
 		expected := strconv.Itoa(i)

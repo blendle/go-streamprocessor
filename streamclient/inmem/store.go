@@ -23,8 +23,14 @@ type Topic struct {
 // Partition is a single instance of a store, containing messages.
 type Partition struct {
 	offset   int
-	messages map[int][]byte
+	messages map[int]*Message
 	mutex    sync.RWMutex
+}
+
+// Message is a single message in the store
+type Message struct {
+	Key   []byte
+	Value []byte
 }
 
 // NewStore initializes a new empty in-memory store.
@@ -60,15 +66,15 @@ func (t *Topic) NewMessage(msg []byte, key []byte) {
 	defer t.mutex.RUnlock()
 
 	p := t.getPartition(key)
-	p.store(msg)
+	p.store(key, msg)
 }
 
 // Messages returns all messages in all Partitions as a map.
-func (t *Topic) Messages() [][]byte {
+func (t *Topic) Messages() []*Message {
 	t.mutex.RLock()
 	defer t.mutex.RUnlock()
 
-	msgs := make([][]byte, 0)
+	msgs := make([]*Message, 0)
 	for _, p := range t.Partitions {
 		msgs = append(msgs, p.Messages()...)
 	}
@@ -77,11 +83,11 @@ func (t *Topic) Messages() [][]byte {
 }
 
 // Messages returns all messages in a partition.
-func (p *Partition) Messages() [][]byte {
+func (p *Partition) Messages() []*Message {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 
-	msgs := make([][]byte, 0, len(p.messages))
+	msgs := make([]*Message, 0, len(p.messages))
 
 	var keys []int
 	for k := range p.messages {
@@ -115,10 +121,10 @@ func (t *Topic) getPartition(key []byte) *Partition {
 }
 
 func newPartition() *Partition {
-	return &Partition{offset: 0, messages: make(map[int][]byte)}
+	return &Partition{offset: 0, messages: make(map[int]*Message)}
 }
 
-func (p *Partition) store(message []byte) {
+func (p *Partition) store(key, value []byte) {
 	p.offset = p.offset + 1
-	p.messages[p.offset] = message
+	p.messages[p.offset] = &Message{key, value}
 }

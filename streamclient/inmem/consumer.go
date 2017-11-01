@@ -13,7 +13,11 @@ func (c *Client) NewConsumer() stream.Consumer {
 	go func() {
 		defer close(consumer.messages)
 		for _, msg := range c.store.NewTopic(c.ConsumerTopic).Messages() {
-			consumer.messages <- &stream.Message{Value: msg, Timestamp: time.Now()}
+			consumer.messages <- &stream.Message{
+				Value:     msg.Value,
+				Key:       msg.Key,
+				Timestamp: time.Now(),
+			}
 		}
 	}()
 

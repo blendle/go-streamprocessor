@@ -25,7 +25,7 @@ func TestConsumer_Messages(t *testing.T) {
 	store := inmem.NewStore()
 	topic := store.NewTopic("test-topic")
 
-	topic.NewMessage([]byte("hello world"), nil)
+	topic.NewMessage([]byte("hello world"), []byte("hi"))
 	topic.NewMessage([]byte("hello universe"), nil)
 
 	ct := func(c *inmem.Client) {
@@ -39,6 +39,12 @@ func TestConsumer_Messages(t *testing.T) {
 
 	expected := "hello world"
 	actual := string(msg.Value)
+	if actual != expected {
+		t.Errorf("Expected %v to equal %v", actual, expected)
+	}
+
+	expected = "hi"
+	actual = string(msg.Key)
 	if actual != expected {
 		t.Errorf("Expected %v to equal %v", actual, expected)
 	}
