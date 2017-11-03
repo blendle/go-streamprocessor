@@ -9,10 +9,11 @@ import (
 // NewConsumer returns a consumer that can iterate over messages on a stream.
 func (c *Client) NewConsumer() stream.Consumer {
 	consumer := &Consumer{messages: make(chan *stream.Message)}
+	topic := c.store.NewTopic(c.ConsumerTopic)
 
 	go func() {
 		defer close(consumer.messages)
-		for _, msg := range c.store.NewTopic(c.ConsumerTopic).Messages() {
+		for _, msg := range topic.Messages() {
 			consumer.messages <- &stream.Message{
 				Value:     msg.Value,
 				Key:       msg.Key,

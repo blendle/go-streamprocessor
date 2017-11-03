@@ -11,7 +11,7 @@ var DefaultStore *Store
 // Store hold the in-memory representation of a data storage service.
 type Store struct {
 	Topics map[string]*Topic
-	mutex  sync.RWMutex
+	mutex  sync.Mutex
 }
 
 // Topic contains all the messages
@@ -62,11 +62,7 @@ func (s *Store) NewTopic(name string) *Topic {
 
 // NewMessage creates a new message in a topic.
 func (t *Topic) NewMessage(msg []byte, key []byte) {
-	t.mutex.Lock()
-	defer t.mutex.Unlock()
-
-	p := t.getPartition(key)
-	p.store(key, msg)
+	t.getPartition(key).store(key, msg)
 }
 
 // Messages returns all messages in all Partitions as a map.
@@ -115,6 +111,9 @@ func (t *Topic) getPartition(key []byte) *Partition {
 		}
 	}
 
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
 	t.Partitions[skey] = newPartition()
 
 	return t.Partitions[skey]
@@ -125,6 +124,9 @@ func newPartition() *Partition {
 }
 
 func (p *Partition) store(key, value []byte) {
-	p.offset = p.offset + 1
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	p.offset++
 	p.messages[p.offset] = &Message{key, value}
 }

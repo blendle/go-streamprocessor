@@ -43,11 +43,3 @@ func NewClientWithStore(store *Store, options ...func(*Client)) stream.Client {
 func (c *Client) NewConsumerAndProducer() (stream.Consumer, stream.Producer) {
 	return c.NewConsumer(), c.NewProducer()
 }
-
-func (c *Client) topicName(msg *stream.Message) string {
-	if msg.Topic != "" {
-		return msg.Topic
-	}
-
-	return c.ProducerTopic
-}
