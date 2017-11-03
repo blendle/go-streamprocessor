@@ -197,6 +197,8 @@ A message is implemented as such:
 
 ```golang
 type Message struct {
+  Topic     string
+  Key       []byte
   Value     []byte
   Timestamp time.Time
 }
@@ -207,6 +209,9 @@ this could be used, or not).
 
 You can also set a "partition key" for a message. Again, depending on the type
 of streamclient you are using, this is either used, or it isn't.
+
+You can optionally provide a topic name, it will be used to override the
+globally configured topic for the processor on a per-message basis.
 
 Here's an example:
 
