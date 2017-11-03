@@ -1,7 +1,9 @@
 package inmem
 
-import "github.com/blendle/go-streamprocessor/stream"
-import "go.uber.org/zap"
+import (
+	"github.com/blendle/go-streamprocessor/stream"
+	"go.uber.org/zap"
+)
 
 // Client provides access to the streaming capabilities.
 type Client struct {

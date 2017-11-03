@@ -50,8 +50,8 @@ func NewStore() *Store {
 
 // NewTopic returns a new topic, or existing one, if it exists.
 func (s *Store) NewTopic(name string) *Topic {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
 	if _, ok := s.Topics[name]; !ok {
 		s.Topics[name] = &Topic{Partitions: make(map[string]*Partition)}
@@ -62,8 +62,8 @@ func (s *Store) NewTopic(name string) *Topic {
 
 // NewMessage creates a new message in a topic.
 func (t *Topic) NewMessage(msg []byte, key []byte) {
-	t.mutex.RLock()
-	defer t.mutex.RUnlock()
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 
 	p := t.getPartition(key)
 	p.store(key, msg)
