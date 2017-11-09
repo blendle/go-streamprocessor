@@ -43,6 +43,33 @@ func TestProducer_Messages(t *testing.T) {
 	}
 }
 
+func TestProducer_CustomTopic(t *testing.T) {
+	store := inmem.NewStore()
+	topic := store.NewTopic("test-topic")
+	customTopic := store.NewTopic("custom")
+
+	pt := func(c *inmem.Client) {
+		c.ProducerTopic = "test-topic"
+	}
+
+	client := inmem.NewClientWithStore(store, pt)
+	c := client.NewProducer()
+
+	msg := &stream.Message{Value: []byte("hello world"), Topic: "custom"}
+	c.Messages() <- msg
+	c.Close()
+
+	if len(topic.Messages()) != 0 {
+		t.Errorf("Expected 0 messages in standard topic, got %d", len(topic.Messages()))
+	}
+
+	expected := "hello world"
+	actual := string(customTopic.Messages()[0].Value)
+	if actual != expected {
+		t.Errorf("Expected %s to equal %s", actual, expected)
+	}
+}
+
 func BenchmarkProducer_Messages1000(b *testing.B) {
 	content := `{"number":%d}`
 

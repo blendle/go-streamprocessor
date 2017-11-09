@@ -25,7 +25,7 @@ func (c *Client) NewProducer() stream.Producer {
 				key = producer.keyFunc(msg)
 			}
 
-			c.store.NewTopic(c.ProducerTopic).NewMessage(msg.Value, key)
+			c.store.NewTopic(c.topicName(msg)).NewMessage(msg.Value, key)
 		}
 	}()
 
