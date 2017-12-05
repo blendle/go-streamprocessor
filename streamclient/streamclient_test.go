@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Shopify/sarama"
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient"
 	"github.com/blendle/go-streamprocessor/streamclient/kafka"
@@ -118,8 +119,9 @@ func TestNewConsumerAndProducer_StandardstreamConsumerAndKafkaProducer(t *testin
 
 	// Set the streamclient file descriptor to a temporary file, simulating
 	// received data in the Stdin fd.
-	options := func(s *standardstream.Client, _ *kafka.Client) {
+	options := func(s *standardstream.Client, kc *kafka.Client) {
 		s.ConsumerFD = f
+		kc.ConsumerConfig.Consumer.Offsets.Initial = sarama.OffsetNewest
 	}
 
 	c, p, err := streamclient.NewConsumerAndProducer(options)

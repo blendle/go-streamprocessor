@@ -3,10 +3,12 @@ package streamclient
 import (
 	"os"
 
+	"github.com/Shopify/sarama"
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/inmem"
 	"github.com/blendle/go-streamprocessor/streamclient/kafka"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstream"
+	cluster "github.com/bsm/sarama-cluster"
 )
 
 // Client is the overarching configuration for all stream clients.
@@ -41,6 +43,8 @@ func NewConsumer(options ...func(sc *standardstream.Client, kc *kafka.Client)) (
 
 	sc := &standardstream.Client{}
 	kc := &kafka.Client{}
+	kc.ConsumerConfig = cluster.NewConfig()
+	kc.ProducerConfig = sarama.NewConfig()
 
 	for _, option := range options {
 		option(sc, kc)
@@ -93,6 +97,8 @@ func NewProducer(options ...func(sc *standardstream.Client, kc *kafka.Client)) (
 
 	sc := &standardstream.Client{}
 	kc := &kafka.Client{}
+	kc.ConsumerConfig = cluster.NewConfig()
+	kc.ProducerConfig = sarama.NewConfig()
 
 	for _, option := range options {
 		option(sc, kc)
