@@ -1,7 +1,9 @@
 package inmem
 
-import "github.com/blendle/go-streamprocessor/stream"
-import "go.uber.org/zap"
+import (
+	"github.com/blendle/go-streamprocessor/stream"
+	"go.uber.org/zap"
+)
 
 // Client provides access to the streaming capabilities.
 type Client struct {
@@ -40,12 +42,4 @@ func NewClientWithStore(store *Store, options ...func(*Client)) stream.Client {
 // and a producer, with a single function call.
 func (c *Client) NewConsumerAndProducer() (stream.Consumer, stream.Producer) {
 	return c.NewConsumer(), c.NewProducer()
-}
-
-func (c *Client) topicName(msg *stream.Message) string {
-	if msg.Topic != "" {
-		return msg.Topic
-	}
-
-	return c.ProducerTopic
 }

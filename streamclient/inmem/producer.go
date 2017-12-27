@@ -24,8 +24,11 @@ func (c *Client) NewProducer() stream.Producer {
 			if producer.keyFunc != nil {
 				key = producer.keyFunc(msg)
 			}
-
-			c.store.NewTopic(c.topicName(msg)).NewMessage(msg.Value, key)
+			topic := msg.Topic
+			if topic == "" {
+				topic = c.ProducerTopic
+			}
+			c.store.NewTopic(topic).NewMessage(msg.Value, key)
 		}
 	}()
 
