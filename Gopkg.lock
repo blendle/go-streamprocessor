@@ -10,26 +10,26 @@
 [[projects]]
   name = "github.com/Shopify/sarama"
   packages = ["."]
-  revision = "240fd146ce68bcafb034cc5dc977229ffbafa8ea"
-  version = "v1.14.0"
+  revision = "3b1b38866a79f06deddf0487d5c27ba0697ccd65"
+  version = "v1.15.0"
 
 [[projects]]
   name = "github.com/bsm/sarama-cluster"
   packages = ["."]
-  revision = "abf039439f66c1ce78017f560b490612552f6472"
-  version = "v2.1.10"
+  revision = "24016d206c730276dfb58f802999066f2f4bfeaa"
+  version = "v2.1.11"
 
 [[projects]]
-  branch = "master"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
-  revision = "a476722483882dd40b8111f0eb64e1d7f43f56e4"
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/eapache/go-resiliency"
   packages = ["breaker"]
-  revision = "b1fe83b5b03f624450823b751b662259ffc6af70"
+  revision = "6800482f2c813e689c88b7ed3282262385011890"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -38,10 +38,10 @@
   revision = "bb955e01b9346ac19dc29eb16586c90ded99a98c"
 
 [[projects]]
-  branch = "master"
   name = "github.com/eapache/queue"
   packages = ["."]
   revision = "44cc805cf13205b55f69e14bcb69867d1ae92f98"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -50,28 +50,28 @@
   revision = "553a641470496b2327abcac10b36396bd98e45c9"
 
 [[projects]]
-  branch = "master"
   name = "github.com/pierrec/lz4"
   packages = ["."]
-  revision = "08c27939df1bd95e881e2c2367a749964ad1fceb"
+  revision = "2fcda4cb7018ce05a25959d2fe08c83e3329f169"
+  version = "v1.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/pierrec/xxHash"
   packages = ["xxHash32"]
-  revision = "a0006b13c722f7f12368c00a3d3c2ae8a999a0c6"
+  revision = "f051bb7f1d1aaf1b5a665d74fb6b0217712c69f7"
+  version = "v0.1.1"
 
 [[projects]]
   branch = "master"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
-  revision = "1f30fe9094a513ce4c700b9a54458bbb0c96996c"
+  revision = "e181e095bae94582363434144c61a9653aff6e50"
 
 [[projects]]
   name = "go.uber.org/atomic"
   packages = ["."]
-  revision = "4e336646b2ef9fc6e47be8e21594178f98e5ebcf"
-  version = "v1.2.0"
+  revision = "8474b86a5a6f79c443ce4b2992817ff32cf208b8"
+  version = "v1.3.1"
 
 [[projects]]
   name = "go.uber.org/multierr"
