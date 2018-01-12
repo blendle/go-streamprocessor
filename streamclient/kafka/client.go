@@ -42,7 +42,7 @@ func NewClient(options ...func(*Client)) stream.Client {
 	c.ConsumerConfig.Metadata.RefreshFrequency = 5 * time.Minute
 	c.ConsumerConfig.Net.KeepAlive = 5 * time.Minute
 	c.ConsumerConfig.Net.MaxOpenRequests = 64
-	c.ConsumerConfig.Version = sarama.V0_10_2_0
+	c.ConsumerConfig.Version = sarama.V1_0_0_0
 
 	c.ProducerConfig = sarama.NewConfig()
 	c.ProducerConfig.ChannelBufferSize = 65536
@@ -53,7 +53,7 @@ func NewClient(options ...func(*Client)) stream.Client {
 	c.ProducerConfig.Producer.RequiredAcks = sarama.WaitForAll
 	c.ProducerConfig.Producer.Retry.Max = 10
 	c.ProducerConfig.Producer.Return.Errors = true
-	c.ProducerConfig.Version = sarama.V0_10_2_0
+	c.ProducerConfig.Version = sarama.V1_0_0_0
 
 	for _, option := range options {
 		option(c)
