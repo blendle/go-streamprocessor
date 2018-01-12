@@ -8,7 +8,7 @@ ENV PATH $PATH:$GOPATH/bin
 RUN mkdir -p $GOPATH/bin
 
 RUN apt-get -y update \
- && apt-get -y install default-jre
+ && apt-get -y install default-jre-headless
 
 RUN curl -s http://apache.hippo.nl/kafka/0.11.0.0/kafka_2.11-0.11.0.0.tgz | tar xvz
 
