@@ -6,10 +6,4 @@ set -ae
 
 cd "$(dirname "$0")/../.."
 
-[ -z "$CI" ] || {
-  cd "$GOPATH/src/github.com/blendle/go-streamprocessor"
-  GOPATH=/home/jenkins/go
-}
-
-TERM=xterm
 godog --random --strict --tags ~@wip "$@"
