@@ -4,16 +4,17 @@ import (
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/stream"
+	"github.com/blendle/go-streamprocessor/streamconfig"
 )
 
 type FakeClient struct {
 }
 
-func (fc *FakeClient) NewConsumer(options ...func(interface{})) (stream.Consumer, error) {
+func (fc *FakeClient) NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, error) {
 	return nil, nil
 }
 
-func (fc *FakeClient) NewProducer(options ...func(interface{})) (stream.Producer, error) {
+func (fc *FakeClient) NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, error) {
 	return nil, nil
 }
 
