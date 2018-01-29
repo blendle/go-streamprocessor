@@ -12,10 +12,10 @@ import (
 // validation, an error is returned as the second argument.
 func NewClient(options ...func(*Client)) (*Client, error) {
 	config := &Client{
-		Inmem:          &inmemconfig.Client{},
-		Kafka:          &kafkaconfig.Client{},
-		Pubsub:         &pubsubconfig.Client{},
-		Standardstream: &standardstreamconfig.Client{},
+		Inmem:          &inmemconfig.ClientDefaults,
+		Kafka:          &kafkaconfig.ClientDefaults,
+		Pubsub:         &pubsubconfig.ClientDefaults,
+		Standardstream: &standardstreamconfig.ClientDefaults,
 	}
 
 	for _, option := range options {
@@ -30,10 +30,10 @@ func NewClient(options ...func(*Client)) (*Client, error) {
 // validation, an error is returned as the second argument.
 func NewConsumer(options ...func(*Consumer)) (*Consumer, error) {
 	config := &Consumer{
-		Inmem:          &inmemconfig.Consumer{},
-		Kafka:          &kafkaconfig.Consumer{},
-		Pubsub:         &pubsubconfig.Consumer{},
-		Standardstream: &standardstreamconfig.Consumer{},
+		Inmem:          &inmemconfig.ConsumerDefaults,
+		Kafka:          &kafkaconfig.ConsumerDefaults,
+		Pubsub:         &pubsubconfig.ConsumerDefaults,
+		Standardstream: &standardstreamconfig.ConsumerDefaults,
 	}
 
 	for _, option := range options {
@@ -48,10 +48,10 @@ func NewConsumer(options ...func(*Consumer)) (*Consumer, error) {
 // validation, an error is returned as the second argument.
 func NewProducer(options ...func(*Producer)) (*Producer, error) {
 	config := &Producer{
-		Inmem:          &inmemconfig.Producer{},
-		Kafka:          &kafkaconfig.Producer{},
-		Pubsub:         &pubsubconfig.Producer{},
-		Standardstream: &standardstreamconfig.Producer{},
+		Inmem:          &inmemconfig.ProducerDefaults,
+		Kafka:          &kafkaconfig.ProducerDefaults,
+		Pubsub:         &pubsubconfig.ProducerDefaults,
+		Standardstream: &standardstreamconfig.ProducerDefaults,
 	}
 
 	for _, option := range options {
