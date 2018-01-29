@@ -18,6 +18,10 @@ func (fc *FakeClient) NewProducer(options ...func(*streamconfig.Producer)) (stre
 	return nil, nil
 }
 
+func (fc *FakeClient) Config() streamconfig.Client {
+	return streamconfig.Client{}
+}
+
 func TestClient(t *testing.T) {
 	var _ stream.Client = (*FakeClient)(nil)
 }

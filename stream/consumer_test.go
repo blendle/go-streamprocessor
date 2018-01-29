@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/stream"
+	"github.com/blendle/go-streamprocessor/streamconfig"
 )
 
 type FakeConsumer struct {
@@ -16,6 +17,10 @@ func (fc *FakeConsumer) Messages() <-chan *stream.Message {
 
 func (fc *FakeConsumer) Close() error {
 	return nil
+}
+
+func (fc *FakeConsumer) Config() streamconfig.Consumer {
+	return streamconfig.Consumer{}
 }
 
 func TestConsumer(t *testing.T) {

@@ -6,4 +6,5 @@ import "github.com/blendle/go-streamprocessor/streamconfig"
 type Client interface {
 	NewConsumer(options ...func(*streamconfig.Consumer)) (Consumer, error)
 	NewProducer(options ...func(*streamconfig.Producer)) (Producer, error)
+	Config() streamconfig.Client
 }
