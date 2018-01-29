@@ -1,6 +1,7 @@
 package standardstreamconfig_test
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
@@ -11,7 +12,9 @@ import (
 func TestProducer(t *testing.T) {
 	t.Parallel()
 
-	_ = standardstreamconfig.Producer{}
+	_ = standardstreamconfig.Producer{
+		Writer: os.Stdout,
+	}
 }
 
 func TestProducerDefaults(t *testing.T) {

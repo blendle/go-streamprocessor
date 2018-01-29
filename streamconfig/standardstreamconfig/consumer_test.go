@@ -1,6 +1,7 @@
 package standardstreamconfig_test
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
@@ -11,7 +12,9 @@ import (
 func TestConsumer(t *testing.T) {
 	t.Parallel()
 
-	_ = standardstreamconfig.Consumer{}
+	_ = standardstreamconfig.Consumer{
+		Reader: os.Stdin,
+	}
 }
 
 func TestConsumerDefaults(t *testing.T) {
