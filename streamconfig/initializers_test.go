@@ -17,11 +17,11 @@ func TestNewClient(t *testing.T) {
 		expected string
 		config   interface{}
 	}{
-		{"*streamconfig.Client", config},
-		{"*inmemconfig.Client", config.Inmem},
-		{"*kafkaconfig.Client", config.Kafka},
-		{"*pubsubconfig.Client", config.Pubsub},
-		{"*standardstreamconfig.Client", config.Standardstream},
+		{"streamconfig.Client", config},
+		{"inmemconfig.Client", config.Inmem},
+		{"kafkaconfig.Client", config.Kafka},
+		{"pubsubconfig.Client", config.Pubsub},
+		{"standardstreamconfig.Client", config.Standardstream},
 	}
 
 	for _, tt := range tests {
@@ -44,11 +44,11 @@ func TestNewConsumer(t *testing.T) {
 		expected string
 		config   interface{}
 	}{
-		{"*streamconfig.Consumer", config},
-		{"*inmemconfig.Consumer", config.Inmem},
-		{"*kafkaconfig.Consumer", config.Kafka},
-		{"*pubsubconfig.Consumer", config.Pubsub},
-		{"*standardstreamconfig.Consumer", config.Standardstream},
+		{"streamconfig.Consumer", config},
+		{"inmemconfig.Consumer", config.Inmem},
+		{"kafkaconfig.Consumer", config.Kafka},
+		{"pubsubconfig.Consumer", config.Pubsub},
+		{"standardstreamconfig.Consumer", config.Standardstream},
 	}
 
 	for _, tt := range tests {
@@ -71,11 +71,11 @@ func TestNewProducer(t *testing.T) {
 		expected string
 		config   interface{}
 	}{
-		{"*streamconfig.Producer", config},
-		{"*inmemconfig.Producer", config.Inmem},
-		{"*kafkaconfig.Producer", config.Kafka},
-		{"*pubsubconfig.Producer", config.Pubsub},
-		{"*standardstreamconfig.Producer", config.Standardstream},
+		{"streamconfig.Producer", config},
+		{"inmemconfig.Producer", config.Inmem},
+		{"kafkaconfig.Producer", config.Kafka},
+		{"pubsubconfig.Producer", config.Pubsub},
+		{"standardstreamconfig.Producer", config.Standardstream},
 	}
 
 	for _, tt := range tests {
