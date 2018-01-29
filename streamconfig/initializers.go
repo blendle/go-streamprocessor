@@ -12,10 +12,10 @@ import (
 // validation, an error is returned as the second argument.
 func NewClient(options ...func(*Client)) (Client, error) {
 	config := &Client{
-		Inmem:          inmemconfig.ClientDefaults,
-		Kafka:          kafkaconfig.ClientDefaults,
-		Pubsub:         pubsubconfig.ClientDefaults,
-		Standardstream: standardstreamconfig.ClientDefaults,
+		Inmem:          inmemconfig.ClientDefaults(),
+		Kafka:          kafkaconfig.ClientDefaults(),
+		Pubsub:         pubsubconfig.ClientDefaults(),
+		Standardstream: standardstreamconfig.ClientDefaults(),
 	}
 
 	for _, option := range options {

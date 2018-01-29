@@ -1,6 +1,7 @@
 package pubsubconfig_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
@@ -8,8 +9,18 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	_ = pubsubconfig.Client{}
 	_ = pubsubconfig.Client{
 		Logger: zap.NewNop(),
+	}
+}
+
+func TestClientDefaults(t *testing.T) {
+	config := pubsubconfig.ClientDefaults()
+
+	expected := "*zap.Logger"
+	actual := reflect.TypeOf(config.Logger).String()
+
+	if actual != expected {
+		t.Errorf("Expected %v to equal %v", actual, expected)
 	}
 }

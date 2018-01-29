@@ -10,7 +10,12 @@ type Client struct {
 	Logger *zap.Logger
 }
 
-// ClientDefaults holds the default values for Client.
-var ClientDefaults = Client{
+// clientDefaults holds the default values for Client.
+var clientDefaults = Client{
 	Logger: zap.NewNop(),
+}
+
+// ClientDefaults returns the provided defaults.
+func ClientDefaults() Client {
+	return clientDefaults
 }
