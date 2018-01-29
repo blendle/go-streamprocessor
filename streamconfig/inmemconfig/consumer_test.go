@@ -9,10 +9,14 @@ import (
 )
 
 func TestConsumer(t *testing.T) {
+	t.Parallel()
+
 	_ = inmemconfig.Consumer{}
 }
 
 func TestConsumerDefaults(t *testing.T) {
+	t.Parallel()
+
 	logger := zap.NewExample()
 
 	cc := inmemconfig.Client{Logger: logger}

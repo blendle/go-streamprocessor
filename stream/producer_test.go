@@ -24,5 +24,7 @@ func (fp *FakeProducer) Config() streamconfig.Producer {
 }
 
 func TestProducer(t *testing.T) {
+	t.Parallel()
+
 	var _ stream.Producer = (*FakeProducer)(nil)
 }

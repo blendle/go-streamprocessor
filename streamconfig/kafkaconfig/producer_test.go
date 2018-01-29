@@ -9,10 +9,14 @@ import (
 )
 
 func TestProducer(t *testing.T) {
+	t.Parallel()
+
 	_ = kafkaconfig.Producer{}
 }
 
 func TestProducerDefaults(t *testing.T) {
+	t.Parallel()
+
 	logger := zap.NewExample()
 
 	cc := kafkaconfig.Client{Logger: logger}

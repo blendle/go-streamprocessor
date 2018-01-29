@@ -8,6 +8,8 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
+	t.Parallel()
+
 	config, err := streamconfig.NewClient()
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -35,6 +37,8 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestNewConsumer(t *testing.T) {
+	t.Parallel()
+
 	cc, err := streamconfig.NewClient()
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -67,6 +71,8 @@ func TestNewConsumer(t *testing.T) {
 }
 
 func TestNewProducer(t *testing.T) {
+	t.Parallel()
+
 	cc, err := streamconfig.NewClient()
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)

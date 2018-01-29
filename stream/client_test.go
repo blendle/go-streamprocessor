@@ -23,5 +23,7 @@ func (fc *FakeClient) Config() streamconfig.Client {
 }
 
 func TestClient(t *testing.T) {
+	t.Parallel()
+
 	var _ stream.Client = (*FakeClient)(nil)
 }
