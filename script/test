@@ -7,7 +7,6 @@ set -e
 cd "$(dirname "$0")/.."
 
 script/tests/gometalinter
-exit 0
 script/tests/go-test
 script/tests/go-test-race
 script/tests/go-test-bench
