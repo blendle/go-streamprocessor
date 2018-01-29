@@ -35,7 +35,12 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestNewConsumer(t *testing.T) {
-	config, err := streamconfig.NewConsumer()
+	cc, err := streamconfig.NewClient()
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	config, err := streamconfig.NewConsumer(cc)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -62,7 +67,12 @@ func TestNewConsumer(t *testing.T) {
 }
 
 func TestNewProducer(t *testing.T) {
-	config, err := streamconfig.NewProducer()
+	cc, err := streamconfig.NewClient()
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	config, err := streamconfig.NewProducer(cc)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}

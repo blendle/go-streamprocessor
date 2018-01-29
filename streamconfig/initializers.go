@@ -30,12 +30,12 @@ func NewClient(options ...func(*Client)) (Client, error) {
 // NewConsumer returns a new Consumer configuration struct, containing the
 // values passed into the function. If any error occurs during configuration
 // validation, an error is returned as the second argument.
-func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
+func NewConsumer(c Client, options ...func(*Consumer)) (Consumer, error) {
 	config := &Consumer{
-		Inmem:          inmemconfig.ConsumerDefaults,
-		Kafka:          kafkaconfig.ConsumerDefaults,
-		Pubsub:         pubsubconfig.ConsumerDefaults,
-		Standardstream: standardstreamconfig.ConsumerDefaults,
+		Inmem:          inmemconfig.ConsumerDefaults(c.Inmem),
+		Kafka:          kafkaconfig.ConsumerDefaults(c.Kafka),
+		Pubsub:         pubsubconfig.ConsumerDefaults(c.Pubsub),
+		Standardstream: standardstreamconfig.ConsumerDefaults(c.Standardstream),
 	}
 
 	for _, option := range options {
@@ -50,12 +50,12 @@ func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
 // NewProducer returns a new Producer configuration struct, containing the
 // values passed into the function. If any error occurs during configuration
 // validation, an error is returned as the second argument.
-func NewProducer(options ...func(*Producer)) (Producer, error) {
+func NewProducer(c Client, options ...func(*Producer)) (Producer, error) {
 	config := &Producer{
-		Inmem:          inmemconfig.ProducerDefaults,
-		Kafka:          kafkaconfig.ProducerDefaults,
-		Pubsub:         pubsubconfig.ProducerDefaults,
-		Standardstream: standardstreamconfig.ProducerDefaults,
+		Inmem:          inmemconfig.ProducerDefaults(c.Inmem),
+		Kafka:          kafkaconfig.ProducerDefaults(c.Kafka),
+		Pubsub:         pubsubconfig.ProducerDefaults(c.Pubsub),
+		Standardstream: standardstreamconfig.ProducerDefaults(c.Standardstream),
 	}
 
 	for _, option := range options {

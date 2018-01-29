@@ -5,5 +5,12 @@ package kafkaconfig
 type Producer struct {
 }
 
-// ProducerDefaults holds the default values for Producer.
-var ProducerDefaults = Producer{}
+// producerDefaults holds the default values for Producer.
+var producerDefaults = Producer{}
+
+// ProducerDefaults returns the provided defaults, optionally using pre-defined
+// client defaults to build the final defaults struct.
+func ProducerDefaults(c Client) Producer {
+	config := producerDefaults
+	return config
+}
