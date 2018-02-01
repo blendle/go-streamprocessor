@@ -27,9 +27,7 @@ gometalinter \
   --deadline=300s \
   --vendored-linters \
   --enable-all \
-  --disable=gotype \
-  --disable=gas \
-  --disable=lll \
-  --disable=gocyclo \
+  --line-length=100 \
   --disable=dupl \
+  --linter='lll:lll -e func -g -l {maxlinelength}:PATH:LINE:MESSAGE' \
   ${@:-./...}

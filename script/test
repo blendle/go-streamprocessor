@@ -10,4 +10,3 @@ script/tests/gometalinter
 script/tests/go-test
 script/tests/go-test-race
 script/tests/go-test-bench
-script/tests/godog

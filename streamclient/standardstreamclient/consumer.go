@@ -66,7 +66,6 @@ func (c *Client) NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Co
 			// a new permanent copy of the value, to prevent a scenario where the
 			// reader of the channel reads the value too late, resulting in unexpected
 			// data being returned.
-			//
 			b := make([]byte, len(scanner.Bytes()))
 			copy(b, scanner.Bytes())
 
