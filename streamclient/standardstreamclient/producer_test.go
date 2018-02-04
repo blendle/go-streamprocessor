@@ -92,7 +92,7 @@ func TestNewProducer_Messages(t *testing.T) {
 
 	producer, closer := newProducer(t, f)
 
-	producer.Messages() <- &stream.Message{Value: []byte(expected)}
+	producer.Messages() <- producer.NewMessage([]byte(expected))
 	closer()
 
 	err := f.Flush()
@@ -116,7 +116,7 @@ func TestNewProducer_AppendNewline(t *testing.T) {
 
 	producer, closer := newProducer(t, f)
 
-	producer.Messages() <- &stream.Message{Value: []byte("hello world")}
+	producer.Messages() <- producer.NewMessage([]byte("hello world"))
 	closer()
 
 	err := f.Flush()
@@ -142,7 +142,7 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 	producer, closer := newProducer(t, f)
 
 	for i := 0; i < messageCount; i++ {
-		producer.Messages() <- &stream.Message{Value: []byte(strconv.Itoa(i))}
+		producer.Messages() <- producer.NewMessage([]byte(strconv.Itoa(i)))
 	}
 	closer()
 
@@ -179,9 +179,7 @@ func BenchmarkProducer_Messages(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		producer.Messages() <- &stream.Message{
-			Value: []byte(fmt.Sprintf(`{"number":%d}`, i)),
-		}
+		producer.Messages() <- producer.NewMessage([]byte(fmt.Sprintf(`{"number":%d}`, i)))
 	}
 }
 

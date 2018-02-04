@@ -34,6 +34,10 @@ type FakeProducer struct {
 	messages chan<- streammsg.Message
 }
 
+func (p *FakeProducer) NewMessage(value []byte) streammsg.Message {
+	return &FakeMessage{value: value}
+}
+
 func (p *FakeProducer) Messages() chan<- streammsg.Message {
 	return p.messages
 }

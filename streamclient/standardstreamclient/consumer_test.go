@@ -82,7 +82,7 @@ func TestNewConsumer_Messages(t *testing.T) {
 	msg := <-consumer.Messages()
 
 	expected := "hello world"
-	actual := string(msg.Value)
+	actual := string(msg.Value())
 
 	if actual != expected {
 		t.Errorf("Expected %v to equal %v", actual, expected)
@@ -91,7 +91,7 @@ func TestNewConsumer_Messages(t *testing.T) {
 	msg = <-consumer.Messages()
 
 	expected = "hello universe!"
-	actual = string(msg.Value)
+	actual = string(msg.Value())
 
 	if actual != expected {
 		t.Errorf("Expected %v to equal %v", actual, expected)
@@ -121,7 +121,7 @@ func TestNewConsumer_MessageOrdering(t *testing.T) {
 
 	i := 0
 	for msg := range consumer.Messages() {
-		if strconv.Itoa(i) != string(msg.Value) {
+		if strconv.Itoa(i) != string(msg.Value()) {
 			t.Fatalf("Expected %q to equal %d", msg.Value, i)
 		}
 
@@ -153,7 +153,7 @@ func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
 		// is already replaced with a newer message in the channel. This is fixed in
 		// this consumer's implementation, but without this test, we couldn't expose
 		// the actual problem.
-		m := bytes.Split(msg.Value, []byte(`"number":`))
+		m := bytes.Split(msg.Value(), []byte(`"number":`))
 		m = bytes.Split(m[1], []byte(`}`))
 
 		expected := strconv.Itoa(i)
