@@ -1,6 +1,14 @@
 package standardstreamclient
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/blendle/go-streamprocessor/streammsg"
+)
+
+type testMessage interface {
+	streammsg.Message
+}
 
 func TestMessage(t *testing.T) {
 	t.Parallel()
@@ -35,10 +43,10 @@ func TestMessage_SetValue(t *testing.T) {
 	}
 }
 
-func newMessage() (*message, Message) {
+func newMessage() (*message, testMessage) {
 	m := &message{
 		value: []byte("testValue"),
 	}
 
-	return m, Message(m)
+	return m, testMessage(m)
 }

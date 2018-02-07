@@ -1,14 +1,8 @@
 package standardstreamclient
 
-import "github.com/blendle/go-streamprocessor/streammsg"
-
-// Message represents the interface as exposed by the standard stream client.
+// The following interfaces are implemented by standardstreamclient:
 //
-// It equals the default streammsg.Message interface, and only exposes the bare
-// minimum data of a message.
-type Message interface {
-	streammsg.Message
-}
+//   streammsg.Message
 
 type message struct {
 	value []byte
