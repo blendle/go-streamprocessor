@@ -3,14 +3,10 @@ package standardstreamclient_test
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
 	"reflect"
 	"strconv"
 	"testing"
 
-	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/stretchr/testify/assert"
@@ -38,8 +34,7 @@ func TestNewConsumer(t *testing.T) {
 func TestNewConsumer_WithOptions(t *testing.T) {
 	t.Parallel()
 
-	f, closer := createTestFile(t, nil)
-	defer closer()
+	f := standardstreamclient.TestBuffer(t)
 
 	client, err := standardstreamclient.New()
 	require.NoError(t, err)
@@ -57,10 +52,8 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 func TestNewConsumer_Messages(t *testing.T) {
 	t.Parallel()
 
-	f, closer := createTestFile(t, []byte("hello world\nhello universe!"))
-	defer closer()
-
-	consumer, closer := newConsumer(t, f)
+	buffer := standardstreamclient.TestBuffer(t, "hello world", "hello universe!")
+	consumer, closer := standardstreamclient.TestConsumer(t, buffer)
 	defer closer()
 
 	msg := <-consumer.Messages()
@@ -77,16 +70,13 @@ func TestNewConsumer_MessageOrdering(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
-	fileContents := []byte("")
-
+	buffer := standardstreamclient.TestBuffer(t)
 	for i := 0; i < messageCount; i++ {
-		fileContents = append(fileContents, []byte(strconv.Itoa(i)+"\n")...)
+		_, err := buffer.Write([]byte(strconv.Itoa(i) + "\n"))
+		require.NoError(t, err)
 	}
 
-	f, closer := createTestFile(t, fileContents)
-	defer closer()
-
-	consumer, closer := newConsumer(t, f)
+	consumer, closer := standardstreamclient.TestConsumer(t, buffer)
 	defer closer()
 
 	i := 0
@@ -101,17 +91,13 @@ func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
-	fileContents := []byte("")
-	line := `{"number":%d}` + "\n"
-
+	buffer := standardstreamclient.TestBuffer(t)
 	for i := 0; i < messageCount; i++ {
-		fileContents = append(fileContents, []byte(fmt.Sprintf(line, i))...)
+		_, err := buffer.Write([]byte(fmt.Sprintf(`{"number":%d}`+"\n", i)))
+		require.NoError(t, err)
 	}
 
-	f, closer := createTestFile(t, fileContents)
-	defer closer()
-
-	consumer, closer := newConsumer(t, f)
+	consumer, closer := standardstreamclient.TestConsumer(t, buffer)
 	defer closer()
 
 	i := 0
@@ -131,68 +117,16 @@ func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
 }
 
 func BenchmarkConsumer_Messages(b *testing.B) {
-	fileContents := []byte("")
-	line := `{"number":%d}` + "\n"
-
+	buffer := standardstreamclient.TestBuffer(b)
 	for i := 1; i <= b.N; i++ {
-		fileContents = append(fileContents, []byte(fmt.Sprintf(line, i))...)
+		_, _ = buffer.Write([]byte(fmt.Sprintf(`{"number":%d}`+"\n", i)))
 	}
-
-	f, closer := createTestFile(b, fileContents)
-	defer closer()
 
 	b.ResetTimer()
 
-	consumer, closer := newConsumer(b, f)
+	consumer, closer := standardstreamclient.TestConsumer(b, buffer)
 	defer closer()
 
 	for range consumer.Messages() {
 	}
-}
-
-func newConsumer(tb testing.TB, r io.ReadCloser) (stream.Consumer, func()) {
-	client, err := standardstreamclient.New()
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	options := func(c *streamconfig.Consumer) {
-		c.Standardstream.Reader = r
-	}
-
-	consumer, err := client.NewConsumer(options)
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	fn := func() {
-		err = consumer.Close()
-		if err != nil {
-			tb.Fatalf("Unexpected error: %v", err)
-		}
-	}
-
-	return consumer, fn
-}
-
-func createTestFile(tb testing.TB, b []byte) (*os.File, func()) {
-	f, _ := ioutil.TempFile("", "")
-	_, err := f.Write(b)
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	_, err = f.Seek(0, 0)
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	fn := func() {
-		err := os.Remove(f.Name())
-		if err != nil {
-			tb.Fatalf("Unexpected error: %v", err)
-		}
-	}
-
-	return f, fn
 }

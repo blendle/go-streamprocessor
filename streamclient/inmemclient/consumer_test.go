@@ -6,9 +6,7 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
-	"time"
 
-	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
@@ -59,10 +57,10 @@ func TestNewConsumer_Messages(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.NewStore()
-	store.Add(newKVMessage("key1", "hello world"))
-	store.Add(newKVMessage("key1", "hello universe!"))
+	store.AddMessage(streammsg.TestMessage(t, "key1", "hello world"))
+	store.AddMessage(streammsg.TestMessage(t, "key2", "hello universe!"))
 
-	consumer, closer := newConsumer(t, store)
+	consumer, closer := inmemclient.TestConsumer(t, store)
 	defer closer()
 
 	msg := <-consumer.Messages()
@@ -82,10 +80,10 @@ func TestNewConsumer_MessageOrdering(t *testing.T) {
 	store := inmemstore.NewStore()
 
 	for i := 0; i < messageCount; i++ {
-		store.Add(newKVMessage(strconv.Itoa(i), "hello world"+strconv.Itoa(i)))
+		store.AddMessage(streammsg.TestMessage(t, strconv.Itoa(i), "hello world"+strconv.Itoa(i)))
 	}
 
-	consumer, closer := newConsumer(t, store)
+	consumer, closer := inmemclient.TestConsumer(t, store)
 	defer closer()
 
 	i := 0
@@ -107,10 +105,10 @@ func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
 	line := `{"number":%d}` + "\n"
 
 	for i := 0; i < messageCount; i++ {
-		store.Add(newKVMessage(strconv.Itoa(i), fmt.Sprintf(line, i)))
+		store.AddMessage(streammsg.TestMessage(t, strconv.Itoa(i), fmt.Sprintf(line, i)))
 	}
 
-	consumer, closer := newConsumer(t, store)
+	consumer, closer := inmemclient.TestConsumer(t, store)
 	defer closer()
 
 	i := 0
@@ -134,43 +132,14 @@ func BenchmarkConsumer_Messages(b *testing.B) {
 	line := `{"number":%d}` + "\n"
 
 	for i := 1; i <= b.N; i++ {
-		store.Add(newKVMessage(strconv.Itoa(i), fmt.Sprintf(line, i)))
+		store.AddMessage(streammsg.TestMessage(b, strconv.Itoa(i), fmt.Sprintf(line, i)))
 	}
 
 	b.ResetTimer()
 
-	consumer, closer := newConsumer(b, store)
+	consumer, closer := inmemclient.TestConsumer(b, store)
 	defer closer()
 
 	for range consumer.Messages() {
 	}
-}
-
-func newConsumer(tb testing.TB, s *inmemstore.Store) (stream.Consumer, func()) {
-	client, err := inmemclient.New()
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	options := func(c *streamconfig.Consumer) {
-		c.Inmem.Store = s
-	}
-
-	consumer, err := client.NewConsumer(options)
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	fn := func() {
-		err = consumer.Close()
-		if err != nil {
-			tb.Fatalf("Unexpected error: %v", err)
-		}
-	}
-
-	return consumer, fn
-}
-
-func newKVMessage(k, v string) ([]byte, []byte, time.Time, string, int64, int32, map[string][]byte) {
-	return []byte(k), []byte(v), time.Time{}, "", 0, 0, map[string][]byte{}
 }

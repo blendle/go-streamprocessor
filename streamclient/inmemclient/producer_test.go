@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
@@ -58,10 +57,10 @@ func TestNewProducer_Messages(t *testing.T) {
 	store := inmemstore.NewStore()
 	expected := "hello world\n"
 
-	producer, closer := newProducer(t, store)
+	producer, closer := inmemclient.TestProducer(t, store)
+	defer closer()
 
 	producer.Messages() <- producer.NewMessage([]byte(expected))
-	closer()
 
 	require.NotEqual(t, store.Messages(), 0, "expected 1 message, got %d", len(store.Messages()))
 	assert.Equal(t, expected, string(store.Messages()[0].Value()))
@@ -73,12 +72,12 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 	messageCount := 100000
 	store := inmemstore.NewStore()
 
-	producer, closer := newProducer(t, store)
+	producer, closer := inmemclient.TestProducer(t, store)
+	defer closer()
 
 	for i := 0; i < messageCount; i++ {
 		producer.Messages() <- producer.NewMessage([]byte(strconv.Itoa(i)))
 	}
-	closer()
 
 	for i, msg := range store.Messages() {
 		require.Equal(t, strconv.Itoa(i), string(msg.Value()))
@@ -86,8 +85,7 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 }
 
 func BenchmarkProducer_Messages(b *testing.B) {
-	store := inmemstore.NewStore()
-	producer, closer := newProducer(b, store)
+	producer, closer := inmemclient.TestProducer(b, nil)
 	defer closer()
 
 	b.ResetTimer()
@@ -95,29 +93,4 @@ func BenchmarkProducer_Messages(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		producer.Messages() <- producer.NewMessage([]byte(fmt.Sprintf(`{"number":%d}`, i)))
 	}
-}
-
-func newProducer(tb testing.TB, s *inmemstore.Store) (stream.Producer, func()) {
-	client, err := inmemclient.New()
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	options := func(c *streamconfig.Producer) {
-		c.Inmem.Store = s
-	}
-
-	producer, err := client.NewProducer(options)
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	fn := func() {
-		err = producer.Close()
-		if err != nil {
-			tb.Fatalf("Unexpected error: %v", err)
-		}
-	}
-
-	return producer, fn
 }
