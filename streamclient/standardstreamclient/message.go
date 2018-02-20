@@ -19,4 +19,6 @@ func (m *message) SetValue(v []byte) {
 }
 
 // Ack is a no-op implementation of the required interface.
-func (m *message) Ack() {}
+func (m *message) Ack() error {
+	return nil
+}

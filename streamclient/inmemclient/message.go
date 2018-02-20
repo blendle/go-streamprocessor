@@ -103,7 +103,11 @@ func (m *message) RemoveTag(k string) {
 }
 
 // Ack is a no-op implementation of the required interface.
-func (m *message) Ack() {}
+func (m *message) Ack() error {
+	return nil
+}
 
 // Nack is a no-op implementation of the required interface.
-func (m *message) Nack() {}
+func (m *message) Nack() error {
+	return nil
+}

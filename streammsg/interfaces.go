@@ -77,11 +77,11 @@ type TagsWriter interface {
 // Acker interface allows messages to be acknowledged. Each stream client has
 // its own implementation to determine what it means to ack a message.
 type Acker interface {
-	Ack()
+	Ack() error
 }
 
 // Nacker interface allows messages to be "not acknowledged". Each stream client
 // has its own implementation to determine what it means to nack a message.
 type Nacker interface {
-	Nack()
+	Nack() error
 }

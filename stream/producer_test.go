@@ -28,7 +28,9 @@ func (m *FakeMessage) SetValue(v []byte) {
 	m.value = v
 }
 
-func (m *FakeMessage) Ack() {}
+func (m *FakeMessage) Ack() error {
+	return nil
+}
 
 type FakeProducer struct {
 	messages chan<- streammsg.Message

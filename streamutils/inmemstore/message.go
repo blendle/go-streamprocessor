@@ -89,7 +89,11 @@ func (m *message) RemoveTag(v string) {
 }
 
 // Ack is a no-op implementation of the streammsg.Acker interface.
-func (m *message) Ack() {}
+func (m *message) Ack() error {
+	return nil
+}
 
 // Nack is a no-op implementation of the streammsg.Nacker interface.
-func (m *message) Nack() {}
+func (m *message) Nack() error {
+	return nil
+}

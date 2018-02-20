@@ -178,4 +178,6 @@ func (m *fakeMessage) Topic() string {
 	return m.topic
 }
 
-func (m *fakeMessage) Ack() {}
+func (m *fakeMessage) Ack() error {
+	return nil
+}
