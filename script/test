@@ -6,7 +6,14 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+echo "==      gometalinter"
 script/tests/gometalinter
+
+echo "==      go-test"
 script/tests/go-test
+
+echo "==      go-test-race"
 script/tests/go-test-race
+
+echo "==      go-test-bench"
 script/tests/go-test-bench
