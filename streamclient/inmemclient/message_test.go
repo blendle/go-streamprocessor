@@ -170,7 +170,7 @@ func TestMessage_Tags(t *testing.T) {
 	_, msg := newMessage()
 
 	actual := msg.Tags()
-	expected := map[string]string{"test": "value", "test2": "value2"}
+	expected := map[string][]byte{"test": []byte("value"), "test2": []byte("value2")}
 
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
@@ -182,7 +182,7 @@ func TestMessage_Tag(t *testing.T) {
 
 	_, msg := newMessage()
 
-	actual := msg.Tag("test2")
+	actual := string(msg.Tag("test2"))
 	expected := "value2"
 
 	if actual != expected {
@@ -194,10 +194,10 @@ func TestMessage_SetTags(t *testing.T) {
 	t.Parallel()
 
 	str, msg := newMessage()
-	msg.SetTags(map[string]string{"test3": "value3"})
+	msg.SetTags(map[string][]byte{"test3": []byte("value3")})
 
 	actual := str.tags
-	expected := map[string]string{"test3": "value3"}
+	expected := map[string][]byte{"test3": []byte("value3")}
 
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
@@ -211,7 +211,11 @@ func TestMessage_SetTag(t *testing.T) {
 	msg.SetTag("test3", "value3")
 
 	actual := str.tags
-	expected := map[string]string{"test": "value", "test2": "value2", "test3": "value3"}
+	expected := map[string][]byte{
+		"test":  []byte("value"),
+		"test2": []byte("value2"),
+		"test3": []byte("value3"),
+	}
 
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
@@ -225,7 +229,7 @@ func TestMessage_RemoveTag(t *testing.T) {
 	msg.RemoveTag("test")
 
 	actual := str.tags
-	expected := map[string]string{"test2": "value2"}
+	expected := map[string][]byte{"test2": []byte("value2")}
 
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
@@ -240,7 +244,10 @@ func newMessage() (*message, testMessage) {
 		topic:     "testTopic",
 		offset:    1,
 		partition: 2,
-		tags:      map[string]string{"test": "value", "test2": "value2"},
+		tags: map[string][]byte{
+			"test":  []byte("value"),
+			"test2": []byte("value2"),
+		},
 	}
 
 	return m, testMessage(m)

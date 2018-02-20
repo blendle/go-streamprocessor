@@ -24,7 +24,7 @@ type message struct {
 	topic     string
 	offset    int64
 	partition int32
-	tags      map[string]string
+	tags      map[string][]byte
 }
 
 // Value returns the value of the message.
@@ -78,22 +78,22 @@ func (m message) Partition() int32 {
 }
 
 // Tags returns all the tags.
-func (m message) Tags() map[string]string {
+func (m message) Tags() map[string][]byte {
 	return m.tags
 }
 
 // Tag returns a single tag.
-func (m message) Tag(k string) string {
+func (m message) Tag(k string) []byte {
 	return m.tags[k]
 }
 
 // SetTags sets the value of tags.
-func (m *message) SetTags(t map[string]string) {
+func (m *message) SetTags(t map[string][]byte) {
 	m.tags = t
 }
 
 // SetTag sets the value of a single tag.
-func (m *message) SetTag(k, v string) {
+func (m *message) SetTag(k string, v []byte) {
 	m.tags[k] = v
 }
 

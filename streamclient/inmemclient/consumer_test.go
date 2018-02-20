@@ -211,6 +211,6 @@ func newConsumer(tb testing.TB, s *inmemstore.Store) (stream.Consumer, func()) {
 	return consumer, fn
 }
 
-func newKVMessage(k, v string) ([]byte, []byte, time.Time, string, int64, int32, map[string]string) {
-	return []byte(k), []byte(v), time.Time{}, "", 0, 0, map[string]string{}
+func newKVMessage(k, v string) ([]byte, []byte, time.Time, string, int64, int32, map[string][]byte) {
+	return []byte(k), []byte(v), time.Time{}, "", 0, 0, map[string][]byte{}
 }

@@ -63,14 +63,14 @@ type PartitionReader interface {
 
 // TagsReader provides access to key/value tags of a message.
 type TagsReader interface {
-	Tags() map[string]string
-	Tag(string) string
+	Tags() map[string][]byte
+	Tag(string) []byte
 }
 
 // TagsWriter allows for setting key/value tags of a message.
 type TagsWriter interface {
-	SetTags(map[string]string)
-	SetTag(string, string)
+	SetTags(map[string][]byte)
+	SetTag(string, []byte)
 	RemoveTag(string)
 }
 

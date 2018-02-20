@@ -54,7 +54,7 @@ func (s *Store) AddMessage(msg streammsg.Message) {
 }
 
 // Add adds a single message to the store.
-func (s *Store) Add(k, v []byte, t time.Time, tp string, o int64, p int32, tg map[string]string) {
+func (s *Store) Add(k, v []byte, t time.Time, tp string, o int64, p int32, tg map[string][]byte) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 

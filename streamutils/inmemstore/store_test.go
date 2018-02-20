@@ -31,7 +31,7 @@ func TestAddMessage(t *testing.T) {
 		topic:     "testTopic",
 		offset:    1,
 		partition: 2,
-		tags:      map[string]string{"test": "value", "test2": "value2"},
+		tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	store.AddMessage(m)
@@ -72,7 +72,7 @@ func TestAdd(t *testing.T) {
 		topic:     "testTopic",
 		offset:    1,
 		partition: 2,
-		tags:      map[string]string{"test": "value", "test2": "value2"},
+		tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	store.Add(m.key, m.value, m.timestamp, m.topic, m.offset, m.partition, m.tags)
@@ -110,7 +110,7 @@ func TestMessages(t *testing.T) {
 		topic:     "testTopic",
 		offset:    1,
 		partition: 2,
-		tags:      map[string]string{"test": "value", "test2": "value2"},
+		tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	store.store = append(store.store, m)
@@ -141,7 +141,7 @@ type fakeMessage struct {
 	topic     string
 	offset    int64
 	partition int32
-	tags      map[string]string
+	tags      map[string][]byte
 }
 
 func (m *fakeMessage) Value() []byte {
@@ -162,11 +162,11 @@ func (m *fakeMessage) Partition() int32 {
 	return m.partition
 }
 
-func (m *fakeMessage) Tag(v string) string {
+func (m *fakeMessage) Tag(v string) []byte {
 	return m.tags[v]
 }
 
-func (m *fakeMessage) Tags() map[string]string {
+func (m *fakeMessage) Tags() map[string][]byte {
 	return m.tags
 }
 
