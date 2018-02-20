@@ -122,7 +122,7 @@ func TestNewConsumer_MessageOrdering(t *testing.T) {
 	i := 0
 	for msg := range consumer.Messages() {
 		if strconv.Itoa(i) != string(msg.Value()) {
-			t.Fatalf("Expected %q to equal %d", msg.Value, i)
+			t.Fatalf("Expected %q to equal %d", msg.Value(), i)
 		}
 
 		i++
