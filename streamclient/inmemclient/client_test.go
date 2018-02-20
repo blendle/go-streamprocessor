@@ -6,6 +6,8 @@ import (
 
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
@@ -19,16 +21,9 @@ func TestNew(t *testing.T) {
 	t.Parallel()
 
 	client, err := inmemclient.New()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
-	expected := "*inmemclient.Client"
-	actual := reflect.TypeOf(client).String()
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "*inmemclient.Client", reflect.TypeOf(client).String())
 }
 
 func TestNew_WithOptions(t *testing.T) {
@@ -41,14 +36,7 @@ func TestNew_WithOptions(t *testing.T) {
 	}
 
 	client, err := inmemclient.New(options)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
-	expected := logger
-	actual := client.Config().Inmem.Logger
-
-	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.EqualValues(t, logger, client.Config().Inmem.Logger)
 }

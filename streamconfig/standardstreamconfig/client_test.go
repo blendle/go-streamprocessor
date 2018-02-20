@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
 
@@ -21,10 +22,5 @@ func TestClientDefaults(t *testing.T) {
 
 	config := standardstreamconfig.ClientDefaults()
 
-	expected := "*zap.Logger"
-	actual := reflect.TypeOf(config.Logger).String()
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
 }

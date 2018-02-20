@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
 
@@ -25,10 +26,5 @@ func TestConsumerDefaults(t *testing.T) {
 	cc := standardstreamconfig.Client{Logger: logger}
 	config := standardstreamconfig.ConsumerDefaults(cc)
 
-	expected := logger
-	actual := config.Logger
-
-	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
 }

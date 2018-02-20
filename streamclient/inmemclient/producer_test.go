@@ -10,6 +10,8 @@ import (
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestProducer(t *testing.T) {
@@ -22,28 +24,13 @@ func TestNewProducer(t *testing.T) {
 	t.Parallel()
 
 	client, err := inmemclient.New()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	producer, err := client.NewProducer()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
+	defer require.NoError(t, producer.Close())
 
-	defer func() {
-		err = producer.Close()
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
-		}
-	}()
-
-	expected := "*inmemclient.Producer"
-	actual := reflect.TypeOf(producer).String()
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "*inmemclient.Producer", reflect.TypeOf(producer).String())
 }
 
 func TestNewProducer_WithOptions(t *testing.T) {
@@ -52,32 +39,17 @@ func TestNewProducer_WithOptions(t *testing.T) {
 	store := inmemstore.NewStore()
 
 	client, err := inmemclient.New()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	options := func(c *streamconfig.Producer) {
 		c.Inmem.Store = store
 	}
 
 	producer, err := client.NewProducer(options)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
+	defer require.NoError(t, producer.Close())
 
-	defer func() {
-		err = producer.Close()
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
-		}
-	}()
-
-	expected := store
-	actual := producer.Config().Inmem.Store
-
-	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.EqualValues(t, store, producer.Config().Inmem.Store)
 }
 
 func TestNewProducer_Messages(t *testing.T) {
@@ -91,15 +63,8 @@ func TestNewProducer_Messages(t *testing.T) {
 	producer.Messages() <- producer.NewMessage([]byte(expected))
 	closer()
 
-	if len(store.Messages()) == 0 {
-		t.Fatalf("expected 1 message, got %d", len(store.Messages()))
-	}
-
-	actual := string(store.Messages()[0].Value())
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	require.NotEqual(t, store.Messages(), 0, "expected 1 message, got %d", len(store.Messages()))
+	assert.Equal(t, expected, string(store.Messages()[0].Value()))
 }
 
 func TestNewProducer_MessageOrdering(t *testing.T) {
@@ -116,12 +81,7 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 	closer()
 
 	for i, msg := range store.Messages() {
-		expected := strconv.Itoa(i)
-		actual := string(msg.Value())
-
-		if actual != expected {
-			t.Errorf("Expected %v to equal %v", actual, expected)
-		}
+		require.Equal(t, strconv.Itoa(i), string(msg.Value()))
 	}
 }
 

@@ -12,6 +12,8 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestProducer(t *testing.T) {
@@ -24,28 +26,13 @@ func TestNewProducer(t *testing.T) {
 	t.Parallel()
 
 	client, err := standardstreamclient.New()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	producer, err := client.NewProducer()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
+	defer func() { require.NoError(t, producer.Close()) }()
 
-	defer func() {
-		err = producer.Close()
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
-		}
-	}()
-
-	expected := "*standardstreamclient.Producer"
-	actual := reflect.TypeOf(producer).String()
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "*standardstreamclient.Producer", reflect.TypeOf(producer).String())
 }
 
 func TestNewProducer_WithOptions(t *testing.T) {
@@ -55,32 +42,17 @@ func TestNewProducer_WithOptions(t *testing.T) {
 	f := bufio.NewWriter(&b)
 
 	client, err := standardstreamclient.New()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	options := func(c *streamconfig.Producer) {
 		c.Standardstream.Writer = f
 	}
 
 	producer, err := client.NewProducer(options)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
+	defer func() { require.NoError(t, producer.Close()) }()
 
-	defer func() {
-		err = producer.Close()
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
-		}
-	}()
-
-	expected := f
-	actual := producer.Config().Standardstream.Writer
-
-	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.EqualValues(t, f, producer.Config().Standardstream.Writer)
 }
 
 func TestNewProducer_Messages(t *testing.T) {
@@ -95,16 +67,8 @@ func TestNewProducer_Messages(t *testing.T) {
 	producer.Messages() <- producer.NewMessage([]byte(expected))
 	closer()
 
-	err := f.Flush()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	actual := b.String()
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	require.NoError(t, f.Flush())
+	assert.Equal(t, expected, b.String())
 }
 
 func TestNewProducer_AppendNewline(t *testing.T) {
@@ -119,16 +83,8 @@ func TestNewProducer_AppendNewline(t *testing.T) {
 	producer.Messages() <- producer.NewMessage([]byte("hello world"))
 	closer()
 
-	err := f.Flush()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	actual := b.String()
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	require.NoError(t, f.Flush())
+	assert.Equal(t, expected, b.String())
 }
 
 func TestNewProducer_MessageOrdering(t *testing.T) {
@@ -146,27 +102,17 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 	}
 	closer()
 
-	err := f.Flush()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, f.Flush())
 
 	i := 0
 	scanner := bufio.NewScanner(bytes.NewReader(b.Bytes()))
 	for scanner.Scan() {
-		expected := strconv.Itoa(i)
-		actual := scanner.Text()
-
-		if actual != expected {
-			t.Errorf("Expected %v to equal %v", actual, expected)
-		}
+		assert.Equal(t, strconv.Itoa(i), scanner.Text())
 
 		i++
 	}
 
-	if err = scanner.Err(); err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	assert.NoError(t, scanner.Err())
 }
 
 func BenchmarkProducer_Messages(b *testing.B) {

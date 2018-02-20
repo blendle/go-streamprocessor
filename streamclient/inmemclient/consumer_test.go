@@ -13,6 +13,8 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConsumer(t *testing.T) {
@@ -25,21 +27,13 @@ func TestNewConsumer(t *testing.T) {
 	t.Parallel()
 
 	client, err := inmemclient.New()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	consumer, err := client.NewConsumer()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
+	defer func() { require.NoError(t, consumer.Close()) }()
 
-	expected := "*inmemclient.Consumer"
-	actual := reflect.TypeOf(consumer).String()
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "*inmemclient.Consumer", reflect.TypeOf(consumer).String())
 }
 
 func TestNewConsumer_WithOptions(t *testing.T) {
@@ -48,25 +42,17 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 	store := inmemstore.NewStore()
 
 	client, err := inmemclient.New()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	options := func(c *streamconfig.Consumer) {
 		c.Inmem.Store = store
 	}
 
 	consumer, err := client.NewConsumer(options)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
+	defer func() { require.NoError(t, consumer.Close()) }()
 
-	expected := store
-	actual := consumer.Config().Inmem.Store
-
-	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.EqualValues(t, store, consumer.Config().Inmem.Store)
 }
 
 func TestNewConsumer_Messages(t *testing.T) {
@@ -80,27 +66,13 @@ func TestNewConsumer_Messages(t *testing.T) {
 	defer closer()
 
 	msg := <-consumer.Messages()
-
-	expected := "hello world"
-	actual := string(msg.Value())
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "hello world", string(msg.Value()))
 
 	msg = <-consumer.Messages()
-
-	expected = "hello universe!"
-	actual = string(msg.Value())
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "hello universe!", string(msg.Value()))
 
 	_, ok := <-consumer.Messages()
-	if ok {
-		t.Errorf("Channel is not closed")
-	}
+	assert.False(t, ok, "consumer did not close after last message")
 }
 
 func TestNewConsumer_MessageOrdering(t *testing.T) {
@@ -119,17 +91,9 @@ func TestNewConsumer_MessageOrdering(t *testing.T) {
 	i := 0
 	for msg := range consumer.Messages() {
 		kr, ok := msg.(streammsg.KeyReader)
-		if !ok {
-			t.Fatal("unable to convert message to correct interface")
-		}
-
-		if "hello world"+strconv.Itoa(i) != string(msg.Value()) {
-			t.Fatalf("Expected %q to equal %d", msg.Value(), i)
-		}
-
-		if strconv.Itoa(i) != string(kr.Key()) {
-			t.Fatalf("Expected %q to equal %q", kr.Key(), i)
-		}
+		require.True(t, ok, "unable to convert message to correct interface")
+		require.Equal(t, "hello world"+strconv.Itoa(i), string(msg.Value()))
+		require.Equal(t, strconv.Itoa(i), string(kr.Key()))
 
 		i++
 	}
@@ -159,11 +123,7 @@ func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
 		m := bytes.Split(msg.Value(), []byte(`"number":`))
 		m = bytes.Split(m[1], []byte(`}`))
 
-		expected := strconv.Itoa(i)
-		actual := string(m[0])
-		if actual != expected {
-			t.Errorf("Unexpected return value, expected %s, got %s", expected, actual)
-		}
+		require.Equal(t, strconv.Itoa(i), string(m[0]))
 
 		i++
 	}
