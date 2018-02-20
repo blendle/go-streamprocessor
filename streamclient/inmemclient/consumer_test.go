@@ -37,8 +37,7 @@ func TestNewConsumer(t *testing.T) {
 func TestNewConsumer_WithOptions(t *testing.T) {
 	t.Parallel()
 
-	store := inmemstore.NewStore()
-
+	store := inmemstore.New()
 	client, err := inmemclient.New()
 	require.NoError(t, err)
 
@@ -56,7 +55,7 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 func TestNewConsumer_Messages(t *testing.T) {
 	t.Parallel()
 
-	store := inmemstore.NewStore()
+	store := inmemstore.New()
 	store.AddMessage(streammsg.TestMessage(t, "key1", "hello world"))
 	store.AddMessage(streammsg.TestMessage(t, "key2", "hello universe!"))
 
@@ -77,7 +76,7 @@ func TestNewConsumer_MessageOrdering(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
-	store := inmemstore.NewStore()
+	store := inmemstore.New()
 
 	for i := 0; i < messageCount; i++ {
 		store.AddMessage(streammsg.TestMessage(t, strconv.Itoa(i), "hello world"+strconv.Itoa(i)))
@@ -101,7 +100,7 @@ func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
-	store := inmemstore.NewStore()
+	store := inmemstore.New()
 	line := `{"number":%d}` + "\n"
 
 	for i := 0; i < messageCount; i++ {
@@ -128,7 +127,7 @@ func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
 }
 
 func BenchmarkConsumer_Messages(b *testing.B) {
-	store := inmemstore.NewStore()
+	store := inmemstore.New()
 	line := `{"number":%d}` + "\n"
 
 	for i := 1; i <= b.N; i++ {

@@ -35,8 +35,7 @@ func TestNewProducer(t *testing.T) {
 func TestNewProducer_WithOptions(t *testing.T) {
 	t.Parallel()
 
-	store := inmemstore.NewStore()
-
+	store := inmemstore.New()
 	client, err := inmemclient.New()
 	require.NoError(t, err)
 
@@ -54,9 +53,8 @@ func TestNewProducer_WithOptions(t *testing.T) {
 func TestNewProducer_Messages(t *testing.T) {
 	t.Parallel()
 
-	store := inmemstore.NewStore()
 	expected := "hello world\n"
-
+	store := inmemstore.New()
 	producer, closer := inmemclient.TestProducer(t, store)
 	defer closer()
 
@@ -70,8 +68,7 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
-	store := inmemstore.NewStore()
-
+	store := inmemstore.New()
 	producer, closer := inmemclient.TestProducer(t, store)
 	defer closer()
 
