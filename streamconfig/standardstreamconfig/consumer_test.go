@@ -7,7 +7,6 @@ import (
 
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 )
 
 func TestConsumer(t *testing.T) {
@@ -21,10 +20,8 @@ func TestConsumer(t *testing.T) {
 func TestConsumerDefaults(t *testing.T) {
 	t.Parallel()
 
-	logger := zap.NewExample()
-
-	cc := standardstreamconfig.Client{Logger: logger}
-	config := standardstreamconfig.ConsumerDefaults(cc)
+	config := standardstreamconfig.ConsumerDefaults
 
 	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
+	assert.EqualValues(t, os.Stdin, config.Reader)
 }

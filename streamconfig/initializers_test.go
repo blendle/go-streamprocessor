@@ -9,37 +9,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewClient(t *testing.T) {
-	t.Parallel()
-
-	config, err := streamconfig.NewClient()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	tests := []struct {
-		expected string
-		config   interface{}
-	}{
-		{"streamconfig.Client", config},
-		{"inmemconfig.Client", config.Inmem},
-		{"kafkaconfig.Client", config.Kafka},
-		{"pubsubconfig.Client", config.Pubsub},
-		{"standardstreamconfig.Client", config.Standardstream},
-	}
-
-	for _, tt := range tests {
-		assert.Equal(t, tt.expected, reflect.TypeOf(tt.config).String())
-	}
-}
-
 func TestNewConsumer(t *testing.T) {
 	t.Parallel()
 
-	cc, err := streamconfig.NewClient()
-	require.NoError(t, err)
-
-	config, err := streamconfig.NewConsumer(cc)
+	config, err := streamconfig.NewConsumer()
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -61,10 +34,7 @@ func TestNewConsumer(t *testing.T) {
 func TestNewProducer(t *testing.T) {
 	t.Parallel()
 
-	cc, err := streamconfig.NewClient()
-	require.NoError(t, err)
-
-	config, err := streamconfig.NewProducer(cc)
+	config, err := streamconfig.NewProducer()
 	require.NoError(t, err)
 
 	tests := []struct {

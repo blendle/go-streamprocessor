@@ -1,6 +1,7 @@
 package kafkaconfig_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
@@ -11,16 +12,15 @@ import (
 func TestProducer(t *testing.T) {
 	t.Parallel()
 
-	_ = kafkaconfig.Producer{}
+	_ = kafkaconfig.Producer{
+		Logger: zap.NewNop(),
+	}
 }
 
 func TestProducerDefaults(t *testing.T) {
 	t.Parallel()
 
-	logger := zap.NewExample()
+	config := kafkaconfig.ProducerDefaults
 
-	cc := kafkaconfig.Client{Logger: logger}
-	config := kafkaconfig.ProducerDefaults(cc)
-
-	assert.EqualValues(t, logger, config.Logger)
+	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
 }

@@ -1,6 +1,7 @@
 package inmemconfig_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
@@ -21,12 +22,8 @@ func TestConsumer(t *testing.T) {
 func TestConsumerDefaults(t *testing.T) {
 	t.Parallel()
 
-	logger := zap.NewExample()
-	store := inmemstore.New()
+	config := inmemconfig.ConsumerDefaults
 
-	cc := inmemconfig.Client{Logger: logger, Store: store}
-	config := inmemconfig.ConsumerDefaults(cc)
-
-	assert.EqualValues(t, logger, config.Logger)
-	assert.EqualValues(t, store, config.Store)
+	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
+	assert.Equal(t, "*inmemstore.Store", reflect.TypeOf(config.Store).String())
 }
