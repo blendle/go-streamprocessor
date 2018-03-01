@@ -24,6 +24,8 @@ type Consumer struct {
 	messages chan streammsg.Message
 }
 
+var _ stream.Consumer = (*Consumer)(nil)
+
 // NewConsumer returns a new inmem consumer.
 func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, error) {
 	consumer, err := newConsumer(options)
