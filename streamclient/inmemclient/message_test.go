@@ -27,20 +27,20 @@ type testMessage interface {
 func TestMessage(t *testing.T) {
 	t.Parallel()
 
-	_, _ = newMessage()
+	_, _ = newMessage(t)
 }
 
 func TestMessage_Value(t *testing.T) {
 	t.Parallel()
 
-	_, msg := newMessage()
+	_, msg := newMessage(t)
 	assert.Equal(t, "testValue", string(msg.Value()))
 }
 
 func TestMessage_SetValue(t *testing.T) {
 	t.Parallel()
 
-	str, msg := newMessage()
+	str, msg := newMessage(t)
 
 	msg.SetValue([]byte("testValue2"))
 	assert.Equal(t, "testValue2", string(str.value))
@@ -49,14 +49,14 @@ func TestMessage_SetValue(t *testing.T) {
 func TestMessage_Key(t *testing.T) {
 	t.Parallel()
 
-	_, msg := newMessage()
+	_, msg := newMessage(t)
 	assert.Equal(t, "testKey", string(msg.Key()))
 }
 
 func TestMessage_SetKey(t *testing.T) {
 	t.Parallel()
 
-	str, msg := newMessage()
+	str, msg := newMessage(t)
 
 	msg.SetKey([]byte("testKey2"))
 	assert.Equal(t, "testKey2", string(str.key))
@@ -65,14 +65,14 @@ func TestMessage_SetKey(t *testing.T) {
 func TestMessage_Timestamp(t *testing.T) {
 	t.Parallel()
 
-	_, msg := newMessage()
+	_, msg := newMessage(t)
 	assert.Equal(t, time.Unix(0, 0), msg.Timestamp())
 }
 
 func TestMessage_SetTimestamp(t *testing.T) {
 	t.Parallel()
 
-	str, msg := newMessage()
+	str, msg := newMessage(t)
 
 	msg.SetTimestamp(time.Unix(10, 0))
 	assert.Equal(t, time.Unix(10, 0), str.timestamp)
@@ -81,14 +81,14 @@ func TestMessage_SetTimestamp(t *testing.T) {
 func TestMessage_Topic(t *testing.T) {
 	t.Parallel()
 
-	_, msg := newMessage()
+	_, msg := newMessage(t)
 	assert.Equal(t, "testTopic", msg.Topic())
 }
 
 func TestMessage_SetTopic(t *testing.T) {
 	t.Parallel()
 
-	str, msg := newMessage()
+	str, msg := newMessage(t)
 
 	msg.SetTopic("testTopic2")
 	assert.Equal(t, "testTopic2", str.topic)
@@ -97,14 +97,14 @@ func TestMessage_SetTopic(t *testing.T) {
 func TestMessage_Offset(t *testing.T) {
 	t.Parallel()
 
-	_, msg := newMessage()
+	_, msg := newMessage(t)
 	assert.Equal(t, int64(1), msg.Offset())
 }
 
 func TestMessage_Partition(t *testing.T) {
 	t.Parallel()
 
-	_, msg := newMessage()
+	_, msg := newMessage(t)
 	assert.Equal(t, int32(2), msg.Partition())
 }
 
@@ -113,14 +113,14 @@ func TestMessage_Tags(t *testing.T) {
 
 	expected := map[string][]byte{"test": []byte("value"), "test2": []byte("value2")}
 
-	_, msg := newMessage()
+	_, msg := newMessage(t)
 	assert.EqualValues(t, expected, msg.Tags())
 }
 
 func TestMessage_Tag(t *testing.T) {
 	t.Parallel()
 
-	_, msg := newMessage()
+	_, msg := newMessage(t)
 	assert.EqualValues(t, []byte("value2"), msg.Tag("test2"))
 }
 
@@ -128,7 +128,7 @@ func TestMessage_SetTags(t *testing.T) {
 	t.Parallel()
 
 	expected := map[string][]byte{"test3": []byte("value3")}
-	str, msg := newMessage()
+	str, msg := newMessage(t)
 
 	msg.SetTags(expected)
 	assert.EqualValues(t, expected, str.tags)
@@ -137,7 +137,7 @@ func TestMessage_SetTags(t *testing.T) {
 func TestMessage_SetTag(t *testing.T) {
 	t.Parallel()
 
-	str, msg := newMessage()
+	str, msg := newMessage(t)
 	expected := map[string][]byte{
 		"test":  []byte("value"),
 		"test2": []byte("value2"),
@@ -152,13 +152,15 @@ func TestMessage_RemoveTag(t *testing.T) {
 	t.Parallel()
 
 	expected := map[string][]byte{"test2": []byte("value2")}
-	str, msg := newMessage()
+	str, msg := newMessage(t)
 
 	msg.RemoveTag("test")
 	assert.EqualValues(t, expected, str.tags)
 }
 
-func newMessage() (*message, testMessage) {
+func newMessage(tb testing.TB) (*message, testMessage) {
+	tb.Helper()
+
 	m := &message{
 		value:     []byte("testValue"),
 		key:       []byte("testKey"),

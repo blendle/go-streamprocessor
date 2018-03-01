@@ -14,6 +14,8 @@ import (
 // pass additional string arguments after the first argument. Each extra
 // argument is written as a line to the buffer, delimited by \n.
 func TestBuffer(tb testing.TB, v ...string) io.ReadWriteCloser {
+	tb.Helper()
+
 	b := &testBuffer{}
 
 	for _, s := range v {
@@ -30,6 +32,8 @@ func TestBuffer(tb testing.TB, v ...string) io.ReadWriteCloser {
 // The return value is the consumer, and a function that should be deferred to
 // clean up resources.
 func TestConsumer(tb testing.TB, r io.ReadCloser) (stream.Consumer, func()) {
+	tb.Helper()
+
 	options := func(c *streamconfig.Consumer) {
 		c.Standardstream.Reader = r
 	}
@@ -46,6 +50,8 @@ func TestConsumer(tb testing.TB, r io.ReadCloser) (stream.Consumer, func()) {
 // The return value is the producer, and a function that should be deferred to
 // clean up resources.
 func TestProducer(tb testing.TB, w io.Writer) (stream.Producer, func()) {
+	tb.Helper()
+
 	options := func(c *streamconfig.Producer) {
 		c.Standardstream.Writer = w
 	}

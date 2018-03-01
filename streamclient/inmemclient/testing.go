@@ -15,6 +15,8 @@ import (
 // You can either pass a pre-configured inmemstore to this function as its
 // second argument, or pass in `nil`, to have one be instantiated for you.
 func TestConsumer(tb testing.TB, s *inmemstore.Store) (stream.Consumer, func()) {
+	tb.Helper()
+
 	if s == nil {
 		s = inmemstore.New()
 	}
@@ -35,6 +37,8 @@ func TestConsumer(tb testing.TB, s *inmemstore.Store) (stream.Consumer, func()) 
 // You can either pass a pre-configured inmemstore to this function as its
 // second argument, or pass in `nil`, to have one be instantiated for you.
 func TestProducer(tb testing.TB, s *inmemstore.Store) (stream.Producer, func()) {
+	tb.Helper()
+
 	if s == nil {
 		s = inmemstore.New()
 	}
