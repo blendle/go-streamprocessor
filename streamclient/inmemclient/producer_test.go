@@ -5,9 +5,11 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -54,8 +56,11 @@ func TestNewProducer_Messages(t *testing.T) {
 
 	producer.Messages() <- producer.NewMessage([]byte(expected))
 
-	require.NotEqual(t, store.Messages(), 0, "expected 1 message, got %d", len(store.Messages()))
-	assert.Equal(t, expected, string(store.Messages()[0].Value()))
+	waitForMessageCount(t, 1, store.Messages)
+	messages := store.Messages()
+
+	require.NotNil(t, messages[0])
+	assert.Equal(t, expected, string(messages[0].Value()))
 }
 
 func TestNewProducer_MessageOrdering(t *testing.T) {
@@ -69,6 +74,8 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 	for i := 0; i < messageCount; i++ {
 		producer.Messages() <- producer.NewMessage([]byte(strconv.Itoa(i)))
 	}
+
+	waitForMessageCount(t, messageCount, store.Messages)
 
 	for i, msg := range store.Messages() {
 		require.Equal(t, strconv.Itoa(i), string(msg.Value()))
@@ -84,4 +91,20 @@ func BenchmarkProducer_Messages(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		producer.Messages() <- producer.NewMessage([]byte(fmt.Sprintf(`{"number":%d}`, i)))
 	}
+}
+
+func waitForMessageCount(tb testing.TB, count int, f func() []streammsg.Message) {
+	tb.Helper()
+
+	var messages []streammsg.Message
+	for i := 0; i < 100; i++ {
+		messages = f()
+		if len(messages) >= count {
+			return
+		}
+
+		time.Sleep(1 * time.Millisecond)
+	}
+
+	require.Len(tb, messages, count)
 }
