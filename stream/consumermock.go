@@ -11,6 +11,8 @@ type ConsumerMock struct {
 	MessagesChan  chan streammsg.Message
 }
 
+var _ Consumer = (*ConsumerMock)(nil)
+
 // Messages implements the Consumer interface for ConsumerMock.
 func (c *ConsumerMock) Messages() <-chan streammsg.Message {
 	return c.MessagesChan

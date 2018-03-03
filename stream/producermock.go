@@ -11,6 +11,7 @@ type ProducerMock struct {
 	MessagesChan  chan streammsg.Message
 }
 
+var _ Producer = (*ProducerMock)(nil)
 
 // Messages implements the Producer interface for ProducerMock.
 func (p *ProducerMock) Messages() chan<- streammsg.Message {
