@@ -13,7 +13,7 @@ func TestProducer(t *testing.T) {
 	t.Parallel()
 
 	_ = kafkaconfig.Producer{
-		Logger: zap.NewNop(),
+		Logger: *zap.NewNop(),
 	}
 }
 
@@ -22,5 +22,5 @@ func TestProducerDefaults(t *testing.T) {
 
 	config := kafkaconfig.ProducerDefaults
 
-	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
+	assert.Equal(t, "zap.Logger", reflect.TypeOf(config.Logger).String())
 }

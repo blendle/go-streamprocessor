@@ -13,7 +13,7 @@ func TestConsumer(t *testing.T) {
 	t.Parallel()
 
 	_ = kafkaconfig.Consumer{
-		Logger: zap.NewNop(),
+		Logger: *zap.NewNop(),
 	}
 }
 
@@ -22,5 +22,5 @@ func TestConsumerDefaults(t *testing.T) {
 
 	config := kafkaconfig.ConsumerDefaults
 
-	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
+	assert.Equal(t, "zap.Logger", reflect.TypeOf(config.Logger).String())
 }
