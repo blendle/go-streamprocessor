@@ -100,6 +100,7 @@ func TestProducer_Messages_Ordering(t *testing.T) {
 		i++
 	}
 
+	assert.Equal(t, messageCount, i)
 	assert.NoError(t, scanner.Err())
 }
 

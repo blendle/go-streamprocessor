@@ -68,7 +68,7 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 			// Since we pass this value to the messages channel, we need to allocate
 			// a new permanent copy of the value, to prevent a scenario where the
 			// reader of the channel reads the value too late, resulting in unexpected
-			// data being returned.
+			// data being returned (race condition).
 			b := make([]byte, len(scanner.Bytes()))
 			copy(b, scanner.Bytes())
 

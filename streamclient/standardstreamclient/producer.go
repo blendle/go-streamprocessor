@@ -8,6 +8,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"go.uber.org/zap"
 )
 
 // Producer implements the stream.Producer interface for the standard stream
@@ -55,7 +56,11 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 
 			_, err := producer.config.Writer.Write(message)
 			if err != nil {
-				panic(err)
+				producer.config.Logger.Fatal(
+					"Unable to write message to stream.",
+					zap.ByteString("messageValue", message),
+					zap.Error(err),
+				)
 			}
 		}
 	}()

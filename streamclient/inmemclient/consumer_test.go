@@ -86,6 +86,8 @@ func TestConsumer_Messages_Ordering(t *testing.T) {
 
 		i++
 	}
+
+	assert.Equal(t, messageCount, i)
 }
 
 func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
