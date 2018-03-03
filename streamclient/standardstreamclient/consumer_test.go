@@ -51,10 +51,10 @@ func TestNewConsumer_Messages(t *testing.T) {
 	defer closer()
 
 	msg := <-consumer.Messages()
-	assert.Equal(t, "hello world", string(msg.Value()))
+	assert.Equal(t, "hello world", string(msg.Value))
 
 	msg = <-consumer.Messages()
-	assert.Equal(t, "hello universe!", string(msg.Value()))
+	assert.Equal(t, "hello universe!", string(msg.Value))
 
 	_, ok := <-consumer.Messages()
 	assert.False(t, ok, "consumer did not close after last message")
@@ -75,7 +75,7 @@ func TestNewConsumer_MessageOrdering(t *testing.T) {
 
 	i := 0
 	for msg := range consumer.Messages() {
-		assert.Equal(t, strconv.Itoa(i), string(msg.Value()))
+		assert.Equal(t, strconv.Itoa(i), string(msg.Value))
 
 		i++
 	}
@@ -101,7 +101,7 @@ func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
 		// is already replaced with a newer message in the channel. This is fixed in
 		// this consumer's implementation, but without this test, we couldn't expose
 		// the actual problem.
-		m := bytes.Split(msg.Value(), []byte(`"number":`))
+		m := bytes.Split(msg.Value, []byte(`"number":`))
 		m = bytes.Split(m[1], []byte(`}`))
 
 		assert.Equal(t, strconv.Itoa(i), string(m[0]))

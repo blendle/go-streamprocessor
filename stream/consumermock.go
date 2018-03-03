@@ -16,6 +16,16 @@ func (c *ConsumerMock) Messages() <-chan streammsg.Message {
 	return c.MessagesChan
 }
 
+// Ack implements the Consumer interface for ConsumerMock.
+func (c *ConsumerMock) Ack(_ streammsg.Message) error {
+	return nil
+}
+
+// Nack implements the Consumer interface for ConsumerMock.
+func (c *ConsumerMock) Nack(_ streammsg.Message) error {
+	return nil
+}
+
 // Close implements the Consumer interface for ConsumerMock.
 func (c *ConsumerMock) Close() error {
 	close(c.MessagesChan)

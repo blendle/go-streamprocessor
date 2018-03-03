@@ -43,16 +43,11 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 		defer producer.wg.Done()
 
 		for msg := range ch {
-			producer.config.Store.AddMessage(msg)
+			producer.config.Store.Add(msg)
 		}
 	}()
 
 	return producer, nil
-}
-
-// NewMessage returns a new message with the provided argument as its value.
-func (p *Producer) NewMessage(value []byte) streammsg.Message {
-	return &message{value: value}
 }
 
 // Messages returns the write channel for messages to be produced.

@@ -43,37 +43,7 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 			consumer.wg.Done()
 		}()
 
-		for _, sm := range consumer.config.Store.Messages() {
-			msg := &message{}
-
-			if m, ok := sm.(streammsg.ValueReader); ok {
-				msg.value = m.Value()
-			}
-
-			if m, ok := sm.(streammsg.KeyReader); ok {
-				msg.key = m.Key()
-			}
-
-			if m, ok := sm.(streammsg.TimestampReader); ok {
-				msg.timestamp = m.Timestamp()
-			}
-
-			if m, ok := sm.(streammsg.TopicReader); ok {
-				msg.topic = m.Topic()
-			}
-
-			if m, ok := sm.(streammsg.OffsetReader); ok {
-				msg.offset = m.Offset()
-			}
-
-			if m, ok := sm.(streammsg.PartitionReader); ok {
-				msg.partition = m.Partition()
-			}
-
-			if m, ok := sm.(streammsg.TagsReader); ok {
-				msg.tags = m.Tags()
-			}
-
+		for _, msg := range consumer.config.Store.Messages() {
 			consumer.messages <- msg
 		}
 	}()
@@ -85,6 +55,16 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 // stream.
 func (c *Consumer) Messages() <-chan streammsg.Message {
 	return c.messages
+}
+
+// Ack is a no-op implementation to satisfy the stream.Consumer interface.
+func (c *Consumer) Ack(_ streammsg.Message) error {
+	return nil
+}
+
+// Nack is a no-op implementation to satisfy the stream.Consumer interface.
+func (c *Consumer) Nack(_ streammsg.Message) error {
+	return nil
 }
 
 // Close closes the consumer connection.

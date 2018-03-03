@@ -45,7 +45,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 		defer producer.wg.Done()
 
 		for msg := range ch {
-			message := msg.Value()
+			message := msg.Value
 
 			// If the original message does not contain a newline at the end, we add
 			// it, as this is used as the message delimiter.
@@ -61,11 +61,6 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	}()
 
 	return producer, nil
-}
-
-// NewMessage returns a new message with the provided argument as its value.
-func (p *Producer) NewMessage(value []byte) streammsg.Message {
-	return &message{value: value}
 }
 
 // Messages returns the write channel for messages to be produced.

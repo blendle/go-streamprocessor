@@ -11,6 +11,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -54,7 +55,7 @@ func TestNewProducer_Messages(t *testing.T) {
 	buffer := standardstreamclient.TestBuffer(t)
 	producer, closer := standardstreamclient.TestProducer(t, buffer)
 
-	producer.Messages() <- producer.NewMessage([]byte(expected))
+	producer.Messages() <- streammsg.Message{Value: []byte(expected)}
 	closer()
 
 	b, err := ioutil.ReadAll(buffer)
@@ -68,7 +69,7 @@ func TestNewProducer_AppendNewline(t *testing.T) {
 	buffer := standardstreamclient.TestBuffer(t)
 	producer, closer := standardstreamclient.TestProducer(t, buffer)
 
-	producer.Messages() <- producer.NewMessage([]byte("hello world"))
+	producer.Messages() <- streammsg.Message{Value: []byte("hello world")}
 	closer()
 
 	b, err := ioutil.ReadAll(buffer)
@@ -84,7 +85,7 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 	producer, closer := standardstreamclient.TestProducer(t, buffer)
 
 	for i := 0; i < messageCount; i++ {
-		producer.Messages() <- producer.NewMessage([]byte(strconv.Itoa(i)))
+		producer.Messages() <- streammsg.Message{Value: []byte(strconv.Itoa(i))}
 	}
 	closer()
 
@@ -110,6 +111,6 @@ func BenchmarkProducer_Messages(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		producer.Messages() <- producer.NewMessage([]byte(fmt.Sprintf(`{"number":%d}`, i)))
+		producer.Messages() <- streammsg.Message{Value: []byte(fmt.Sprintf(`{"number":%d}`, i))}
 	}
 }

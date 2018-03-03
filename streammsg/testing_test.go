@@ -6,7 +6,6 @@ import (
 
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestTestMessage(t *testing.T) {
@@ -14,26 +13,20 @@ func TestTestMessage(t *testing.T) {
 
 	message := streammsg.TestMessage(t, "hello", "world")
 
-	kr, ok := message.(streammsg.KeyReader)
-	require.True(t, ok, "unable to convert message to correct interface")
-
-	assert.Equal(t, "hello", string(kr.Key()))
-	assert.Equal(t, "world", string(message.Value()))
+	assert.Equal(t, "hello", string(message.Key))
+	assert.Equal(t, "world", string(message.Value))
+	assert.Equal(t, time.Unix(0, 0), message.Timestamp)
+	assert.Equal(t, "testTopic", message.Topic)
+	assert.Equal(t, int64(12), *message.Offset)
+	assert.Equal(t, "testTagValue1", string(message.Tags["testTagKey1"]))
+	assert.Equal(t, "testTagValue2", string(message.Tags["testTagKey2"]))
 }
 
-func TestTestMessageWithStruct(t *testing.T) {
+func TestTestMessage_DefaultKeyAndValue(t *testing.T) {
 	t.Parallel()
 
-	message, str := streammsg.TestMessageWithStruct(t, "hello", "world")
+	message := streammsg.TestMessage(t, "", "")
 
-	_, ok := message.(streammsg.KeyReader)
-	require.True(t, ok, "unable to convert message to correct interface")
-
-	assert.Equal(t, "hello", string(str.KeyField))
-	assert.Equal(t, "world", string(str.ValueField))
-	assert.Equal(t, time.Unix(0, 0), str.TimestampField)
-	assert.Equal(t, "testTopic", str.TopicField)
-	assert.Equal(t, int64(0), str.OffsetField)
-	assert.Equal(t, int32(0), str.PartitionField)
-	assert.Equal(t, "testTagValue1", string(str.TagsField["testTagKey1"]))
+	assert.Equal(t, "testKey", string(message.Key))
+	assert.Equal(t, "testValue", string(message.Value))
 }
