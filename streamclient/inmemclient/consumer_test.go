@@ -66,7 +66,7 @@ func TestNewConsumer_Messages(t *testing.T) {
 	assert.False(t, ok, "consumer did not close after last message")
 }
 
-func TestNewConsumer_MessageOrdering(t *testing.T) {
+func TestConsumer_Messages_Ordering(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
@@ -88,7 +88,7 @@ func TestNewConsumer_MessageOrdering(t *testing.T) {
 	}
 }
 
-func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
+func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
