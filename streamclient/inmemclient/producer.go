@@ -7,6 +7,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"go.uber.org/zap"
 )
 
 // Producer implements the stream.Producer interface for the inmem client.
@@ -20,6 +21,7 @@ type Producer struct {
 	// other producer implementations, irrelevant to the current implementation.
 	rawConfig streamconfig.Producer
 
+	logger   *zap.Logger
 	wg       sync.WaitGroup
 	messages chan<- streammsg.Message
 }
@@ -81,6 +83,7 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 	producer := &Producer{
 		config:    config.Inmem,
 		rawConfig: config,
+		logger:    &config.Logger,
 		messages:  ch,
 	}
 

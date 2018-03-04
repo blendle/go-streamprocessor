@@ -7,6 +7,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"go.uber.org/zap"
 )
 
 // Consumer implements the stream.Consumer interface for the inmem client.
@@ -20,6 +21,7 @@ type Consumer struct {
 	// other consumer implementations, irrelevant to the current implementation.
 	rawConfig streamconfig.Consumer
 
+	logger   *zap.Logger
 	wg       sync.WaitGroup
 	messages chan streammsg.Message
 }
@@ -90,6 +92,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	consumer := &Consumer{
 		config:    config.Inmem,
 		rawConfig: config,
+		logger:    &config.Logger,
 		messages:  make(chan streammsg.Message),
 	}
 

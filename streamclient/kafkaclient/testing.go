@@ -187,7 +187,7 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 		require.NoError(tb, err)
 
 		verbose := func(c *streamconfig.Consumer) {
-			c.Kafka.Logger = *logger.Named("TestConsumer")
+			c.Logger = *logger.Named("TestConsumer")
 			c.Kafka.Debug.All = true
 		}
 
@@ -218,7 +218,7 @@ func TestProducerConfig(tb testing.TB, topic string, options ...func(c *streamco
 		require.NoError(tb, err)
 
 		verbose := func(c *streamconfig.Producer) {
-			c.Kafka.Logger = *logger.Named("TestProducer")
+			c.Logger = *logger.Named("TestProducer")
 			c.Kafka.Debug.All = true
 		}
 

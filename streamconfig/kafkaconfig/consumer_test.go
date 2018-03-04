@@ -1,7 +1,6 @@
 package kafkaconfig_test
 
 import (
-	"reflect"
 	"testing"
 	"time"
 
@@ -9,7 +8,6 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 )
 
 var consumerDefaults = map[string]interface{}{
@@ -31,7 +29,6 @@ func TestConsumer(t *testing.T) {
 		HeartbeatInterval: time.Duration(0),
 		ID:                "",
 		InitialOffset:     kafkaconfig.OffsetBeginning,
-		Logger:            *zap.NewNop(),
 		SecurityProtocol:  kafkaconfig.ProtocolPlaintext,
 		SessionTimeout:    time.Duration(0),
 		SSL:               kafkaconfig.SSL{KeyPath: ""},
@@ -48,7 +45,6 @@ func TestConsumerDefaults(t *testing.T) {
 	assert.Equal(t, kafkaconfig.Debug{}, config.Debug)
 	assert.Equal(t, 10*time.Second, config.HeartbeatInterval)
 	assert.Equal(t, kafkaconfig.OffsetBeginning, config.InitialOffset)
-	assert.Equal(t, "zap.Logger", reflect.TypeOf(config.Logger).String())
 	assert.Equal(t, 30*time.Second, config.SessionTimeout)
 	assert.Equal(t, kafkaconfig.SSL{}, config.SSL)
 }
@@ -148,11 +144,6 @@ func TestConsumer_ConfigMap(t *testing.T) {
 		"initialOffset (beginning)": {
 			&kafkaconfig.Consumer{InitialOffset: kafkaconfig.OffsetBeginning},
 			&kafka.ConfigMap{"default.topic.config": kafka.ConfigMap{"auto.offset.reset": "beginning"}},
-		},
-
-		"logger (skipped)": {
-			&kafkaconfig.Consumer{Logger: *zap.NewNop()},
-			&kafka.ConfigMap{},
 		},
 
 		"securityProtocol (plaintext)": {

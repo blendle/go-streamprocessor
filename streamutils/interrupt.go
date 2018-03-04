@@ -12,7 +12,7 @@ import (
 // closer function once received. It has a built-in timeout capability to force
 // terminate the application when the closer takes too long to close, or returns
 // an error during closing.
-func HandleInterrupts(closer func() error, logger zap.Logger) {
+func HandleInterrupts(closer func() error, logger *zap.Logger) {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
 

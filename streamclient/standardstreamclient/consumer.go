@@ -8,6 +8,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"go.uber.org/zap"
 )
 
 // maxCapacity represents the maximum number of tokens supported per-line. This
@@ -28,6 +29,7 @@ type Consumer struct {
 	// other consumer implementations, irrelevant to the current implementation.
 	rawConfig streamconfig.Consumer
 
+	logger   *zap.Logger
 	wg       sync.WaitGroup
 	messages chan streammsg.Message
 }
@@ -123,6 +125,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	consumer := &Consumer{
 		config:    config.Standardstream,
 		rawConfig: config,
+		logger:    &config.Logger,
 		messages:  make(chan streammsg.Message),
 	}
 

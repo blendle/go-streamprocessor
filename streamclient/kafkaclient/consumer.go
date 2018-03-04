@@ -24,6 +24,7 @@ type Consumer struct {
 	// other consumer implementations, irrelevant to the current implementation.
 	rawConfig streamconfig.Consumer
 
+	logger   *zap.Logger
 	kafka    *kafka.Consumer
 	wg       sync.WaitGroup
 	messages chan streammsg.Message
@@ -58,7 +59,7 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// these cases gracefully, but just in case, we try to close the consumer if
 	// any such interrupt signal is intercepted. If closing the consumer fails, we
 	// exit 1, and log a fatal message explaining what happened.
-	go streamutils.HandleInterrupts(consumer.Close, consumer.config.Logger)
+	go streamutils.HandleInterrupts(consumer.Close, consumer.logger)
 
 	return consumer, nil
 }
@@ -120,7 +121,7 @@ func (c *Consumer) Close() (err error) {
 
 		// Let's flush all logs still in the buffer, since this consumer is no
 		// longer useful after this point.
-		_ = c.config.Logger.Sync() // nolint: gas
+		_ = c.logger.Sync() // nolint: gas
 	})
 
 	return err
@@ -140,7 +141,7 @@ func (c *Consumer) consume() {
 	for {
 		select {
 		case <-c.quit:
-			c.config.Logger.Info("Received quit signal. Exiting consumer.")
+			c.logger.Info("Received quit signal. Exiting consumer.")
 
 			return
 		case event := <-c.kafka.Events():
@@ -248,7 +249,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 		return nil, err
 	}
 
-	config.Kafka.Logger.Info(
+	config.Logger.Info(
 		"Finished parsing Kafka client configurations.",
 		zap.Any("config", kconfig),
 	)
@@ -267,6 +268,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	consumer := &Consumer{
 		config:    config.Kafka,
 		rawConfig: config,
+		logger:    &config.Logger,
 		kafka:     kafkaconsumer,
 		messages:  make(chan streammsg.Message),
 		quit:      make(chan bool),
@@ -312,7 +314,7 @@ func (c *Consumer) storeOffset(tp kafka.TopicPartition) error {
 func (c *Consumer) commit() ([]kafka.TopicPartition, error) {
 	p, err := c.kafka.Commit()
 	if err == nil {
-		c.config.Logger.Debug(
+		c.logger.Debug(
 			"Committed local partition offsets to broker.",
 			zap.Any("partitionDetails", p),
 		)

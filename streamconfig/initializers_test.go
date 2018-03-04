@@ -24,6 +24,7 @@ func TestNewConsumer(t *testing.T) {
 		{"kafkaconfig.Consumer", config.Kafka},
 		{"pubsubconfig.Consumer", config.Pubsub},
 		{"standardstreamconfig.Consumer", config.Standardstream},
+		{"zap.Logger", config.Logger},
 	}
 
 	for _, tt := range tests {
@@ -53,6 +54,7 @@ func TestNewProducer(t *testing.T) {
 		{"kafkaconfig.Producer", config.Kafka},
 		{"pubsubconfig.Producer", config.Pubsub},
 		{"standardstreamconfig.Producer", config.Standardstream},
+		{"zap.Logger", config.Logger},
 	}
 
 	for _, tt := range tests {

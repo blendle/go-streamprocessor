@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"go.uber.org/zap"
 )
 
 // Consumer is a value-object, containing all user-configurable configuration
@@ -58,10 +57,6 @@ type Consumer struct {
 	// * none: throw exception to the consumer if no previous offset is found for
 	//   the consumer's group
 	InitialOffset Offset `kafka:"{topic}.auto.offset.reset,omitempty"`
-
-	// Logger is the configurable logger instance to log messages. If left
-	// undefined, a no-op logger will be used.
-	Logger zap.Logger `kafka:"-"`
 
 	// SecurityProtocol is the protocol used to communicate with brokers.
 	SecurityProtocol Protocol `kafka:"security.protocol,omitempty"`
@@ -145,7 +140,6 @@ var ConsumerDefaults = Consumer{
 	Debug:             Debug{},
 	HeartbeatInterval: 10 * time.Second,
 	InitialOffset:     OffsetBeginning,
-	Logger:            *zap.NewNop(),
 	SecurityProtocol:  ProtocolPlaintext,
 	SessionTimeout:    30 * time.Second,
 	SSL:               SSL{},
