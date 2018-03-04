@@ -10,6 +10,6 @@ cache:
   directories:
   - $GOPATH/pkg/dep
 
-before_install: script/bootstrap
+before_install: script/cisetup
 install: dep ensure -vendor-only
 script: script/test

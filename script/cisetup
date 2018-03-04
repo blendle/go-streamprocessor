@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# script/cisetup: Prepare CI for testing.
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+VERSION=7101c2310341ab3f4675fc565f64f0967e135a6a
+
+if [ -z "$CI" ]; then
+  echo >&2 "\$CI not set, refusing to run $0."
+  exit 1
+fi
+
+pushd "$(mktemp -d)"
+
+curl -sL "https://github.com/edenhill/librdkafka/archive/$VERSION.tar.gz" | \
+  tar -xz --strip-components=1 -f -
+
+./configure
+make -j
+make install
+popd
+
+script/bootstrap
