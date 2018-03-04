@@ -31,6 +31,13 @@ func TestNewConsumer(t *testing.T) {
 	}
 }
 
+func TestNewConsumer_Options_Nil(t *testing.T) {
+	t.Parallel()
+
+	_, err := streamconfig.NewConsumer(nil)
+	assert.NoError(t, err)
+}
+
 func TestNewProducer(t *testing.T) {
 	t.Parallel()
 
@@ -51,4 +58,11 @@ func TestNewProducer(t *testing.T) {
 	for _, tt := range tests {
 		assert.Equal(t, tt.expected, reflect.TypeOf(tt.config).String())
 	}
+}
+
+func TestNewProducer_Options_Nil(t *testing.T) {
+	t.Parallel()
+
+	_, err := streamconfig.NewProducer(nil)
+	assert.NoError(t, err)
 }

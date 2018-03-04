@@ -21,6 +21,10 @@ func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
 	// After we've defined the default values, we overwrite them with any provided
 	// custom configuration values.
 	for _, option := range options {
+		if option == nil {
+			continue
+		}
+
 		option(config)
 	}
 
@@ -43,6 +47,10 @@ func NewProducer(options ...func(*Producer)) (Producer, error) {
 	// After we've defined the default values, we overwrite them with any provided
 	// custom configuration values.
 	for _, option := range options {
+		if option == nil {
+			continue
+		}
+
 		option(config)
 	}
 
