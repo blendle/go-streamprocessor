@@ -6,7 +6,6 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -15,14 +14,9 @@ import (
 
 // Consumer implements the stream.Consumer interface for the Kafka client.
 type Consumer struct {
-	// config represents the relevant portion of the configuration passed into the
-	// consumer its initialization function.
-	config kafkaconfig.Consumer
-
-	// rawConfig represents the as-is configuration passed into the consumer its
-	// initialization function by the user. This includes the configuration of
-	// other consumer implementations, irrelevant to the current implementation.
-	rawConfig streamconfig.Consumer
+	// c represents the configuration passed into the consumer on
+	// initialization.
+	c streamconfig.Consumer
 
 	logger   *zap.Logger
 	kafka    *kafka.Consumer
@@ -62,7 +56,7 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	//
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag.
-	if consumer.rawConfig.HandleInterrupt {
+	if consumer.c.HandleInterrupt {
 		go streamutils.HandleInterrupts(consumer.Close, consumer.logger)
 	}
 
@@ -134,7 +128,7 @@ func (c *Consumer) Close() (err error) {
 
 // Config returns a read-only representation of the consumer configuration.
 func (c *Consumer) Config() streamconfig.Consumer {
-	return c.rawConfig
+	return c.c
 }
 
 func (c *Consumer) consume() {
@@ -271,13 +265,12 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	}
 
 	consumer := &Consumer{
-		config:    config.Kafka,
-		rawConfig: config,
-		logger:    &config.Logger,
-		kafka:     kafkaconsumer,
-		messages:  make(chan streammsg.Message),
-		quit:      make(chan bool),
-		once:      &sync.Once{},
+		c:        config,
+		logger:   &config.Logger,
+		kafka:    kafkaconsumer,
+		messages: make(chan streammsg.Message),
+		quit:     make(chan bool),
+		once:     &sync.Once{},
 	}
 
 	return consumer, nil

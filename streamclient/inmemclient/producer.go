@@ -5,7 +5,6 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils"
 	"go.uber.org/zap"
@@ -13,14 +12,9 @@ import (
 
 // Producer implements the stream.Producer interface for the inmem client.
 type Producer struct {
-	// config represents the relevant portion of the configuration passed into the
-	// producer its initialization function.
-	config inmemconfig.Producer
-
-	// rawConfig represents the as-is configuration passed into the producer its
-	// initialization function by the user. This includes the configuration of
-	// other producer implementations, irrelevant to the current implementation.
-	rawConfig streamconfig.Producer
+	// c represents the configuration passed into the producer on
+	// initialization.
+	c streamconfig.Producer
 
 	logger   *zap.Logger
 	wg       sync.WaitGroup
@@ -54,7 +48,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	//
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag.
-	if producer.rawConfig.HandleInterrupt {
+	if producer.c.HandleInterrupt {
 		go streamutils.HandleInterrupts(producer.Close, producer.logger)
 	}
 
@@ -80,14 +74,14 @@ func (p *Producer) Close() error {
 
 // Config returns a read-only representation of the producer configuration.
 func (p *Producer) Config() streamconfig.Producer {
-	return p.rawConfig
+	return p.c
 }
 
 func (p *Producer) produce(ch <-chan streammsg.Message) {
 	defer p.wg.Done()
 
 	for msg := range ch {
-		p.config.Store.Add(msg)
+		p.c.Inmem.Store.Add(msg)
 	}
 }
 
@@ -98,10 +92,9 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 	}
 
 	producer := &Producer{
-		config:    config.Inmem,
-		rawConfig: config,
-		logger:    &config.Logger,
-		messages:  ch,
+		c:        config,
+		logger:   &config.Logger,
+		messages: ch,
 	}
 
 	return producer, nil

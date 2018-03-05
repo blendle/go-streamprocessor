@@ -6,7 +6,6 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils"
 	"go.uber.org/zap"
@@ -15,14 +14,9 @@ import (
 // Producer implements the stream.Producer interface for the standard stream
 // client.
 type Producer struct {
-	// config represents the relevant portion of the configuration passed into the
-	// producer its initialization function.
-	config standardstreamconfig.Producer
-
-	// rawConfig represents the as-is configuration passed into the producer its
-	// initialization function by the user. This includes the configuration of
-	// other producer implementations, irrelevant to the current implementation.
-	rawConfig streamconfig.Producer
+	// c represents the configuration passed into the producer on
+	// initialization.
+	c streamconfig.Producer
 
 	logger   *zap.Logger
 	wg       sync.WaitGroup
@@ -57,7 +51,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	//
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag.
-	if producer.rawConfig.HandleInterrupt {
+	if producer.c.HandleInterrupt {
 		go streamutils.HandleInterrupts(producer.Close, producer.logger)
 	}
 
@@ -83,7 +77,7 @@ func (p *Producer) Close() error {
 
 // Config returns a read-only representation of the producer configuration.
 func (p *Producer) Config() streamconfig.Producer {
-	return p.rawConfig
+	return p.c
 }
 
 func (p *Producer) produce(ch <-chan streammsg.Message) {
@@ -98,7 +92,7 @@ func (p *Producer) produce(ch <-chan streammsg.Message) {
 			message = append(message, "\n"...)
 		}
 
-		_, err := p.config.Writer.Write(message)
+		_, err := p.c.Standardstream.Writer.Write(message)
 		if err != nil {
 			p.logger.Fatal(
 				"Unable to write message to stream.",
@@ -116,10 +110,9 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 	}
 
 	producer := &Producer{
-		config:    config.Standardstream,
-		rawConfig: config,
-		logger:    &config.Logger,
-		messages:  ch,
+		c:        config,
+		logger:   &config.Logger,
+		messages: ch,
 	}
 
 	return producer, nil
