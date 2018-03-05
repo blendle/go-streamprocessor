@@ -204,35 +204,6 @@ func (c *Consumer) consume() {
 	}
 }
 
-func newMessageFromKafka(m *kafka.Message) *streammsg.Message {
-	oint := int64(m.TopicPartition.Offset)
-	offset := &oint
-
-	// If the offset is set to the special-value `-1001`, that means the offset is
-	// not set yet (or invalid), so we set the offset to `nil`.
-	//
-	// see: https://git.io/vAHI2
-	if oint == -1001 {
-		offset = nil
-	}
-
-	msg := &streammsg.Message{
-		Key:       m.Key,
-		Value:     m.Value,
-		Timestamp: m.Timestamp,
-		Topic:     *m.TopicPartition.Topic,
-		Offset:    offset,
-	}
-
-	// We set the message's opaque field (which is still nil at this point), and
-	// populate it with the `TopicPartition` details of the Kafka message. This
-	// allows us to acknowledge this message at a later point in time, without
-	// having to hold on to the Kafka message itself.
-	_ = streammsg.SetMessageOpaque(msg, opaque{toppar: &m.TopicPartition})
-
-	return msg
-}
-
 func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	// Construct a full configuration object, based on the provided configuration,
 	// the default configurations, and the static configurations.
@@ -274,6 +245,35 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	}
 
 	return consumer, nil
+}
+
+func newMessageFromKafka(m *kafka.Message) *streammsg.Message {
+	oint := int64(m.TopicPartition.Offset)
+	offset := &oint
+
+	// If the offset is set to the special-value `-1001`, that means the offset is
+	// not set yet (or invalid), so we set the offset to `nil`.
+	//
+	// see: https://git.io/vAHI2
+	if oint == -1001 {
+		offset = nil
+	}
+
+	msg := &streammsg.Message{
+		Key:       m.Key,
+		Value:     m.Value,
+		Timestamp: m.Timestamp,
+		Topic:     *m.TopicPartition.Topic,
+		Offset:    offset,
+	}
+
+	// We set the message's opaque field (which is still nil at this point), and
+	// populate it with the `TopicPartition` details of the Kafka message. This
+	// allows us to acknowledge this message at a later point in time, without
+	// having to hold on to the Kafka message itself.
+	_ = streammsg.SetMessageOpaque(msg, opaque{toppar: &m.TopicPartition})
+
+	return msg
 }
 
 // storeOffset accepts a `kafka.TopicPartition` and uses the rdkafka-consumer to

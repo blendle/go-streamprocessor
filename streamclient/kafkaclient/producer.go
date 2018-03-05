@@ -119,39 +119,6 @@ func (p *Producer) Config() streamconfig.Producer {
 	return p.c
 }
 
-func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
-	// Construct a full configuration object, based on the provided configuration,
-	// the default configurations, and the static configurations.
-	config, err := streamconfig.NewProducer(options...)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert the configuration struct into a format that can be sent to the
-	// rdkafka library.
-	kconfig, err := config.Kafka.ConfigMap()
-	if err != nil {
-		return nil, err
-	}
-
-	// Instantiate a new rdkafka-based Kafka producer.
-	kafkaproducer, err := kafka.NewProducer(kconfig)
-	if err != nil {
-		return nil, err
-	}
-
-	producer := &Producer{
-		c:        config,
-		logger:   &config.Logger,
-		kafka:    kafkaproducer,
-		messages: ch,
-		quit:     make(chan bool),
-		once:     &sync.Once{},
-	}
-
-	return producer, nil
-}
-
 func (p *Producer) produce(ch <-chan streammsg.Message) {
 	defer func() {
 		close(p.messages)
@@ -183,6 +150,39 @@ func (p *Producer) produce(ch <-chan streammsg.Message) {
 			}
 		}
 	}
+}
+
+func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
+	// Construct a full configuration object, based on the provided configuration,
+	// the default configurations, and the static configurations.
+	config, err := streamconfig.NewProducer(options...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert the configuration struct into a format that can be sent to the
+	// rdkafka library.
+	kconfig, err := config.Kafka.ConfigMap()
+	if err != nil {
+		return nil, err
+	}
+
+	// Instantiate a new rdkafka-based Kafka producer.
+	kafkaproducer, err := kafka.NewProducer(kconfig)
+	if err != nil {
+		return nil, err
+	}
+
+	producer := &Producer{
+		c:        config,
+		logger:   &config.Logger,
+		kafka:    kafkaproducer,
+		messages: ch,
+		quit:     make(chan bool),
+		once:     &sync.Once{},
+	}
+
+	return producer, nil
 }
 
 func (p *Producer) newMessage(m streammsg.Message) *kafka.Message {
