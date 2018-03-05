@@ -8,6 +8,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"github.com/blendle/go-streamprocessor/streamutils"
 	"go.uber.org/zap"
 )
 
@@ -77,6 +78,17 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 			consumer.messages <- streammsg.Message{Value: b}
 		}
 	}()
+
+	// Finally, we monitor for any interrupt signals. Ideally, the user handles
+	// these cases gracefully, but just in case, we try to close the consumer if
+	// any such interrupt signal is intercepted. If closing the consumer fails, we
+	// exit 1, and log a fatal message explaining what happened.
+	//
+	// This functionality is enabled by default, but can be disabled through a
+	// configuration flag.
+	if consumer.rawConfig.HandleInterrupt {
+		go streamutils.HandleInterrupts(consumer.Close, consumer.logger)
+	}
 
 	return consumer, nil
 }
