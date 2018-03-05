@@ -22,6 +22,12 @@ type Consumer struct {
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
 	Logger zap.Logger
+
+	// HandleInterrupt determines whether the consumer should close itself
+	// gracefully when an interrupt signal (^C) is received. This defaults to true
+	// to increase first-time ease-of-use, but if the application wants to handle
+	// these signals manually, this flag disable the automated implementation.
+	HandleInterrupt bool
 }
 
 // Producer contains the configuration for all the different consumer that
@@ -38,14 +44,22 @@ type Producer struct {
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
 	Logger zap.Logger
+
+	// HandleInterrupt determines whether the producer should close itself
+	// gracefully when an interrupt signal (^C) is received. This defaults to true
+	// to increase first-time ease-of-use, but if the application wants to handle
+	// these signals manually, this flag disable the automated implementation.
+	HandleInterrupt bool
 }
 
 // ConsumerDefaults holds the default values for Consumer.
 var ConsumerDefaults = Consumer{
-	Logger: *zap.NewNop(),
+	Logger:          *zap.NewNop(),
+	HandleInterrupt: true,
 }
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
-	Logger: *zap.NewNop(),
+	Logger:          *zap.NewNop(),
+	HandleInterrupt: true,
 }

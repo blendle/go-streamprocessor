@@ -67,7 +67,12 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// these cases gracefully, but just in case, we try to close the producer if
 	// any such interrupt signal is intercepted. If closing the producer fails, we
 	// exit 1, and log a fatal message explaining what happened.
-	go streamutils.HandleInterrupts(producer.Close, producer.logger)
+	//
+	// This functionality is enabled by default, but can be disabled through a
+	// configuration flag.
+	if producer.rawConfig.HandleInterrupt {
+		go streamutils.HandleInterrupts(producer.Close, producer.logger)
+	}
 
 	return producer, nil
 }
