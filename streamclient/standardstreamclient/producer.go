@@ -44,28 +44,11 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// are completed and the write channel is closed.
 	producer.wg.Add(1)
 
-	go func() {
-		defer producer.wg.Done()
-
-		for msg := range ch {
-			message := msg.Value
-
-			// If the original message does not contain a newline at the end, we add
-			// it, as this is used as the message delimiter.
-			if !bytes.HasSuffix(message, []byte("\n")) {
-				message = append(message, "\n"...)
-			}
-
-			_, err := producer.config.Writer.Write(message)
-			if err != nil {
-				producer.logger.Fatal(
-					"Unable to write message to stream.",
-					zap.ByteString("messageValue", message),
-					zap.Error(err),
-				)
-			}
-		}
-	}()
+	// We listen to the produce channel in a goroutine. For every message
+	// delivered to this producer we add a newline (if missing), and send the
+	// message value to the configured io.Writer. If the producer is closed, the
+	// close is blocked until the channel is closed.
+	go producer.produce(ch)
 
 	// Finally, we monitor for any interrupt signals. Ideally, the user handles
 	// these cases gracefully, but just in case, we try to close the producer if
@@ -101,6 +84,29 @@ func (p *Producer) Close() error {
 // Config returns a read-only representation of the producer configuration.
 func (p *Producer) Config() streamconfig.Producer {
 	return p.rawConfig
+}
+
+func (p *Producer) produce(ch <-chan streammsg.Message) {
+	defer p.wg.Done()
+
+	for msg := range ch {
+		message := msg.Value
+
+		// If the original message does not contain a newline at the end, we add
+		// it, as this is used as the message delimiter.
+		if !bytes.HasSuffix(message, []byte("\n")) {
+			message = append(message, "\n"...)
+		}
+
+		_, err := p.config.Writer.Write(message)
+		if err != nil {
+			p.logger.Fatal(
+				"Unable to write message to stream.",
+				zap.ByteString("messageValue", message),
+				zap.Error(err),
+			)
+		}
+	}
 }
 
 func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {

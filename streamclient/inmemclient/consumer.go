@@ -40,16 +40,11 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// are completed and the read channel is closed.
 	consumer.wg.Add(1)
 
-	go func() {
-		defer func() {
-			close(consumer.messages)
-			consumer.wg.Done()
-		}()
-
-		for _, msg := range consumer.config.Store.Messages() {
-			consumer.messages <- msg
-		}
-	}()
+	// We start a goroutine to consume any messages currently stored in the inmem
+	// storage. We deliver these messages on a blocking channel, so as long as no
+	// one is listening on the other end of the channel, there's no significant
+	// overhead to starting the goroutine this early.
+	go consumer.consume()
 
 	// Finally, we monitor for any interrupt signals. Ideally, the user handles
 	// these cases gracefully, but just in case, we try to close the consumer if
@@ -93,6 +88,17 @@ func (c *Consumer) Close() error {
 // Config returns a read-only representation of the consumer configuration.
 func (c *Consumer) Config() streamconfig.Consumer {
 	return c.rawConfig
+}
+
+func (c *Consumer) consume() {
+	defer func() {
+		close(c.messages)
+		c.wg.Done()
+	}()
+
+	for _, msg := range c.config.Store.Messages() {
+		c.messages <- msg
+	}
 }
 
 func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {

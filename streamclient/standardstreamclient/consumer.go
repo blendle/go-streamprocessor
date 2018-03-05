@@ -48,36 +48,11 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// are completed and the read channel is closed.
 	consumer.wg.Add(1)
 
-	go func() {
-		// scanner.Scan() stops once it reached the last line of the provided
-		// reader. When it does, we close the read channel, making sure any blocking
-		// consumers are unblocked. We also reduce the WaitGroup count by one
-		// (making the total count zero), making sure we unblock any subsequent call
-		// to consumer.Close().
-		defer func() {
-			close(consumer.messages)
-			consumer.wg.Done()
-		}()
-
-		scanner := bufio.NewScanner(consumer.config.Reader)
-		buf := make([]byte, 0, maxCapacity)
-		scanner.Buffer(buf, maxCapacity)
-
-		for scanner.Scan() {
-			// scanner.Bytes() does not allocate any new memory for the returned
-			// bytes. This means that during the next scan, the memory will be re-used
-			// for the value of the next line.
-			//
-			// Since we pass this value to the messages channel, we need to allocate
-			// a new permanent copy of the value, to prevent a scenario where the
-			// reader of the channel reads the value too late, resulting in unexpected
-			// data being returned (race condition).
-			b := make([]byte, len(scanner.Bytes()))
-			copy(b, scanner.Bytes())
-
-			consumer.messages <- streammsg.Message{Value: b}
-		}
-	}()
+	// We start a goroutine to consume any messages sent to us from the configured
+	// reader. We deliver these messages on a blocking channel, so as long as no
+	// one is listening on the other end of the channel, there's no significant
+	// overhead to starting the goroutine this early.
+	go consumer.consume()
 
 	// Finally, we monitor for any interrupt signals. Ideally, the user handles
 	// these cases gracefully, but just in case, we try to close the consumer if
@@ -126,6 +101,37 @@ func (c *Consumer) Close() error {
 // Config returns a read-only representation of the consumer configuration.
 func (c *Consumer) Config() streamconfig.Consumer {
 	return c.rawConfig
+}
+
+func (c *Consumer) consume() {
+	// scanner.Scan() stops once it reached the last line of the provided
+	// reader. When it does, we close the read channel, making sure any blocking
+	// consumers are unblocked. We also reduce the WaitGroup count by one
+	// (making the total count zero), making sure we unblock any subsequent call
+	// to consumer.Close().
+	defer func() {
+		close(c.messages)
+		c.wg.Done()
+	}()
+
+	scanner := bufio.NewScanner(c.config.Reader)
+	buf := make([]byte, 0, maxCapacity)
+	scanner.Buffer(buf, maxCapacity)
+
+	for scanner.Scan() {
+		// scanner.Bytes() does not allocate any new memory for the returned
+		// bytes. This means that during the next scan, the memory will be re-used
+		// for the value of the next line.
+		//
+		// Since we pass this value to the messages channel, we need to allocate
+		// a new permanent copy of the value, to prevent a scenario where the
+		// reader of the channel reads the value too late, resulting in unexpected
+		// data being returned (race condition).
+		b := make([]byte, len(scanner.Bytes()))
+		copy(b, scanner.Bytes())
+
+		c.messages <- streammsg.Message{Value: b}
+	}
 }
 
 func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {

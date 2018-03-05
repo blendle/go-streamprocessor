@@ -42,13 +42,10 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// are completed and the write channel is closed.
 	producer.wg.Add(1)
 
-	go func() {
-		defer producer.wg.Done()
-
-		for msg := range ch {
-			producer.config.Store.Add(msg)
-		}
-	}()
+	// We listen to the produce channel in a goroutine. Every message delivered to
+	// this producer gets stored in the inmem store. If the producer is closed,
+	// the close is blocked until the channel is closed.
+	go producer.produce(ch)
 
 	// Finally, we monitor for any interrupt signals. Ideally, the user handles
 	// these cases gracefully, but just in case, we try to close the producer if
@@ -84,6 +81,14 @@ func (p *Producer) Close() error {
 // Config returns a read-only representation of the producer configuration.
 func (p *Producer) Config() streamconfig.Producer {
 	return p.rawConfig
+}
+
+func (p *Producer) produce(ch <-chan streammsg.Message) {
+	defer p.wg.Done()
+
+	for msg := range ch {
+		p.config.Store.Add(msg)
+	}
 }
 
 func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
