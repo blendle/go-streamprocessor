@@ -26,7 +26,7 @@ type Consumer struct {
 	// HandleInterrupt determines whether the consumer should close itself
 	// gracefully when an interrupt signal (^C) is received. This defaults to true
 	// to increase first-time ease-of-use, but if the application wants to handle
-	// these signals manually, this flag disable the automated implementation.
+	// these signals manually, this flag disables the automated implementation.
 	HandleInterrupt bool
 }
 
@@ -48,7 +48,7 @@ type Producer struct {
 	// HandleInterrupt determines whether the producer should close itself
 	// gracefully when an interrupt signal (^C) is received. This defaults to true
 	// to increase first-time ease-of-use, but if the application wants to handle
-	// these signals manually, this flag disable the automated implementation.
+	// these signals manually, this flag disables the automated implementation.
 	HandleInterrupt bool
 }
 
