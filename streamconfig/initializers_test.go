@@ -77,6 +77,21 @@ func TestNewConsumer_WithOptionsAndEnvironmentVariables(t *testing.T) {
 	assert.Equal(t, "test", config.Kafka.ID)
 }
 
+func TestNewConsumer_WithOptionsWithoutEnvironmentVariables(t *testing.T) {
+	_ = os.Setenv("CONSUMER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("CONSUMER_KAFKA_BROKERS") // nolint: errcheck
+
+	options := func(c *streamconfig.Consumer) {
+		c.AllowEnvironmentBasedConfiguration = false
+		c.Kafka.Brokers = []string{"broker2"}
+	}
+
+	config, err := streamconfig.NewConsumer(options)
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker2"}, config.Kafka.Brokers)
+}
+
 func TestNewProducer(t *testing.T) {
 	t.Parallel()
 
@@ -142,4 +157,19 @@ func TestNewProducer_WithOptionsAndEnvironmentVariables(t *testing.T) {
 
 	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
 	assert.Equal(t, "test", config.Kafka.ID)
+}
+
+func TestNewProducer_WithOptionsWithoutEnvironmentVariables(t *testing.T) {
+	_ = os.Setenv("CONSUMER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("CONSUMER_KAFKA_BROKERS") // nolint: errcheck
+
+	options := func(c *streamconfig.Producer) {
+		c.AllowEnvironmentBasedConfiguration = false
+		c.Kafka.Brokers = []string{"broker2"}
+	}
+
+	config, err := streamconfig.NewProducer(options)
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker2"}, config.Kafka.Brokers)
 }

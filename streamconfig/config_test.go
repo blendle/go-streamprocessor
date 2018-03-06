@@ -27,6 +27,7 @@ func TestConsumer(t *testing.T) {
 		Logger:          *zap.NewNop(),
 		HandleInterrupt: false,
 		Name:            "",
+		AllowEnvironmentBasedConfiguration: false,
 	}
 }
 
@@ -38,6 +39,7 @@ func TestConsumerDefaults(t *testing.T) {
 	assert.Equal(t, "zap.Logger", reflect.TypeOf(config.Logger).String())
 	assert.True(t, config.HandleInterrupt)
 	assert.Equal(t, "consumer", config.Name)
+	assert.True(t, config.AllowEnvironmentBasedConfiguration)
 }
 
 func TestConsumerUsage(t *testing.T) {
@@ -265,8 +267,10 @@ func TestConsumerEnvironmentVariables(t *testing.T) {
 			}
 
 			tt.config.Name = "consumer"
+			tt.config.AllowEnvironmentBasedConfiguration = true
 			options := func(c *streamconfig.Consumer) {
 				c.Name = "consumer"
+				c.AllowEnvironmentBasedConfiguration = true
 			}
 
 			assert.EqualValues(t, tt.config, streamconfig.TestNewConsumer(t, false, options))
@@ -285,6 +289,7 @@ func TestProducer(t *testing.T) {
 		Logger:          *zap.NewNop(),
 		HandleInterrupt: false,
 		Name:            "",
+		AllowEnvironmentBasedConfiguration: false,
 	}
 }
 
@@ -296,6 +301,7 @@ func TestProducerDefaults(t *testing.T) {
 	assert.Equal(t, "zap.Logger", reflect.TypeOf(config.Logger).String())
 	assert.True(t, config.HandleInterrupt)
 	assert.Equal(t, "producer", config.Name)
+	assert.True(t, config.AllowEnvironmentBasedConfiguration)
 }
 
 func TestProducerUsage(t *testing.T) {
@@ -539,8 +545,10 @@ func TestProducerEnvironmentVariables(t *testing.T) {
 			}
 
 			tt.config.Name = "producer"
+			tt.config.AllowEnvironmentBasedConfiguration = true
 			options := func(c *streamconfig.Producer) {
 				c.Name = "producer"
+				c.AllowEnvironmentBasedConfiguration = true
 			}
 
 			assert.EqualValues(t, tt.config, streamconfig.TestNewProducer(t, false, options))

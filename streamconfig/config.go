@@ -40,6 +40,12 @@ type Consumer struct {
 	// is set, then the prefix is "consumer" is used, so you prepend all
 	// environment variables with "CONSUMER_.
 	Name string `ignored:"true"`
+
+	// AllowEnvironmentBasedConfiguration allows you to disable configuring the
+	// stream client based on predefined environment variables. This is enabled by
+	// default, but can be disabled if you want full control over the behavior of
+	// the stream client without any outside influence.
+	AllowEnvironmentBasedConfiguration bool `ignored:"true"`
 }
 
 // Producer contains the configuration for all the different consumer that
@@ -70,6 +76,12 @@ type Producer struct {
 	// is set, then the prefix is "producer" is used, so you prepend all
 	// environment variables with "PRODUCER_.
 	Name string `ignored:"true"`
+
+	// AllowEnvironmentBasedConfiguration allows you to disable configuring the
+	// stream client based on predefined environment variables. This is enabled by
+	// default, but can be disabled if you want full control over the behavior of
+	// the stream client without any outside influence.
+	AllowEnvironmentBasedConfiguration bool `ignored:"true"`
 }
 
 // ConsumerDefaults holds the default values for Consumer.
@@ -77,6 +89,7 @@ var ConsumerDefaults = Consumer{
 	Logger:          *zap.NewNop(),
 	HandleInterrupt: true,
 	Name:            "consumer",
+	AllowEnvironmentBasedConfiguration: true,
 }
 
 // ProducerDefaults holds the default values for Producer.
@@ -84,6 +97,7 @@ var ProducerDefaults = Producer{
 	Logger:          *zap.NewNop(),
 	HandleInterrupt: true,
 	Name:            "producer",
+	AllowEnvironmentBasedConfiguration: true,
 }
 
 // Usage calls the usage() function and returns a byte array.

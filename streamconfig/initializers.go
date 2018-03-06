@@ -32,10 +32,13 @@ func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
 	}
 
 	// Finally, we set/overwrite any value with any custom configuration values
-	// provided via environment variables.
-	err := envconfig.Process(config.Name, config)
-	if err != nil {
-		return *config, err
+	// provided via environment variables. If `AllowEnvironmentBasedConfiguration`
+	// is set to false, this step is skipped.
+	if config.AllowEnvironmentBasedConfiguration {
+		err := envconfig.Process(config.Name, config)
+		if err != nil {
+			return *config, err
+		}
 	}
 
 	// We pass the config by-value, to prevent any race-condition where the
@@ -67,10 +70,13 @@ func NewProducer(options ...func(*Producer)) (Producer, error) {
 	}
 
 	// Finally, we set/overwrite any value with any custom configuration values
-	// provided via environment variables.
-	err := envconfig.Process(config.Name, config)
-	if err != nil {
-		return *config, err
+	// provided via environment variables. If `AllowEnvironmentBasedConfiguration`
+	// is set to false, this step is skipped.
+	if config.AllowEnvironmentBasedConfiguration {
+		err := envconfig.Process(config.Name, config)
+		if err != nil {
+			return *config, err
+		}
 	}
 
 	// We pass the config by-value, to prevent any race-condition where the

@@ -26,6 +26,7 @@ func TestNewConsumer(tb testing.TB, defaults bool, options ...func(*Consumer)) C
 		c.Logger = zap.Logger{}
 		c.HandleInterrupt = false
 		c.Name = ""
+		c.AllowEnvironmentBasedConfiguration = false
 	}
 
 	for _, option := range options {
@@ -56,6 +57,7 @@ func TestNewProducer(tb testing.TB, defaults bool, options ...func(*Producer)) P
 		p.Logger = zap.Logger{}
 		p.HandleInterrupt = false
 		p.Name = ""
+		p.AllowEnvironmentBasedConfiguration = false
 	}
 
 	for _, option := range options {
