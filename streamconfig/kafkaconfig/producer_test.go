@@ -12,7 +12,6 @@ import (
 
 var producerDefaults = map[string]interface{}{
 	"queue.buffering.backpressure.threshold": 100,
-	"compression.codec":                      "snappy",
 	"batch.num.messages":                     100000,
 }
 
@@ -26,6 +25,7 @@ func TestProducer(t *testing.T) {
 
 	_ = kafkaconfig.Producer{
 		Brokers:                []string{},
+		CompressionCodec:       kafkaconfig.CompressionNone,
 		Debug:                  kafkaconfig.Debug{All: true},
 		HeartbeatInterval:      time.Duration(0),
 		ID:                     "",
@@ -47,6 +47,7 @@ func TestProducerDefaults(t *testing.T) {
 	config := kafkaconfig.ProducerDefaults
 
 	assert.Equal(t, kafkaconfig.Debug{}, config.Debug)
+	assert.Equal(t, kafkaconfig.CompressionSnappy, config.CompressionCodec)
 	assert.Equal(t, 10*time.Second, config.HeartbeatInterval)
 	assert.Equal(t, 0, config.MaxDeliveryRetries)
 	assert.Equal(t, 0*time.Second, config.MaxQueueBufferDuration)
@@ -77,6 +78,26 @@ func TestProducer_ConfigMap(t *testing.T) {
 		"brokers (empty)": {
 			&kafkaconfig.Producer{Brokers: []string{}},
 			&kafka.ConfigMap{},
+		},
+
+		"compressionCodec (none)": {
+			&kafkaconfig.Producer{CompressionCodec: kafkaconfig.CompressionNone},
+			&kafka.ConfigMap{"compression.codec": "none"},
+		},
+
+		"compressionCodec (gzip)": {
+			&kafkaconfig.Producer{CompressionCodec: kafkaconfig.CompressionGZIP},
+			&kafka.ConfigMap{"compression.codec": "gzip"},
+		},
+
+		"compressionCodec (Snappy)": {
+			&kafkaconfig.Producer{CompressionCodec: kafkaconfig.CompressionSnappy},
+			&kafka.ConfigMap{"compression.codec": "snappy"},
+		},
+
+		"compressionCodec (lz4)": {
+			&kafkaconfig.Producer{CompressionCodec: kafkaconfig.CompressionLZ4},
+			&kafka.ConfigMap{"compression.codec": "lz4"},
 		},
 
 		"debug (all)": {

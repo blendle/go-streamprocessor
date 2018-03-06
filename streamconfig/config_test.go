@@ -318,6 +318,34 @@ func TestProducerEnvironmentVariables(t *testing.T) {
 		envs   map[string]string
 		config streamconfig.Producer
 	}{
+		"Kafka.CompressionCodec (none)": {
+			map[string]string{"PRODUCER_KAFKA_COMPRESSION_CODEC": "none"},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{CompressionCodec: kafkaconfig.CompressionNone},
+			},
+		},
+
+		"Kafka.CompressionCodec (gzip)": {
+			map[string]string{"PRODUCER_KAFKA_COMPRESSION_CODEC": "gzip"},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{CompressionCodec: kafkaconfig.CompressionGZIP},
+			},
+		},
+
+		"Kafka.CompressionCodec (snappy)": {
+			map[string]string{"PRODUCER_KAFKA_COMPRESSION_CODEC": "snappy"},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{CompressionCodec: kafkaconfig.CompressionSnappy},
+			},
+		},
+
+		"Kafka.CompressionCodec (lz4)": {
+			map[string]string{"PRODUCER_KAFKA_COMPRESSION_CODEC": "lz4"},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{CompressionCodec: kafkaconfig.CompressionLZ4},
+			},
+		},
+
 		"Kafka.Brokers": {
 			map[string]string{"PRODUCER_KAFKA_BROKERS": "hello,world"},
 			streamconfig.Producer{Kafka: kafkaconfig.Producer{Brokers: []string{"hello", "world"}}},

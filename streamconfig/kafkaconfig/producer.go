@@ -20,6 +20,12 @@ type Producer struct {
 	// though, in case a server is down).
 	Brokers []string `kafka:"metadata.broker.list,omitempty" split_words:"true"`
 
+	// CompressionCodec sets the compression codec to use for compressing message
+	// sets. This is the default value for all topics, may be overridden by the
+	// topic configuration property compression.codec. Set tot `Snappy` by
+	// default.
+	CompressionCodec Compression `kafka:"compression.codec,omitempty" split_words:"true"`
+
 	// Debug allows tweaking of the default debug values.
 	Debug Debug `kafka:"debug,omitempty"`
 
@@ -104,12 +110,6 @@ type staticProducer struct {
 	// Set to 100, and non-configurable for now.
 	QueueBackpressureThreshold int `kafka:"queue.buffering.backpressure.threshold"`
 
-	// CompressionCodec sets the compression codec to use for compressing message
-	// sets. This is the default value for all topics, may be overridden by the
-	// topic configuration property compression.codec. Set tot `Snappy`,
-	// non-configurable.
-	CompressionCodec Compression `kafka:"compression.codec"`
-
 	// BatchMessageSize sets the maximum number of messages batched in one
 	// MessageSet. The total MessageSet size is also limited by message.max.bytes.
 	BatchMessageSize int `kafka:"batch.num.messages"`
@@ -117,6 +117,7 @@ type staticProducer struct {
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
+	CompressionCodec:       CompressionSnappy,
 	Debug:                  Debug{},
 	HeartbeatInterval:      10 * time.Second,
 	MaxDeliveryRetries:     0,
@@ -130,7 +131,6 @@ var ProducerDefaults = Producer{
 
 var staticProducerDefaults = &staticProducer{
 	QueueBackpressureThreshold: 100,
-	CompressionCodec:           CompressionSnappy,
 	BatchMessageSize:           100000,
 }
 
