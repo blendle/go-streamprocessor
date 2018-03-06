@@ -1,6 +1,7 @@
 package streamconfig_test
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
@@ -32,11 +33,48 @@ func TestNewConsumer(t *testing.T) {
 	}
 }
 
-func TestNewConsumer_Options_Nil(t *testing.T) {
+func TestNewConsumer_WithOptions(t *testing.T) {
+	options := func(c *streamconfig.Consumer) {
+		c.Kafka.ID = "test"
+	}
+
+	config, err := streamconfig.NewConsumer(options)
+	require.NoError(t, err)
+
+	assert.Equal(t, "test", config.Kafka.ID)
+}
+
+func TestNewConsumer_WithOptions_Nil(t *testing.T) {
 	t.Parallel()
 
 	_, err := streamconfig.NewConsumer(nil)
 	assert.NoError(t, err)
+}
+
+func TestNewConsumer_WithEnvironmentVariables(t *testing.T) {
+	_ = os.Setenv("CONSUMER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("CONSUMER_KAFKA_BROKERS") // nolint: errcheck
+
+	config, err := streamconfig.NewConsumer()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
+}
+
+func TestNewConsumer_WithOptionsAndEnvironmentVariables(t *testing.T) {
+	_ = os.Setenv("CONSUMER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("CONSUMER_KAFKA_BROKERS") // nolint: errcheck
+
+	options := func(c *streamconfig.Consumer) {
+		c.Kafka.Brokers = []string{"broker2"}
+		c.Kafka.ID = "test"
+	}
+
+	config, err := streamconfig.NewConsumer(options)
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
+	assert.Equal(t, "test", config.Kafka.ID)
 }
 
 func TestNewProducer(t *testing.T) {
@@ -62,9 +100,46 @@ func TestNewProducer(t *testing.T) {
 	}
 }
 
-func TestNewProducer_Options_Nil(t *testing.T) {
+func TestNewProducer_WithOptions(t *testing.T) {
+	options := func(c *streamconfig.Producer) {
+		c.Kafka.ID = "test"
+	}
+
+	config, err := streamconfig.NewProducer(options)
+	require.NoError(t, err)
+
+	assert.Equal(t, "test", config.Kafka.ID)
+}
+
+func TestNewProducer_WithOptions_Nil(t *testing.T) {
 	t.Parallel()
 
 	_, err := streamconfig.NewProducer(nil)
 	assert.NoError(t, err)
+}
+
+func TestNewProducer_WithEnvironmentVariables(t *testing.T) {
+	_ = os.Setenv("PRODUCER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("PRODUCER_KAFKA_BROKERS") // nolint: errcheck
+
+	config, err := streamconfig.NewProducer()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
+}
+
+func TestNewProducer_WithOptionsAndEnvironmentVariables(t *testing.T) {
+	_ = os.Setenv("PRODUCER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("PRODUCER_KAFKA_BROKERS") // nolint: errcheck
+
+	options := func(c *streamconfig.Producer) {
+		c.Kafka.Brokers = []string{"broker2"}
+		c.Kafka.ID = "test"
+	}
+
+	config, err := streamconfig.NewProducer(options)
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
+	assert.Equal(t, "test", config.Kafka.ID)
 }

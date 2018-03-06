@@ -49,32 +49,61 @@ func (d Debug) ConfigValue() kafka.ConfigValue {
 	return kafka.ConfigValue(strings.Join(debugs, ","))
 }
 
+// Set is used by the `envconfig` package to allow setting the debug
+// configuration through environment variables.
+func (d *Debug) Set(value string) error {
+	v := strings.Split(strings.ToLower(value), ",")
+
+	// If any of the values is "all" or "true", set Debug.All to `true` and return
+	// early.
+	for i := range v {
+		if v[i] == "all" || v[i] == "true" || v[i] == "1" {
+			d.All = true
+			return nil
+		}
+	}
+
+	// Else, we go through all available Debug struct fields, and set the value to
+	// true if we find a matching name in the provided environment variable value.
+	rv := reflect.ValueOf(d).Elem()
+	t := rv.Type()
+	for i := 0; i < t.NumField(); i++ {
+		for j := range v {
+			if v[j] == strings.ToLower(t.Field(i).Name) {
+				rv.Field(i).SetBool(true)
+			}
+		}
+	}
+
+	return nil
+}
+
 // SSL contains all configuration values for Kafka SSL connections.
 type SSL struct {
 	// CAPath is the file or directory path to CA certificate(s) for verifying the
 	// broker's key.
-	CAPath string `kafka:"ca.location,omitempty"`
+	CAPath string `kafka:"ca.location,omitempty" envconfig:"ca_path"`
 
 	// CertPath is the path to client's public key (PEM) used for authentication.
-	CertPath string `kafka:"certificate.location,omitempty"`
+	CertPath string `kafka:"certificate.location,omitempty" envconfig:"cert_path"`
 
 	// CRLPath is the path to CRL for verifying broker's certificate validity.
-	CRLPath string `kafka:"crl.location,omitempty"`
+	CRLPath string `kafka:"crl.location,omitempty" envconfig:"crl_path"`
 
 	// KeyPassword is the password of the private key in the key store file. This
 	// is optional for client.
-	KeyPassword string `kafka:"key.password,omitempty"`
+	KeyPassword string `kafka:"key.password,omitempty" split_words:"true"`
 
 	// KeyPath is the path to client's private key (PEM) used for authentication.
-	KeyPath string `kafka:"key.location,omitempty"`
+	KeyPath string `kafka:"key.location,omitempty" split_words:"true"`
 
 	// KeystorePassword is the store password for the key store file. This is
 	// optional for client and only needed if `KeystorePath` is configured.
-	KeystorePassword string `kafka:"keystore.password,omitempty"`
+	KeystorePassword string `kafka:"keystore.password,omitempty" split_words:"true"`
 
 	// KeystorePath is the location of the key store file. This is optional for
 	// client and can be used for two-way authentication for client.
-	KeystorePath string `kafka:"keystore.location,omitempty"`
+	KeystorePath string `kafka:"keystore.location,omitempty" split_words:"true"`
 }
 
 // Offset is the configuration that dictates whether the consumer should start
@@ -93,6 +122,13 @@ const (
 // ConfigValue returns the kafka.ConfigValue value for the method receiver.
 func (o Offset) ConfigValue() kafka.ConfigValue {
 	return string(o)
+}
+
+// Set is used by the `envconfig` package to set the right value based off of
+// the provided environment variables.
+func (o *Offset) Set(value string) error {
+	*o = Offset(strings.ToLower(value))
+	return nil
 }
 
 // Ack is the configuration that dictates the acknowledgment behavior of the
@@ -145,6 +181,13 @@ const (
 // ConfigValue returns the kafka.ConfigValue value for the method receiver.
 func (p Protocol) ConfigValue() kafka.ConfigValue {
 	return string(p)
+}
+
+// Set is used by the `envconfig` package to set the right value based off of
+// the provided environment variables.
+func (p *Protocol) Set(value string) error {
+	*p = Protocol(strings.ToLower(value))
+	return nil
 }
 
 // Compression is the compression codec used to compress message sets before

@@ -9,7 +9,7 @@ import (
 type Consumer struct {
 	// Store is the inmem store from which to consume messages. If left undefined,
 	// an internal store will be used.
-	Store *inmemstore.Store
+	Store *inmemstore.Store `ignored:"true"`
 }
 
 // ConsumerDefaults holds the default values for Consumer.

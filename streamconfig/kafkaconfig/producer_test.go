@@ -32,7 +32,7 @@ func TestProducer(t *testing.T) {
 		MaxDeliveryRetries:     0,
 		MaxQueueBufferDuration: time.Duration(0),
 		MaxQueueSizeKBytes:     0,
-		MaxQueueSize:           0,
+		MaxQueueSizeMessages:   0,
 		RequiredAcks:           kafkaconfig.AckAll,
 		SecurityProtocol:       kafkaconfig.ProtocolPlaintext,
 		SessionTimeout:         time.Duration(0),
@@ -51,7 +51,7 @@ func TestProducerDefaults(t *testing.T) {
 	assert.Equal(t, 0, config.MaxDeliveryRetries)
 	assert.Equal(t, 0*time.Second, config.MaxQueueBufferDuration)
 	assert.Equal(t, 2097151, config.MaxQueueSizeKBytes)
-	assert.Equal(t, 10000000, config.MaxQueueSize)
+	assert.Equal(t, 10000000, config.MaxQueueSizeMessages)
 	assert.EqualValues(t, kafkaconfig.AckLeader, config.RequiredAcks)
 	assert.Equal(t, 30*time.Second, config.SessionTimeout)
 	assert.Equal(t, kafkaconfig.SSL{}, config.SSL)
@@ -150,12 +150,12 @@ func TestProducer_ConfigMap(t *testing.T) {
 		},
 
 		"maxQueueSize": {
-			&kafkaconfig.Producer{MaxQueueSize: 99},
+			&kafkaconfig.Producer{MaxQueueSizeMessages: 99},
 			&kafka.ConfigMap{"queue.buffering.max.messages": 99},
 		},
 
 		"maxQueueSize (empty)": {
-			&kafkaconfig.Producer{MaxQueueSize: 0},
+			&kafkaconfig.Producer{MaxQueueSizeMessages: 0},
 			&kafka.ConfigMap{},
 		},
 

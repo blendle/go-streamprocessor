@@ -5,6 +5,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"github.com/kelseyhightower/envconfig"
 )
 
 // NewConsumer returns a new Consumer configuration struct, containing the
@@ -19,14 +20,22 @@ func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
 	config.Pubsub = pubsubconfig.ConsumerDefaults
 	config.Standardstream = standardstreamconfig.ConsumerDefaults
 
-	// After we've defined the default values, we overwrite them with any provided
-	// custom configuration values.
+	// After we've defined the default values, we overwrite any currently defined
+	// value with any custom configuration values passed into the `NewConsumer`
+	// function.
 	for _, option := range options {
 		if option == nil {
 			continue
 		}
 
 		option(config)
+	}
+
+	// Finally, we set/overwrite any value with any custom configuration values
+	// provided via environment variables.
+	err := envconfig.Process(config.Name, config)
+	if err != nil {
+		return *config, err
 	}
 
 	// We pass the config by-value, to prevent any race-condition where the
@@ -46,14 +55,22 @@ func NewProducer(options ...func(*Producer)) (Producer, error) {
 	config.Pubsub = pubsubconfig.ProducerDefaults
 	config.Standardstream = standardstreamconfig.ProducerDefaults
 
-	// After we've defined the default values, we overwrite them with any provided
-	// custom configuration values.
+	// After we've defined the default values, we overwrite any currently defined
+	// value with any custom configuration values passed into the `NewProducer`
+	// function.
 	for _, option := range options {
 		if option == nil {
 			continue
 		}
 
 		option(config)
+	}
+
+	// Finally, we set/overwrite any value with any custom configuration values
+	// provided via environment variables.
+	err := envconfig.Process(config.Name, config)
+	if err != nil {
+		return *config, err
 	}
 
 	// We pass the config by-value, to prevent any race-condition where the
