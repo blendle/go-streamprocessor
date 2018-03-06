@@ -318,6 +318,13 @@ func TestProducerEnvironmentVariables(t *testing.T) {
 		envs   map[string]string
 		config streamconfig.Producer
 	}{
+		"Kafka.BatchMessageSize": {
+			map[string]string{"PRODUCER_KAFKA_BATCH_MESSAGE_SIZE": "10000"},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{BatchMessageSize: 10000},
+			},
+		},
+
 		"Kafka.CompressionCodec (none)": {
 			map[string]string{"PRODUCER_KAFKA_COMPRESSION_CODEC": "none"},
 			streamconfig.Producer{

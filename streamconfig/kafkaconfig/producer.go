@@ -10,6 +10,10 @@ import (
 // Producer is a value-object, containing all user-configurable configuration
 // values that dictate how the Kafka client's producer will behave.
 type Producer struct {
+	// BatchMessageSize sets the maximum number of messages batched in one
+	// MessageSet. The total MessageSet size is also limited by message.max.bytes.
+	BatchMessageSize int `kafka:"batch.num.messages,omitempty" split_words:"true"`
+
 	// Brokers is a list of host/port pairs to use for establishing the initial
 	// connection to the Kafka cluster. The client will make use of all servers
 	// irrespective of which servers are specified here for bootstrapping — this
@@ -109,14 +113,11 @@ type staticProducer struct {
 	// accumulator. A lower number yields larger and more effective batches.
 	// Set to 100, and non-configurable for now.
 	QueueBackpressureThreshold int `kafka:"queue.buffering.backpressure.threshold"`
-
-	// BatchMessageSize sets the maximum number of messages batched in one
-	// MessageSet. The total MessageSet size is also limited by message.max.bytes.
-	BatchMessageSize int `kafka:"batch.num.messages"`
 }
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
+	BatchMessageSize:       100000,
 	CompressionCodec:       CompressionSnappy,
 	Debug:                  Debug{},
 	HeartbeatInterval:      10 * time.Second,
@@ -131,7 +132,6 @@ var ProducerDefaults = Producer{
 
 var staticProducerDefaults = &staticProducer{
 	QueueBackpressureThreshold: 100,
-	BatchMessageSize:           100000,
 }
 
 // ConfigMap converts the current configuration into a format known to the

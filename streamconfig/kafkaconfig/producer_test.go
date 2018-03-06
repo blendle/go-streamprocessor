@@ -12,7 +12,6 @@ import (
 
 var producerDefaults = map[string]interface{}{
 	"queue.buffering.backpressure.threshold": 100,
-	"batch.num.messages":                     100000,
 }
 
 var producerOmitempties = []string{
@@ -24,6 +23,7 @@ func TestProducer(t *testing.T) {
 	t.Parallel()
 
 	_ = kafkaconfig.Producer{
+		BatchMessageSize:       0,
 		Brokers:                []string{},
 		CompressionCodec:       kafkaconfig.CompressionNone,
 		Debug:                  kafkaconfig.Debug{All: true},
@@ -46,6 +46,7 @@ func TestProducerDefaults(t *testing.T) {
 
 	config := kafkaconfig.ProducerDefaults
 
+	assert.Equal(t, 100000, config.BatchMessageSize)
 	assert.Equal(t, kafkaconfig.Debug{}, config.Debug)
 	assert.Equal(t, kafkaconfig.CompressionSnappy, config.CompressionCodec)
 	assert.Equal(t, 10*time.Second, config.HeartbeatInterval)
@@ -68,6 +69,11 @@ func TestProducer_ConfigMap(t *testing.T) {
 		"empty": {
 			&kafkaconfig.Producer{},
 			&kafka.ConfigMap{},
+		},
+
+		"batchMessageSize": {
+			&kafkaconfig.Producer{BatchMessageSize: 10},
+			&kafka.ConfigMap{"batch.num.messages": 10},
 		},
 
 		"brokers": {
