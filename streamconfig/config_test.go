@@ -346,6 +346,13 @@ func TestProducerEnvironmentVariables(t *testing.T) {
 			},
 		},
 
+		"Kafka.CompressionCodec (capitalized)": {
+			map[string]string{"PRODUCER_KAFKA_COMPRESSION_CODEC": "LZ4"},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{CompressionCodec: kafkaconfig.CompressionLZ4},
+			},
+		},
+
 		"Kafka.Brokers": {
 			map[string]string{"PRODUCER_KAFKA_BROKERS": "hello,world"},
 			streamconfig.Producer{Kafka: kafkaconfig.Producer{Brokers: []string{"hello", "world"}}},

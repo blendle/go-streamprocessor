@@ -213,3 +213,10 @@ const (
 func (c Compression) ConfigValue() kafka.ConfigValue {
 	return string(c)
 }
+
+// Set is used by the `envconfig` package to set the right value based off of
+// the provided environment variables.
+func (c *Compression) Set(value string) error {
+	*c = Compression(strings.ToLower(value))
+	return nil
+}
