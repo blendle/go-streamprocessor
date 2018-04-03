@@ -3,11 +3,11 @@
 
 [[constraint]]
   name = "github.com/Shopify/sarama"
-  version = "1.15.0"
+  version = "1.16.0"
 
 [[constraint]]
   name = "github.com/bsm/sarama-cluster"
-  version = "v2.1.11"
+  version = "v2.1.13"
 
 [[constraint]]
   name = "go.uber.org/zap"
