@@ -12,6 +12,13 @@ import (
 var validIntegrationTestName = regexp.MustCompile(`^(Test|Benchmark)(Integration)?.+$`)
 var validRandomName = regexp.MustCompile(`[a-zA-Z0-9_]+`)
 
+// TimeoutMultiplier can be used to increase the default timeouts during
+// test runs when waiting for time-sensitive values to be returned. It
+// defaults to a multiplier of 1.
+//
+// This is specifically useful on slower environments like a CI server.
+var TimeoutMultiplier = 1
+
 // Integration skips the test if the `-short` flag is specified. It also
 // enforces the test name to starts with `Integration`, this allows to run
 // _only_ integration tests using `-run '^TestIntegration'` or

@@ -67,7 +67,7 @@ func TestIntegrationProducer_Messages(t *testing.T) {
 
 	select {
 	case producer.Messages() <- message:
-	case <-time.After(time.Duration(5*kafkaclient.TestTimeoutMultiplier) * time.Second):
+	case <-time.After(time.Duration(5*testutils.TimeoutMultiplier) * time.Second):
 		require.Fail(t, "Timeout while waiting for message to be delivered.")
 	}
 
