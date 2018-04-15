@@ -2,6 +2,7 @@ package inmemclient_test
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"strconv"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
+	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -80,6 +82,25 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 	for i, msg := range store.Messages() {
 		require.Equal(t, strconv.Itoa(i), string(msg.Value))
 	}
+}
+
+func TestProducer_Close(t *testing.T) {
+	t.Parallel()
+
+	producer, err := inmemclient.NewProducer()
+	require.NoError(t, err)
+
+	go func(t *testing.T) {
+		time.Sleep(time.Duration(10*testutils.TimeoutMultiplier) * time.Millisecond)
+		println("timeout while waiting for close to return")
+		os.Exit(1)
+	}(t)
+
+	// First call, close is working as expected, and the producer is terminated.
+	assert.NoError(t, producer.Close())
+
+	// Second call, close will return nil immediately, due to `sync.Once`.
+	assert.NoError(t, producer.Close())
 }
 
 func BenchmarkProducer_Messages(b *testing.B) {

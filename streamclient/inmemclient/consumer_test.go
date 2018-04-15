@@ -3,14 +3,17 @@ package inmemclient_test
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
+	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -118,6 +121,29 @@ func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 
 		i++
 	}
+}
+
+func TestConsumer_Close(t *testing.T) {
+	t.Parallel()
+
+	opts := func(c *streamconfig.Consumer) {
+		c.Inmem.ConsumeOnce = false
+	}
+
+	consumer, err := inmemclient.NewConsumer(opts)
+	require.NoError(t, err)
+
+	go func(t *testing.T) {
+		time.Sleep(time.Duration(10*testutils.TimeoutMultiplier) * time.Millisecond)
+		println("timeout while waiting for close to return")
+		os.Exit(1)
+	}(t)
+
+	// First call, close is working as expected, and the consumer is terminated.
+	assert.NoError(t, consumer.Close())
+
+	// Second call, close will return nil immediately, due to `sync.Once`.
+	assert.NoError(t, consumer.Close())
 }
 
 func BenchmarkConsumer_Messages(b *testing.B) {

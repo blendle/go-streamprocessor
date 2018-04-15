@@ -19,6 +19,7 @@ type Producer struct {
 	logger   *zap.Logger
 	wg       sync.WaitGroup
 	messages chan<- streammsg.Message
+	once     *sync.Once
 }
 
 var _ stream.Producer = (*Producer)(nil)
@@ -63,11 +64,13 @@ func (p *Producer) Messages() chan<- streammsg.Message {
 // Close closes the producer connection. This function blocks until all messages
 // still in the channel have been processed, and the channel is properly closed.
 func (p *Producer) Close() error {
-	close(p.messages)
+	p.once.Do(func() {
+		close(p.messages)
 
-	// Wait until the WaitGroup counter is zero. This makes sure we block the
-	// close call until all messages have been delivered, to prevent data-loss.
-	p.wg.Wait()
+		// Wait until the WaitGroup counter is zero. This makes sure we block the
+		// close call until all messages have been delivered, to prevent data-loss.
+		p.wg.Wait()
+	})
 
 	return nil
 }
@@ -95,6 +98,7 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 		c:        config,
 		logger:   &config.Logger,
 		messages: ch,
+		once:     &sync.Once{},
 	}
 
 	return producer, nil
