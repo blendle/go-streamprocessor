@@ -49,7 +49,7 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 	assert.Equal(t, store, consumer.Config().Inmem.Store)
 }
 
-func TestNewConsumer_Messages(t *testing.T) {
+func TestConsumer_Messages(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.New()
@@ -112,7 +112,7 @@ func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 		// By making this test do some "work" during the processing of a message, we
 		// trigger a potential race condition where the actual value of the message
 		// is already replaced with a newer message in the channel. This is fixed in
-		// this consumer's implementation, but without this test, we couldn't expose
+		// this consumer's implementation, but without this test, we wouldn't expose
 		// the actual problem.
 		m := bytes.Split(msg.Value, []byte(`"number":`))
 		m = bytes.Split(m[1], []byte(`}`))
@@ -133,11 +133,12 @@ func TestConsumer_Close(t *testing.T) {
 	consumer, err := inmemclient.NewConsumer(opts)
 	require.NoError(t, err)
 
-	go func(t *testing.T) {
-		time.Sleep(time.Duration(10*testutils.TimeoutMultiplier) * time.Millisecond)
+	go func() {
+		// TODO: make this not stink
+		time.Sleep(time.Duration(1000*testutils.TimeoutMultiplier) * time.Millisecond)
 		println("timeout while waiting for close to return")
 		os.Exit(1)
-	}(t)
+	}()
 
 	// First call, close is working as expected, and the consumer is terminated.
 	assert.NoError(t, consumer.Close())

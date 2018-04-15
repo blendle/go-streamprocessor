@@ -48,7 +48,7 @@ func TestNewProducer_WithOptions(t *testing.T) {
 	assert.EqualValues(t, store, producer.Config().Inmem.Store)
 }
 
-func TestNewProducer_Messages(t *testing.T) {
+func TestProducer_Messages(t *testing.T) {
 	t.Parallel()
 
 	expected := "hello world\n"
@@ -65,7 +65,7 @@ func TestNewProducer_Messages(t *testing.T) {
 	assert.Equal(t, expected, string(messages[0].Value))
 }
 
-func TestNewProducer_MessageOrdering(t *testing.T) {
+func TestProducer_MessageOrdering(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
@@ -91,7 +91,8 @@ func TestProducer_Close(t *testing.T) {
 	require.NoError(t, err)
 
 	go func(t *testing.T) {
-		time.Sleep(time.Duration(10*testutils.TimeoutMultiplier) * time.Millisecond)
+		// TODO: make this not stink
+		time.Sleep(time.Duration(1000*testutils.TimeoutMultiplier) * time.Millisecond)
 		println("timeout while waiting for close to return")
 		os.Exit(1)
 	}(t)
@@ -114,6 +115,11 @@ func BenchmarkProducer_Messages(b *testing.B) {
 	}
 }
 
+// waitForMessageCount accepts a count, and a function that returns an array of
+// `streammsg.Message`s. It will try 100 times to call the provided function and
+// match the number of the returned messages against the provided count. If a
+// match is found anywhere between the first and last run, the function returns,
+// if no match is ever found, the test calling this function will fail.
 func waitForMessageCount(tb testing.TB, count int, f func() []streammsg.Message) {
 	tb.Helper()
 
@@ -127,5 +133,5 @@ func waitForMessageCount(tb testing.TB, count int, f func() []streammsg.Message)
 		time.Sleep(1 * time.Millisecond)
 	}
 
-	require.Len(tb, messages, count)
+	require.Len(tb, messages, count, "unexpected amount of messages counted")
 }
