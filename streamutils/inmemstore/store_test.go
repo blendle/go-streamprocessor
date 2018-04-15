@@ -7,6 +7,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNew(t *testing.T) {
@@ -47,6 +48,49 @@ func TestAdd(t *testing.T) {
 	for _, tt := range tests {
 		assert.EqualValues(t, tt.expected, tt.actual)
 	}
+}
+
+func TestDelete(t *testing.T) {
+	t.Parallel()
+
+	store := New()
+	m1 := streammsg.Message{
+		Value:     []byte("testValue1"),
+		Key:       []byte("testKey1"),
+		Timestamp: time.Unix(0, 0),
+		Topic:     "testTopic",
+		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
+	}
+
+	m2 := streammsg.Message{
+		Value:     []byte("testValue2"),
+		Key:       []byte("testKey2"),
+		Timestamp: time.Unix(0, 0),
+		Topic:     "testTopic",
+		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
+	}
+
+	m3 := streammsg.Message{
+		Value:     []byte("testValue3"),
+		Key:       []byte("testKey3"),
+		Timestamp: time.Unix(0, 0),
+		Topic:     "testTopic",
+		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
+	}
+
+	store.store = append(store.store, m1, m2)
+	require.Len(t, store.store, 2)
+
+	store.Delete(m1)
+	assert.Len(t, store.store, 1)
+	assert.Equal(t, m2, store.store[0])
+
+	store.Delete(m3)
+	assert.Len(t, store.store, 1)
+	assert.Equal(t, m2, store.store[0])
+
+	store.Delete(m2)
+	assert.Len(t, store.store, 0)
 }
 
 func TestMessages(t *testing.T) {

@@ -17,8 +17,9 @@ type Consumer struct {
 	c streamconfig.Consumer
 
 	logger   *zap.Logger
-	wg       sync.WaitGroup
 	messages chan streammsg.Message
+	quit     chan bool
+	wg       sync.WaitGroup
 }
 
 var _ stream.Consumer = (*Consumer)(nil)
@@ -72,6 +73,12 @@ func (c *Consumer) Nack(_ streammsg.Message) error {
 
 // Close closes the consumer connection.
 func (c *Consumer) Close() error {
+	if !c.c.Inmem.ConsumeOnce {
+		// Trigger the quit channel, which terminates our internal goroutine to
+		// process messages, and closes the messages channel.
+		c.quit <- true
+	}
+
 	// Wait until the WaitGroup counter is zero. This makes sure we block the
 	// close call until the reader has been closed, to prevent reading errors.
 	c.wg.Wait()
@@ -90,8 +97,26 @@ func (c *Consumer) consume() {
 		c.wg.Done()
 	}()
 
-	for _, msg := range c.c.Inmem.Store.Messages() {
-		c.messages <- msg
+	if c.c.Inmem.ConsumeOnce {
+		for _, msg := range c.c.Inmem.Store.Messages() {
+			c.messages <- msg
+		}
+
+		return
+	}
+
+	for true {
+		select {
+		case <-c.quit:
+			c.logger.Info("Received quit signal. Exiting consumer.")
+
+			return
+		default:
+			for _, msg := range c.c.Inmem.Store.Messages() {
+				c.messages <- msg
+				c.c.Inmem.Store.Delete(msg)
+			}
+		}
 	}
 }
 
@@ -105,6 +130,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 		c:        config,
 		logger:   &config.Logger,
 		messages: make(chan streammsg.Message),
+		quit:     make(chan bool),
 	}
 
 	return consumer, nil

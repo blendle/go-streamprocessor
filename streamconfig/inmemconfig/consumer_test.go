@@ -13,7 +13,8 @@ func TestConsumer(t *testing.T) {
 	t.Parallel()
 
 	_ = inmemconfig.Consumer{
-		Store: inmemstore.New(),
+		Store:       inmemstore.New(),
+		ConsumeOnce: false,
 	}
 }
 
@@ -23,4 +24,5 @@ func TestConsumerDefaults(t *testing.T) {
 	config := inmemconfig.ConsumerDefaults
 
 	assert.Equal(t, "*inmemstore.Store", reflect.TypeOf(config.Store).String())
+	assert.Equal(t, true, config.ConsumeOnce)
 }
