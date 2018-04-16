@@ -4,7 +4,7 @@
 
 [[constraint]]
   name = "github.com/confluentinc/confluent-kafka-go"
-  revision = "767701354ee866ea3a63110035df26a8cccc3dee"
+  version = "v0.11.4"
 
 [[constraint]]
   name = "github.com/kelseyhightower/envconfig"
