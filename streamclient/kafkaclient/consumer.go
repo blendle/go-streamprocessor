@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Consumer implements the stream.Consumer interface for the Kafka client.
+// Consumer implements the `stream.Consumer` interface for the Kafka client.
 type Consumer struct {
 	// c represents the configuration passed into the consumer on
 	// initialization.
@@ -69,7 +69,9 @@ func (c *Consumer) Messages() <-chan streammsg.Message {
 	return c.messages
 }
 
-// Ack acknowledges that a message was processed
+// Ack acknowledges that a message was processed. See `Consumer.storeOffset` for
+// more details on how message acknowledgment works for the Kafka consumer. If
+// the consumer is unable to acknowledge a message, an error is returned.
 func (c *Consumer) Ack(m streammsg.Message) error {
 	o, ok := streammsg.MessageOpqaue(&m).(opaque)
 	if !ok {
@@ -86,7 +88,8 @@ func (c *Consumer) Nack(m streammsg.Message) error {
 	return nil
 }
 
-// Close closes the consumer connection.
+// Close closes the consumer connection. Close is safe to call more than once,
+// but it will only effectively close the consumer on the first call.
 func (c *Consumer) Close() (err error) {
 	c.once.Do(func() {
 		// This synchronous call closes the Kafka consumer and also sends any
@@ -120,7 +123,7 @@ func (c *Consumer) Close() (err error) {
 
 		// Let's flush all logs still in the buffer, since this consumer is no
 		// longer useful after this point.
-		_ = c.logger.Sync() // nolint: gas
+		err = c.logger.Sync()
 	})
 
 	return err
@@ -247,6 +250,8 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	return consumer, nil
 }
 
+// newMessageFromKafka takes a *kafka.Message (provided by librdkafka), and
+// converts it to this package's `streammsg.Message` format.
 func newMessageFromKafka(m *kafka.Message) *streammsg.Message {
 	oint := int64(m.TopicPartition.Offset)
 	offset := &oint

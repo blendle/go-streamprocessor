@@ -15,12 +15,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	// TestBrokerAddress is the address used to connect to the testing broker.
-	// This defaults to 127.0.0.1:9092, but can be overwritten if desired.
-	TestBrokerAddress = "127.0.0.1:9092"
-)
-
 // TestConsumer returns a new kafka consumer to be used in test cases. It also
 // returns a function that should be deferred to clean up resources.
 //
@@ -111,7 +105,7 @@ func TestMessagesFromTopic(tb testing.TB, topic string) []streammsg.Message {
 // as the message value, all other values are ignored.
 //
 // * `streammsg.Message` – The value (and, if applicable, the key) are set on a
-//  new `kafka.Message`.
+// new `kafka.Message`.
 //
 // * `*kafka.Message` – The message is delivered to Kafka as-is. If
 // `kafka.TopicPartition` is empty, the passed in topic value is used instead.
@@ -221,9 +215,9 @@ func TestProducerConfig(tb testing.TB, topic string, options ...func(c *streamco
 
 	opts := func(p *streamconfig.Producer) {
 		p.Kafka.ID = "testProducer"
-		p.Kafka.Brokers = []string{TestBrokerAddress}
 		p.Kafka.SessionTimeout = time.Duration(1000*testutils.TimeoutMultiplier) * time.Millisecond
 		p.Kafka.HeartbeatInterval = time.Duration(150*testutils.TimeoutMultiplier) * time.Millisecond
+		p.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 		p.Kafka.Topic = topic
 	}
 
@@ -235,7 +229,7 @@ func testKafkaProducer(tb testing.TB) (*kafka.Producer, func()) {
 
 	config := &kafka.ConfigMap{
 		"client.id":            "testKafkaProducer",
-		"metadata.broker.list": TestBrokerAddress,
+		"metadata.broker.list": kafkaconfig.TestBrokerAddress,
 		"go.batch.producer":    false,
 		"default.topic.config": kafka.ConfigMap{"acks": 1},
 	}
