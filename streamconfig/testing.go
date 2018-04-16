@@ -43,6 +43,20 @@ func TestNewConsumer(tb testing.TB, defaults bool, options ...func(*Consumer)) C
 	return c
 }
 
+// TestConsumerOptions returns an array of consumer options ready to be used
+// during testing.
+func TestConsumerOptions(tb testing.TB, options ...func(*Consumer)) []func(c *Consumer) {
+	tb.Helper()
+
+	var defaults []func(c *Consumer)
+
+	defaults = append(defaults, func(c *Consumer) {
+		c.Kafka = kafkaconfig.TestConsumer(tb)
+	})
+
+	return append(defaults, options...)
+}
+
 // TestNewProducer returns a new producer configuration struct, optionally with
 // the default values removed.
 func TestNewProducer(tb testing.TB, defaults bool, options ...func(*Producer)) Producer {

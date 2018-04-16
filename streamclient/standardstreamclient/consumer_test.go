@@ -3,6 +3,8 @@ package standardstreamclient_test
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"os/exec"
 	"reflect"
 	"strconv"
 	"testing"
@@ -110,6 +112,33 @@ func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 
 		i++
 	}
+}
+
+func TestConsumer_Messages_ScannerError(t *testing.T) {
+	t.Parallel()
+
+	if os.Getenv("BE_TESTING_FATAL") == "1" {
+		// This byte array is longer than is accepted by
+		// `standardstreamclient.maxCapacity`, which causes a Fatal error to occurs.
+		b := make([]byte, 512*1024)
+
+		buffer := standardstreamclient.TestBuffer(t, string(b))
+		consumer, closer := standardstreamclient.TestConsumer(t, buffer)
+		defer closer()
+
+		<-consumer.Messages()
+		return
+	}
+
+	// TODO: this should probably be easier to test, but I haven't found a way yet
+	//       to test Zap's `Fatal` log level without actually exiting the binary.
+	cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
+	cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
+
+	_, err := cmd.CombinedOutput()
+	require.NotNil(t, err)
+
+	assert.False(t, err.(*exec.ExitError).Success())
 }
 
 func BenchmarkConsumer_Messages(b *testing.B) {

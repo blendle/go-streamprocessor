@@ -116,3 +116,20 @@ func TestTestNewProducer_WithOptionsAndEnvironmentVariables(t *testing.T) {
 
 	assert.EqualValues(t, c1, c2)
 }
+
+func TestTestConsumerOptions(t *testing.T) {
+	options := func(c *streamconfig.Consumer) {
+		c.Kafka.GroupID = "overrideGroup"
+	}
+
+	opts := streamconfig.TestConsumerOptions(t, options)
+	require.Len(t, opts, 2)
+
+	c := &streamconfig.Consumer{}
+
+	opts[0](c)
+	assert.Equal(t, c.Kafka.GroupID, "testGroup")
+
+	opts[1](c)
+	assert.Equal(t, c.Kafka.GroupID, "overrideGroup")
+}
