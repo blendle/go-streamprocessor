@@ -152,6 +152,12 @@ func TestOffsets(tb testing.TB, message streammsg.Message) []kafka.TopicPartitio
 func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *streamconfig.Consumer)) []func(c *streamconfig.Consumer) {
 	var allOptions []func(c *streamconfig.Consumer)
 
+	opts := func(c *streamconfig.Consumer) {
+		c.Kafka = kafkaconfig.TestConsumer(tb)
+		c.Kafka.GroupID = topicAndGroup
+		c.Kafka.Topics = []string{topicAndGroup}
+	}
+
 	if testing.Verbose() {
 		logger, err := zap.NewDevelopment()
 		require.NoError(tb, err)
@@ -162,17 +168,6 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 		}
 
 		allOptions = append(allOptions, verbose)
-	}
-
-	opts := func(c *streamconfig.Consumer) {
-		c.Kafka.ID = "testConsumer"
-		c.Kafka.SessionTimeout = time.Duration(1000*TestTimeoutMultiplier) * time.Millisecond
-		c.Kafka.HeartbeatInterval = time.Duration(150*TestTimeoutMultiplier) * time.Millisecond
-		c.Kafka.CommitInterval = time.Duration(500*TestTimeoutMultiplier) * time.Millisecond
-		c.Kafka.Brokers = []string{TestBrokerAddress}
-		c.Kafka.GroupID = topicAndGroup
-		c.Kafka.Topics = []string{topicAndGroup}
-		c.Kafka.InitialOffset = kafkaconfig.OffsetBeginning
 	}
 
 	return append(append(allOptions, opts), options...)
