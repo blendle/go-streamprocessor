@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/blendle/go-streamprocessor/streamclient"
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
@@ -138,7 +139,7 @@ func TestIntegrationTestMessageFromTopic(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { assert.NoError(t, consumer.Close()) }()
 
-	message := kafkaclient.TestMessageFromConsumer(t, consumer)
+	message := streamclient.TestMessageFromConsumer(t, consumer)
 
 	assert.Equal(t, "hello world", string(message.Value))
 }
