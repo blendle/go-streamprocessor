@@ -2,7 +2,6 @@ package inmemclient_test
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"strconv"
 	"testing"
@@ -90,18 +89,20 @@ func TestProducer_Close(t *testing.T) {
 	producer, err := inmemclient.NewProducer()
 	require.NoError(t, err)
 
-	go func(t *testing.T) {
-		// TODO: make this not stink
-		time.Sleep(time.Duration(1000*testutils.TimeoutMultiplier) * time.Millisecond)
-		println("timeout while waiting for close to return")
-		os.Exit(1)
-	}(t)
+	ch := make(chan error)
+	go func() {
+		ch <- producer.Close() // Close is working as expected, and the producer is terminated.
+		ch <- producer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
 
-	// First call, close is working as expected, and the producer is terminated.
-	assert.NoError(t, producer.Close())
-
-	// Second call, close will return nil immediately, due to `sync.Once`.
-	assert.NoError(t, producer.Close())
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(time.Duration(1*testutils.TimeoutMultiplier) * time.Second):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
 }
 
 func BenchmarkProducer_Messages(b *testing.B) {

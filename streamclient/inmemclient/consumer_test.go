@@ -3,7 +3,6 @@ package inmemclient_test
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"reflect"
 	"strconv"
 	"testing"
@@ -133,18 +132,20 @@ func TestConsumer_Close(t *testing.T) {
 	consumer, err := inmemclient.NewConsumer(opts)
 	require.NoError(t, err)
 
+	ch := make(chan error)
 	go func() {
-		// TODO: make this not stink
-		time.Sleep(time.Duration(1000*testutils.TimeoutMultiplier) * time.Millisecond)
-		println("timeout while waiting for close to return")
-		os.Exit(1)
+		ch <- consumer.Close() // Close is working as expected, and the consumer is terminated.
+		ch <- consumer.Close() // Close should return nil immediately, due to `sync.Once`.
 	}()
 
-	// First call, close is working as expected, and the consumer is terminated.
-	assert.NoError(t, consumer.Close())
-
-	// Second call, close will return nil immediately, due to `sync.Once`.
-	assert.NoError(t, consumer.Close())
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(time.Duration(1*testutils.TimeoutMultiplier) * time.Second):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
 }
 
 func BenchmarkConsumer_Messages(b *testing.B) {
