@@ -17,21 +17,27 @@ import (
 // these options can be passed into the new consumer to determine its behavior.
 // If the consumer only has to support a single implementation of the interface,
 // then all other configuration values can be ignored.
-type Consumer struct {
+type Consumer struct { // nolint:malign
 	Inmem          inmemconfig.Consumer
 	Kafka          kafkaconfig.Consumer
 	Pubsub         pubsubconfig.Consumer
 	Standardstream standardstreamconfig.Consumer
 
-	// Logger is the configurable logger instance to log messages. If left
-	// undefined, a no-op logger will be used.
-	Logger zap.Logger `ignored:"true"`
+	// AllowEnvironmentBasedConfiguration allows you to disable configuring the
+	// stream client based on predefined environment variables. This is enabled by
+	// default, but can be disabled if you want full control over the behavior of
+	// the stream client without any outside influence.
+	AllowEnvironmentBasedConfiguration bool `ignored:"true"`
 
 	// HandleInterrupt determines whether the consumer should close itself
 	// gracefully when an interrupt signal (^C) is received. This defaults to true
 	// to increase first-time ease-of-use, but if the application wants to handle
 	// these signals manually, this flag disables the automated implementation.
 	HandleInterrupt bool `ignored:"true"`
+
+	// Logger is the configurable logger instance to log messages. If left
+	// undefined, a no-op logger will be used.
+	Logger zap.Logger `ignored:"true"`
 
 	// Name is the name of the current processor. It is currently only used to
 	// determine the prefix for environment-variable based configuration values.
@@ -40,12 +46,6 @@ type Consumer struct {
 	// is set, then the prefix is "consumer" is used, so you prepend all
 	// environment variables with "CONSUMER_.
 	Name string `ignored:"true"`
-
-	// AllowEnvironmentBasedConfiguration allows you to disable configuring the
-	// stream client based on predefined environment variables. This is enabled by
-	// default, but can be disabled if you want full control over the behavior of
-	// the stream client without any outside influence.
-	AllowEnvironmentBasedConfiguration bool `ignored:"true"`
 }
 
 // Producer contains the configuration for all the different consumer that
@@ -53,21 +53,27 @@ type Consumer struct {
 // these options can be passed into the new producer to determine its behavior.
 // If the producer only has to support a single implementation of the interface,
 // then all other configuration values can be ignored.
-type Producer struct {
+type Producer struct { // nolint:malign
 	Inmem          inmemconfig.Producer
 	Kafka          kafkaconfig.Producer
 	Pubsub         pubsubconfig.Producer
 	Standardstream standardstreamconfig.Producer
 
-	// Logger is the configurable logger instance to log messages. If left
-	// undefined, a no-op logger will be used.
-	Logger zap.Logger `ignored:"true"`
+	// AllowEnvironmentBasedConfiguration allows you to disable configuring the
+	// stream client based on predefined environment variables. This is enabled by
+	// default, but can be disabled if you want full control over the behavior of
+	// the stream client without any outside influence.
+	AllowEnvironmentBasedConfiguration bool `ignored:"true"`
 
 	// HandleInterrupt determines whether the producer should close itself
 	// gracefully when an interrupt signal (^C) is received. This defaults to true
 	// to increase first-time ease-of-use, but if the application wants to handle
 	// these signals manually, this flag disables the automated implementation.
 	HandleInterrupt bool `ignored:"true"`
+
+	// Logger is the configurable logger instance to log messages. If left
+	// undefined, a no-op logger will be used.
+	Logger zap.Logger `ignored:"true"`
 
 	// Name is the name of the current processor. It is currently only used to
 	// determine the prefix for environment-variable based configuration values.
@@ -76,12 +82,6 @@ type Producer struct {
 	// is set, then the prefix is "producer" is used, so you prepend all
 	// environment variables with "PRODUCER_.
 	Name string `ignored:"true"`
-
-	// AllowEnvironmentBasedConfiguration allows you to disable configuring the
-	// stream client based on predefined environment variables. This is enabled by
-	// default, but can be disabled if you want full control over the behavior of
-	// the stream client without any outside influence.
-	AllowEnvironmentBasedConfiguration bool `ignored:"true"`
 }
 
 // ConsumerDefaults holds the default values for Consumer.
