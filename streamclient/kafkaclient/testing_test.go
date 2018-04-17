@@ -72,42 +72,6 @@ func TestIntegrationTestProducer_WithOptions(t *testing.T) {
 	assert.Equal(t, topic, producer.Config().Kafka.Topic)
 }
 
-func TestIntegrationTestMessageFromConsumer(t *testing.T) {
-	t.Parallel()
-	testutils.Integration(t)
-
-	topicAndGroup := testutils.Random(t)
-
-	config := &kafka.ConfigMap{
-		"metadata.broker.list":  kafkaclient.TestBrokerAddress,
-		"produce.offset.report": false,
-	}
-	producer, err := kafka.NewProducer(config)
-	require.NoError(t, err)
-
-	p := kafka.TopicPartition{Topic: &topicAndGroup, Partition: kafka.PartitionAny} // nolint: gotypex
-	msg := &kafka.Message{Value: []byte("hello world"), TopicPartition: p}
-
-	require.NoError(t, producer.Produce(msg, nil))
-	<-producer.Events()
-	require.Zero(t, producer.Flush(1000))
-	producer.Close()
-
-	options := func(c *streamconfig.Consumer) {
-		c.Kafka.Brokers = []string{kafkaclient.TestBrokerAddress}
-		c.Kafka.Topics = []string{topicAndGroup}
-		c.Kafka.GroupID = topicAndGroup
-	}
-
-	consumer, err := kafkaclient.NewConsumer(options)
-	require.NoError(t, err)
-	defer func() { assert.NoError(t, consumer.Close()) }()
-
-	message := kafkaclient.TestMessageFromConsumer(t, consumer)
-
-	assert.Equal(t, "hello world", string(message.Value))
-}
-
 func TestIntegrationTestMessageFromTopic(t *testing.T) {
 	t.Parallel()
 	testutils.Integration(t)
