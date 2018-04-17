@@ -140,8 +140,8 @@ func TestOffsets(tb testing.TB, message streammsg.Message) []kafka.TopicPartitio
 	consumer, closer := testKafkaConsumer(tb, message.Topic, false)
 	defer closer()
 
-	o := streammsg.MessageOpqaue(&message).(opaque)
-	offsets, err := consumer.Committed([]kafka.TopicPartition{*o.toppar}, 1000*testutils.TimeoutMultiplier)
+	tp := []kafka.TopicPartition{*streammsg.MessageOpqaue(&message).(opaque).toppar}
+	offsets, err := consumer.Committed(tp, 2000*testutils.TimeoutMultiplier)
 	require.NoError(tb, err)
 
 	return offsets
