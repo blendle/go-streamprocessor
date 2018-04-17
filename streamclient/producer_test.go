@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamclient"
-	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -44,7 +44,7 @@ func TestIntegrationNewProducer_Env(t *testing.T) {
 			"kafka",
 			"*kafkaclient.Producer",
 			func(c *streamconfig.Producer) {
-				c.Kafka.Brokers = []string{kafkaclient.TestBrokerAddress}
+				c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 				c.Kafka.Topic = "test"
 			},
 		},

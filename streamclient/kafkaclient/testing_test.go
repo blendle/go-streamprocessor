@@ -6,6 +6,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -113,7 +114,7 @@ func TestIntegrationTestMessageFromTopic(t *testing.T) {
 	topicAndGroup := testutils.Random(t)
 
 	config := &kafka.ConfigMap{
-		"metadata.broker.list":  kafkaclient.TestBrokerAddress,
+		"metadata.broker.list":  kafkaconfig.TestBrokerAddress,
 		"produce.offset.report": false,
 	}
 	producer, err := kafka.NewProducer(config)
@@ -128,7 +129,7 @@ func TestIntegrationTestMessageFromTopic(t *testing.T) {
 	producer.Close()
 
 	options := func(c *streamconfig.Consumer) {
-		c.Kafka.Brokers = []string{kafkaclient.TestBrokerAddress}
+		c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 		c.Kafka.Topics = []string{topicAndGroup}
 		c.Kafka.GroupID = topicAndGroup
 	}
@@ -149,7 +150,7 @@ func TestIntegrationTestMessagesFromTopic(t *testing.T) {
 	topicAndGroup := testutils.Random(t)
 
 	config := &kafka.ConfigMap{
-		"metadata.broker.list":  kafkaclient.TestBrokerAddress,
+		"metadata.broker.list":  kafkaconfig.TestBrokerAddress,
 		"produce.offset.report": false,
 	}
 	producer, err := kafka.NewProducer(config)
@@ -215,7 +216,7 @@ func TestIntegrationTestProduceMessages(t *testing.T) {
 			println(topicAndGroup)
 
 			config := &kafka.ConfigMap{
-				"metadata.broker.list":     kafkaclient.TestBrokerAddress,
+				"metadata.broker.list":     kafkaconfig.TestBrokerAddress,
 				"group.id":                 topicAndGroup,
 				"enable.partition.eof":     true,
 				"go.events.channel.enable": true,
@@ -257,7 +258,7 @@ func TestIntegrationTestOffsets(t *testing.T) {
 	topicAndGroup := testutils.Random(t)
 
 	config := &kafka.ConfigMap{
-		"metadata.broker.list":  kafkaclient.TestBrokerAddress,
+		"metadata.broker.list":  kafkaconfig.TestBrokerAddress,
 		"produce.offset.report": false,
 	}
 	producer, err := kafka.NewProducer(config)
@@ -270,7 +271,7 @@ func TestIntegrationTestOffsets(t *testing.T) {
 	producer.Close()
 
 	options := func(c *streamconfig.Consumer) {
-		c.Kafka.Brokers = []string{kafkaclient.TestBrokerAddress}
+		c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 		c.Kafka.Topics = []string{topicAndGroup}
 		c.Kafka.GroupID = topicAndGroup
 	}

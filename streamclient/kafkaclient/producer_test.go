@@ -9,6 +9,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/stretchr/testify/assert"
@@ -115,7 +116,7 @@ func BenchmarkIntegrationProducer_Messages(b *testing.B) {
 	// We use the default (production-like) config in this benchmark, to simulate
 	// real-world usage as best as possible.
 	options := func(c *streamconfig.Producer) {
-		c.Kafka.Brokers = []string{kafkaclient.TestBrokerAddress}
+		c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 		c.Kafka.Topic = topic
 	}
 

@@ -7,8 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/streamclient"
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -135,7 +137,7 @@ func TestIntegrationConsumer_Ack(t *testing.T) {
 
 	consumer, closer := kafkaclient.TestConsumer(t, topicOrGroup)
 
-	message := kafkaclient.TestMessageFromConsumer(t, consumer)
+	message := streamclient.TestMessageFromConsumer(t, consumer)
 
 	// Without ack'ing the message, the offset for the consumer group is still set
 	// to -1001 (which is a special int, signaling "no offset available yet").
@@ -178,7 +180,7 @@ func TestIntegrationConsumer_Ack(t *testing.T) {
 	assert.Equal(t, int64(1), int64(offsets[0].Offset))
 
 	consumer, closer = kafkaclient.TestConsumer(t, topicOrGroup)
-	message = kafkaclient.TestMessageFromConsumer(t, consumer)
+	message = streamclient.TestMessageFromConsumer(t, consumer)
 
 	// Ack'ing the second message results in another increase in offset.
 	err = consumer.Ack(message)
@@ -198,7 +200,7 @@ func TestIntegrationMessage_Ack_WithClosedConsumer(t *testing.T) {
 	kafkaclient.TestProduceMessages(t, topicOrGroup, "hello world")
 
 	consumer, closer := kafkaclient.TestConsumer(t, topicOrGroup)
-	message := kafkaclient.TestMessageFromConsumer(t, consumer)
+	message := streamclient.TestMessageFromConsumer(t, consumer)
 	closer()
 
 	err := consumer.Ack(message)
@@ -212,7 +214,7 @@ func BenchmarkIntegrationConsumer_Messages(b *testing.B) {
 	line := `{"number":%d}` + "\n"
 
 	config := &kafka.ConfigMap{
-		"metadata.broker.list":         kafkaclient.TestBrokerAddress,
+		"metadata.broker.list":         kafkaconfig.TestBrokerAddress,
 		"go.batch.producer":            true,
 		"go.delivery.reports":          false,
 		"queue.buffering.max.messages": b.N,
@@ -251,7 +253,7 @@ func BenchmarkIntegrationConsumer_Messages(b *testing.B) {
 	// We use the default (production-like) config in this benchmark, to simulate
 	// real-world usage as best as possible.
 	options := func(c *streamconfig.Consumer) {
-		c.Kafka.Brokers = []string{kafkaclient.TestBrokerAddress}
+		c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 		c.Kafka.GroupID = topicAndGroup
 		c.Kafka.Topics = []string{topicAndGroup}
 	}
