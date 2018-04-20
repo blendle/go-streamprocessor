@@ -1,13 +1,13 @@
 package inmemclient
 
 import (
+	"os"
 	"sync"
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamcore"
 	"github.com/blendle/go-streamprocessor/streammsg"
-	"github.com/blendle/go-streamprocessor/streamutils"
 	"go.uber.org/zap"
 )
 
@@ -21,6 +21,7 @@ type Producer struct {
 	wg       sync.WaitGroup
 	errors   chan error
 	messages chan<- streammsg.Message
+	signals  chan os.Signal
 	once     *sync.Once
 }
 
@@ -63,7 +64,8 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag.
 	if producer.c.HandleInterrupt {
-		go streamutils.HandleInterrupts(producer.Close, producer.logger)
+		producer.signals = make(chan os.Signal, 1)
+		go streamcore.HandleInterrupts(producer.signals, producer.Close, producer.logger)
 	}
 
 	return producer, nil
@@ -98,6 +100,9 @@ func (p *Producer) Close() error {
 		// longer useful after this point. We ignore any errors returned by sync, as
 		// it is known to return unexpected errors. See: https://git.io/vpJFk
 		_ = p.logger.Sync() // nolint: gas
+
+		// Finally, close the signals channel, as it's no longer needed
+		close(p.signals)
 	})
 
 	return nil
