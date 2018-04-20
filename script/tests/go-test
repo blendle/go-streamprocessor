@@ -1,9 +1,22 @@
 #!/bin/sh
 
-# script/tests/go-test-race: Run benchmark tests
+# script/tests/go-test: Run tests
 
 set -e
 
 cd "$(dirname "$0")/../.."
 
-go test ${@:-./...}
+if [ -z "$*" ] && ! nc -z -G1 127.0.0.1 9092 2>/dev/null; then
+  echo >&2 "No response received from 127.0.0.1:9092." \
+           "Unable to run integration tests."
+  echo >&2
+  echo >&2 "Running script with \"-short ./...\" arguments."
+  echo >&2
+  echo >&2 "To run integration tests, first run \"docker-compose up\"."
+  echo >&2
+
+  $0 -short ./...
+  exit $?
+fi
+
+go test "${@:-./...}"

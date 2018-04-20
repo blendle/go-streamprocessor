@@ -6,17 +6,17 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
-matches=$(grep \
-  --ignore-case \
-  --recursive \
-  --exclude-dir vendor \
-  '^// [a-z]* \.\.\.$' . || true)
+[ -z "$CI" ] || cd "$GOPATH/src/github.com/blendle/stream-processor-pipe"
+
+matches=$(find . \( -name vendor -prune \) \
+  -o \( -type f -name '*' \) \
+  -exec grep -i '^// [a-z]* \.\.\.$' {} \; || true)
 
 if [ -n "$matches" ]; then
-  echo >&2 "Invalid code comments detected:"
-  echo >&2
-  echo >&2 "$matches"
-  echo >&2
+  >&2 echo "Invalid code comments detected:"
+  >&2 echo
+  >&2 echo "$matches"
+  >&2 echo
   exit 1
 fi
 
@@ -28,8 +28,9 @@ gometalinter \
   --vendored-linters \
   --enable-all \
   --line-length=100 \
+  --cyclo-over=11 \
   --disable=dupl \
   --linter='lll:lll -e func -g -l {maxlinelength}:PATH:LINE:MESSAGE' \
   --linter='test:go test -short:PATH:LINE:MESSAGE' \
   --linter='testify:go test -short:PATH:LINE:MESSAGE' \
-  ${@:-./...}
+  "${@:-./...}"
