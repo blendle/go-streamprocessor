@@ -1,9 +1,0 @@
-#!/bin/sh
-
-# script/tests/go-test-race: Run benchmark tests
-
-set -ae
-
-cd "$(dirname "$0")/../.."
-
-godog --random --strict --tags ~@wip "$@"
