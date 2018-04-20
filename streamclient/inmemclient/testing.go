@@ -14,18 +14,21 @@ import (
 //
 // You can either pass a pre-configured inmemstore to this function as its
 // second argument, or pass in `nil`, to have one be instantiated for you.
-func TestConsumer(tb testing.TB, s *inmemstore.Store) (stream.Consumer, func()) {
+//
+// You can optionally provide extra options to be used when instantiating the
+// consumer.
+func TestConsumer(tb testing.TB, s *inmemstore.Store, options ...func(c *streamconfig.Consumer)) (stream.Consumer, func()) {
 	tb.Helper()
 
 	if s == nil {
 		s = inmemstore.New()
 	}
 
-	options := func(c *streamconfig.Consumer) {
+	options = append(options, func(c *streamconfig.Consumer) {
 		c.Inmem.Store = s
-	}
+	})
 
-	consumer, err := NewConsumer(options)
+	consumer, err := NewConsumer(options...)
 	require.NoError(tb, err)
 
 	return consumer, func() { require.NoError(tb, consumer.Close()) }
@@ -36,18 +39,18 @@ func TestConsumer(tb testing.TB, s *inmemstore.Store) (stream.Consumer, func()) 
 //
 // You can either pass a pre-configured inmemstore to this function as its
 // second argument, or pass in `nil`, to have one be instantiated for you.
-func TestProducer(tb testing.TB, s *inmemstore.Store) (stream.Producer, func()) {
+func TestProducer(tb testing.TB, s *inmemstore.Store, options ...func(c *streamconfig.Producer)) (stream.Producer, func()) {
 	tb.Helper()
 
 	if s == nil {
 		s = inmemstore.New()
 	}
 
-	options := func(c *streamconfig.Producer) {
+	options = append(options, func(c *streamconfig.Producer) {
 		c.Inmem.Store = s
-	}
+	})
 
-	producer, err := NewProducer(options)
+	producer, err := NewProducer(options...)
 	require.NoError(tb, err)
 
 	return producer, func() { require.NoError(tb, producer.Close()) }

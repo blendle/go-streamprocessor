@@ -78,6 +78,8 @@ func (p *Producer) Messages() chan<- streammsg.Message {
 
 // Close closes the producer connection. This function blocks until all messages
 // still in the channel have been processed, and the channel is properly closed.
+// Close is safe to call more than once, but it will only effectively close the
+// producer on the first call.
 func (p *Producer) Close() (err error) {
 	p.once.Do(func() {
 		// Trigger the quit channel, which terminates our internal goroutine to
@@ -108,7 +110,7 @@ func (p *Producer) Close() (err error) {
 
 		// Let's flush all logs still in the buffer, since this producer is no
 		// longer useful after this point.
-		_ = p.logger.Sync() // nolint: gas
+		err = p.logger.Sync()
 	})
 
 	return err

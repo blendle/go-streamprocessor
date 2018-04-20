@@ -9,22 +9,10 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-)
-
-var (
-	// TestBrokerAddress is the address used to connect to the testing broker.
-	// This defaults to 127.0.0.1:9092, but can be overwritten if desired.
-	TestBrokerAddress = "127.0.0.1:9092"
-
-	// TestTimeoutMultiplier can be used to increase the default timeouts during
-	// test runs when waiting for time-sensitive values to be returned. It
-	// defaults to a multiplier of 1.
-	//
-	// This is specifically useful on slower environments like a CI server.
-	TestTimeoutMultiplier = 1
 )
 
 // TestConsumer returns a new kafka consumer to be used in test cases. It also
@@ -80,7 +68,7 @@ func TestMessageFromTopic(tb testing.TB, topic string) streammsg.Message {
 	consumer, closer := testKafkaConsumer(tb, topic, false)
 	defer closer()
 
-	m, err := consumer.ReadMessage(time.Duration(3000*TestTimeoutMultiplier) * time.Millisecond)
+	m, err := consumer.ReadMessage(time.Duration(3000*testutils.TimeoutMultiplier) * time.Millisecond)
 	require.NoError(tb, err)
 
 	return *newMessageFromKafka(m)
@@ -117,7 +105,7 @@ func TestMessagesFromTopic(tb testing.TB, topic string) []streammsg.Message {
 // as the message value, all other values are ignored.
 //
 // * `streammsg.Message` – The value (and, if applicable, the key) are set on a
-//  new `kafka.Message`.
+// new `kafka.Message`.
 //
 // * `*kafka.Message` – The message is delivered to Kafka as-is. If
 // `kafka.TopicPartition` is empty, the passed in topic value is used instead.
@@ -155,7 +143,7 @@ func TestProduceMessages(tb testing.TB, topic string, values ...interface{}) {
 
 		select {
 		case <-producer.Events():
-		case <-time.After(time.Duration(5*TestTimeoutMultiplier) * time.Second):
+		case <-time.After(time.Duration(5*testutils.TimeoutMultiplier) * time.Second):
 			require.Fail(tb, "Timeout while waiting for message to be delivered.")
 		}
 	}
@@ -171,7 +159,7 @@ func TestOffsets(tb testing.TB, message streammsg.Message) []kafka.TopicPartitio
 	defer closer()
 
 	o := streammsg.MessageOpqaue(&message).(opaque)
-	offsets, err := consumer.Committed([]kafka.TopicPartition{*o.toppar}, 1000*TestTimeoutMultiplier)
+	offsets, err := consumer.Committed([]kafka.TopicPartition{*o.toppar}, 1000*testutils.TimeoutMultiplier)
 	require.NoError(tb, err)
 
 	return offsets
@@ -227,9 +215,9 @@ func TestProducerConfig(tb testing.TB, topic string, options ...func(c *streamco
 
 	opts := func(p *streamconfig.Producer) {
 		p.Kafka.ID = "testProducer"
-		p.Kafka.SessionTimeout = time.Duration(1000*TestTimeoutMultiplier) * time.Millisecond
-		p.Kafka.HeartbeatInterval = time.Duration(150*TestTimeoutMultiplier) * time.Millisecond
-		p.Kafka.Brokers = []string{TestBrokerAddress}
+		p.Kafka.SessionTimeout = time.Duration(1000*testutils.TimeoutMultiplier) * time.Millisecond
+		p.Kafka.HeartbeatInterval = time.Duration(150*testutils.TimeoutMultiplier) * time.Millisecond
+		p.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 		p.Kafka.Topic = topic
 	}
 
@@ -241,7 +229,7 @@ func testKafkaProducer(tb testing.TB) (*kafka.Producer, func()) {
 
 	config := &kafka.ConfigMap{
 		"client.id":            "testKafkaProducer",
-		"metadata.broker.list": TestBrokerAddress,
+		"metadata.broker.list": kafkaconfig.TestBrokerAddress,
 		"go.batch.producer":    false,
 		"default.topic.config": kafka.ConfigMap{"acks": 1},
 	}
@@ -250,7 +238,7 @@ func testKafkaProducer(tb testing.TB) (*kafka.Producer, func()) {
 	require.NoError(tb, err)
 
 	closer := func() {
-		i := producer.Flush(1000 * TestTimeoutMultiplier)
+		i := producer.Flush(1000 * testutils.TimeoutMultiplier)
 		require.Zero(tb, i, "expected all messages to be flushed")
 
 		producer.Close()

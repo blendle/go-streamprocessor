@@ -126,6 +126,13 @@ func (c *Consumer) consume() {
 
 		c.messages <- streammsg.Message{Value: b}
 	}
+
+	if err := scanner.Err(); err != nil {
+		c.logger.Fatal(
+			"Error while reading messages from stream.",
+			zap.Error(err),
+		)
+	}
 }
 
 func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {

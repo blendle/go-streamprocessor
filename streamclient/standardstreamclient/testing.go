@@ -31,14 +31,14 @@ func TestBuffer(tb testing.TB, v ...string) io.ReadWriteCloser {
 //
 // The return value is the consumer, and a function that should be deferred to
 // clean up resources.
-func TestConsumer(tb testing.TB, r io.ReadCloser) (stream.Consumer, func()) {
+func TestConsumer(tb testing.TB, r io.ReadCloser, options ...func(c *streamconfig.Consumer)) (stream.Consumer, func()) {
 	tb.Helper()
 
-	options := func(c *streamconfig.Consumer) {
+	options = append(options, func(c *streamconfig.Consumer) {
 		c.Standardstream.Reader = r
-	}
+	})
 
-	consumer, err := NewConsumer(options)
+	consumer, err := NewConsumer(streamconfig.TestConsumerOptions(tb, options...)...)
 	require.NoError(tb, err)
 
 	return consumer, func() { require.NoError(tb, consumer.Close()) }
