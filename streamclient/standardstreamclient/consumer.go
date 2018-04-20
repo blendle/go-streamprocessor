@@ -31,6 +31,7 @@ type Consumer struct {
 	errors   chan error
 	messages chan streammsg.Message
 	signals  chan os.Signal
+	once     *sync.Once
 }
 
 var _ stream.Consumer = (*Consumer)(nil)
@@ -101,27 +102,29 @@ func (c *Consumer) Nack(_ streammsg.Message) error {
 }
 
 // Close closes the consumer connection.
-func (c *Consumer) Close() error {
-	err := c.c.Standardstream.Reader.Close()
-	if err != nil {
-		return err
-	}
+func (c *Consumer) Close() (err error) {
+	c.once.Do(func() {
+		err = c.c.Standardstream.Reader.Close()
+		if err != nil {
+			return
+		}
 
-	// Wait until the WaitGroup counter is zero. This makes sure we block the
-	// close call until the reader has been closed, to prevent reading errors.
-	c.wg.Wait()
+		// Wait until the WaitGroup counter is zero. This makes sure we block the
+		// close call until the reader has been closed, to prevent reading errors.
+		c.wg.Wait()
 
-	// At this point, no more errors are expected, so we can close the errors
-	// channel.
-	close(c.errors)
+		// At this point, no more errors are expected, so we can close the errors
+		// channel.
+		close(c.errors)
 
-	// Let's flush all logs still in the buffer, since this consumer is no
-	// longer useful after this point. We ignore any errors returned by sync, as
-	// it is known to return unexpected errors. See: https://git.io/vpJFk
-	_ = c.logger.Sync() // nolint: gas
+		// Let's flush all logs still in the buffer, since this consumer is no
+		// longer useful after this point. We ignore any errors returned by sync, as
+		// it is known to return unexpected errors. See: https://git.io/vpJFk
+		_ = c.logger.Sync() // nolint: gas
 
-	// Finally, close the signals channel, as it's no longer needed
-	close(c.signals)
+		// Finally, close the signals channel, as it's no longer needed
+		close(c.signals)
+	})
 
 	return nil
 }
@@ -177,6 +180,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 		logger:   &config.Logger,
 		errors:   make(chan error),
 		messages: make(chan streammsg.Message),
+		once:     &sync.Once{},
 	}
 
 	return consumer, nil
