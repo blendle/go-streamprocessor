@@ -2,13 +2,13 @@ package kafkaclient
 
 import (
 	"errors"
+	"os"
 	"sync"
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamcore"
 	"github.com/blendle/go-streamprocessor/streammsg"
-	"github.com/blendle/go-streamprocessor/streamutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"go.uber.org/zap"
 )
@@ -24,6 +24,7 @@ type Consumer struct {
 	wg       sync.WaitGroup
 	errors   chan error
 	messages chan streammsg.Message
+	signals  chan os.Signal
 	quit     chan bool
 	once     *sync.Once
 }
@@ -70,7 +71,8 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag.
 	if consumer.c.HandleInterrupt {
-		go streamutils.HandleInterrupts(consumer.Close, consumer.logger)
+		consumer.signals = make(chan os.Signal, 1)
+		go streamcore.HandleInterrupts(consumer.signals, consumer.Close, consumer.logger)
 	}
 
 	return consumer, nil
@@ -148,6 +150,9 @@ func (c *Consumer) Close() (err error) {
 		// longer useful after this point. We ignore any errors returned by sync, as
 		// it is known to return unexpected errors. See: https://git.io/vpJFk
 		_ = c.logger.Sync() // nolint: gas
+
+		// Finally, close the signals channel, as it's no longer needed
+		close(c.signals)
 	})
 
 	return err
