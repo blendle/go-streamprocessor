@@ -5,27 +5,39 @@ import (
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
+	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
 	"go.uber.org/zap"
 )
 
 func TestProducer(t *testing.T) {
 	t.Parallel()
 
-	_ = inmemconfig.Producer{}
+	_ = inmemconfig.Producer{
+		Logger: zap.NewNop(),
+		Store:  inmemstore.New(),
+	}
 }
 
 func TestProducerDefaults(t *testing.T) {
 	t.Parallel()
 
 	logger := zap.NewExample()
+	store := inmemstore.New()
 
-	cc := inmemconfig.Client{Logger: logger}
+	cc := inmemconfig.Client{Logger: logger, Store: store}
 	config := inmemconfig.ProducerDefaults(cc)
 
-	expected := logger
-	actual := config.Logger
+	expected1 := logger
+	actual1 := config.Logger
 
-	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("Expected %v to equal %v", actual, expected)
+	if !reflect.DeepEqual(expected1, actual1) {
+		t.Errorf("Expected %v to equal %v", actual1, expected1)
+	}
+
+	expected2 := store
+	actual2 := config.Store
+
+	if !reflect.DeepEqual(expected2, actual2) {
+		t.Errorf("Expected %v to equal %v", actual2, expected2)
 	}
 }
