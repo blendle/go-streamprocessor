@@ -1,10 +1,14 @@
 package streamconfig
 
 import (
+	"bytes"
+	"text/tabwriter"
+
 	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"github.com/kelseyhightower/envconfig"
 	"go.uber.org/zap"
 )
 
@@ -21,13 +25,27 @@ type Consumer struct {
 
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
-	Logger zap.Logger
+	Logger zap.Logger `ignored:"true"`
 
 	// HandleInterrupt determines whether the consumer should close itself
 	// gracefully when an interrupt signal (^C) is received. This defaults to true
 	// to increase first-time ease-of-use, but if the application wants to handle
 	// these signals manually, this flag disables the automated implementation.
-	HandleInterrupt bool
+	HandleInterrupt bool `ignored:"true"`
+
+	// Name is the name of the current processor. It is currently only used to
+	// determine the prefix for environment-variable based configuration values.
+	// For example, if Name is set to `MyProcessor`, then all environment
+	// variable-based configurations need to start with `MYPROCESSOR_`. If no name
+	// is set, then the prefix is "consumer" is used, so you prepend all
+	// environment variables with "CONSUMER_.
+	Name string `ignored:"true"`
+
+	// AllowEnvironmentBasedConfiguration allows you to disable configuring the
+	// stream client based on predefined environment variables. This is enabled by
+	// default, but can be disabled if you want full control over the behavior of
+	// the stream client without any outside influence.
+	AllowEnvironmentBasedConfiguration bool `ignored:"true"`
 }
 
 // Producer contains the configuration for all the different consumer that
@@ -43,23 +61,78 @@ type Producer struct {
 
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
-	Logger zap.Logger
+	Logger zap.Logger `ignored:"true"`
 
 	// HandleInterrupt determines whether the producer should close itself
 	// gracefully when an interrupt signal (^C) is received. This defaults to true
 	// to increase first-time ease-of-use, but if the application wants to handle
 	// these signals manually, this flag disables the automated implementation.
-	HandleInterrupt bool
+	HandleInterrupt bool `ignored:"true"`
+
+	// Name is the name of the current processor. It is currently only used to
+	// determine the prefix for environment-variable based configuration values.
+	// For example, if Name is set to `MyProcessor`, then all environment
+	// variable-based configurations need to start with `MYPROCESSOR_`.If no name
+	// is set, then the prefix is "producer" is used, so you prepend all
+	// environment variables with "PRODUCER_.
+	Name string `ignored:"true"`
+
+	// AllowEnvironmentBasedConfiguration allows you to disable configuring the
+	// stream client based on predefined environment variables. This is enabled by
+	// default, but can be disabled if you want full control over the behavior of
+	// the stream client without any outside influence.
+	AllowEnvironmentBasedConfiguration bool `ignored:"true"`
 }
 
 // ConsumerDefaults holds the default values for Consumer.
 var ConsumerDefaults = Consumer{
 	Logger:          *zap.NewNop(),
 	HandleInterrupt: true,
+	Name:            "consumer",
+	AllowEnvironmentBasedConfiguration: true,
 }
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
 	Logger:          *zap.NewNop(),
 	HandleInterrupt: true,
+	Name:            "producer",
+	AllowEnvironmentBasedConfiguration: true,
+}
+
+// Usage calls the usage() function and returns a byte array.
+func (c Consumer) Usage() []byte {
+	return usage(c.Name, c)
+}
+
+// Usage calls the usage() function and returns a byte array.
+func (p Producer) Usage() []byte {
+	return usage(p.Name, p)
+}
+
+// usage returns a byte array with a table-based explanation on how to set the
+// configuration values using environment variables. This can be used to explain
+// usage details to the user of the application.
+func usage(name string, inf interface{}) []byte {
+	var err error
+	b := &bytes.Buffer{}
+	tabs := tabwriter.NewWriter(b, 1, 0, 4, ' ', 0)
+
+	if c, ok := inf.(Consumer); ok {
+		err = envconfig.Usagef(name, &c, tabs, envconfig.DefaultTableFormat)
+	}
+
+	if p, ok := inf.(Producer); ok {
+		err = envconfig.Usagef(name, &p, tabs, envconfig.DefaultTableFormat)
+	}
+
+	if err != nil {
+		return nil
+	}
+
+	if tabs.Flush() != nil {
+		return nil
+	}
+
+	return b.Bytes()
 }

@@ -10,7 +10,7 @@ import (
 type Producer struct {
 	// Writer is the object that implements the io.Writer interface. This object
 	// is used to write new messages to the stream. Defaults to `os.Stdout`.
-	Writer io.Writer
+	Writer io.Writer `ignored:"true"`
 }
 
 // ProducerDefaults holds the default values for Producer.

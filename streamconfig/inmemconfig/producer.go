@@ -9,7 +9,7 @@ import (
 type Producer struct {
 	// Store is the inmem store to which to produce messages. If left undefined,
 	// an internal store will be used.
-	Store *inmemstore.Store
+	Store *inmemstore.Store `ignored:"true"`
 }
 
 // ProducerDefaults holds the default values for Producer.

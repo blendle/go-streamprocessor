@@ -11,7 +11,7 @@ type Consumer struct {
 	// Reader is the object that implements the io.ReadCloser interface
 	// (io.Reader + io.Closer). This object is used to read messages from the
 	// stream. Defaults to `os.Stdin`.
-	Reader io.ReadCloser
+	Reader io.ReadCloser `ignored:"true"`
 }
 
 // ConsumerDefaults holds the default values for Consumer.

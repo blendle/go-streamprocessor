@@ -22,7 +22,7 @@ type Consumer struct {
 
 	// CommitInterval represents the frequency in milliseconds that the
 	// consumer offsets are auto-committed to Kafka.
-	CommitInterval time.Duration `kafka:"auto.commit.interval.ms,omitempty"`
+	CommitInterval time.Duration `kafka:"auto.commit.interval.ms,omitempty" split_words:"true"`
 
 	// Debug allows tweaking of the default debug values.
 	Debug Debug `kafka:"debug,omitempty"`
@@ -31,7 +31,7 @@ type Consumer struct {
 	// belongs to. This property is required if the consumer uses either the group
 	// management functionality by using subscribe(topic) or the Kafka-based
 	// offset management strategy.
-	GroupID string `kafka:"group.id,omitempty"`
+	GroupID string `kafka:"group.id,omitempty" split_words:"true"`
 
 	// HeartbeatInterval represents The expected time between heartbeats to the
 	// consumer coordinator when using Kafka's group management facilities.
@@ -40,13 +40,13 @@ type Consumer struct {
 	// value must be set lower than `SessionTimeout`, but typically should be set
 	// no higher than 1/3 of that value. It can be adjusted even lower to control
 	// the expected time for normal rebalances.
-	HeartbeatInterval time.Duration `kafka:"heartbeat.interval.ms,omitempty"`
+	HeartbeatInterval time.Duration `kafka:"heartbeat.interval.ms,omitempty" split_words:"true"`
 
 	// ID is an id string to pass to the server when making requests. The purpose
 	// of this is to be able to track the source of requests beyond just IP/port
 	// by allowing a logical application name to be included in server-side
 	// request logging.
-	ID string `kafka:"client.id,omitempty"`
+	ID string `kafka:"client.id,omitempty" envconfig:"client_id"`
 
 	// InitialOffset dictates what to do when there is no initial offset in Kafka
 	// or if the current offset does not exist any more on the server (e.g.
@@ -56,10 +56,10 @@ type Consumer struct {
 	// * OffsetEnd: automatically reset the offset to the latest offset
 	// * none: throw exception to the consumer if no previous offset is found for
 	//   the consumer's group
-	InitialOffset Offset `kafka:"{topic}.auto.offset.reset,omitempty"`
+	InitialOffset Offset `kafka:"{topic}.auto.offset.reset,omitempty" split_words:"true"`
 
 	// SecurityProtocol is the protocol used to communicate with brokers.
-	SecurityProtocol Protocol `kafka:"security.protocol,omitempty"`
+	SecurityProtocol Protocol `kafka:"security.protocol,omitempty" split_words:"true"`
 
 	// SessionTimeout represents the timeout used to detect consumer failures when
 	// using Kafka's group management facility. The consumer sends periodic
@@ -69,7 +69,7 @@ type Consumer struct {
 	// rebalance. Note that the value must be in the allowable range as configured
 	// in the broker configuration by `group.min.session.timeout.ms` and
 	// `group.max.session.timeout.ms`.
-	SessionTimeout time.Duration `kafka:"session.timeout.ms,omitempty"`
+	SessionTimeout time.Duration `kafka:"session.timeout.ms,omitempty" split_words:"true"`
 
 	// SSL contains all configuration values for Kafka SSL connections. Defaults
 	// to an empty struct, meaning no SSL configuration is required to connect to
