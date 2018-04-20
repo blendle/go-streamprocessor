@@ -2,7 +2,6 @@ package inmemstore
 
 import (
 	"sync"
-	"time"
 
 	"github.com/blendle/go-streamprocessor/streammsg"
 )
@@ -18,48 +17,12 @@ func New() *Store {
 	return &Store{store: make([]streammsg.Message, 0)}
 }
 
-// AddMessage adds a streammsg.Message to the store.
-func (s *Store) AddMessage(msg streammsg.Message) {
-	m := &message{}
-
-	if v, ok := msg.(streammsg.ValueReader); ok {
-		m.value = v.Value()
-	}
-
-	if v, ok := msg.(streammsg.KeyReader); ok {
-		m.key = v.Key()
-	}
-
-	if v, ok := msg.(streammsg.TopicReader); ok {
-		m.topic = v.Topic()
-	}
-
-	if v, ok := msg.(streammsg.TimestampReader); ok {
-		m.timestamp = v.Timestamp()
-	}
-
-	if v, ok := msg.(streammsg.OffsetReader); ok {
-		m.offset = v.Offset()
-	}
-
-	if v, ok := msg.(streammsg.PartitionReader); ok {
-		m.partition = v.Partition()
-	}
-
-	if v, ok := msg.(streammsg.TagsReader); ok {
-		m.tags = v.Tags()
-	}
-
-	s.Add(m.key, m.value, m.timestamp, m.topic, m.offset, m.partition, m.tags)
-}
-
-// Add adds a single message to the store.
-func (s *Store) Add(k, v []byte, t time.Time, tp string, o int64, p int32, tg map[string][]byte) {
+// Add adds a streammsg.Message to the store.
+func (s *Store) Add(msg streammsg.Message) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	m := &message{key: k, value: v, timestamp: t, topic: tp, offset: o, partition: p, tags: tg}
-	s.store = append(s.store, streammsg.Message(m))
+	s.store = append(s.store, msg)
 }
 
 // Messages returns all messages in the store.

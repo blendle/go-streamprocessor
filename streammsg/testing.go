@@ -5,18 +5,8 @@ import (
 	"time"
 )
 
-// TestMessage returns a new message interface with test data to be used during
-// testing.
-func TestMessage(tb testing.TB, k, v string) Message {
-	m, _ := TestMessageWithStruct(tb, k, v)
-
-	return m
-}
-
-// TestMessageWithStruct returns a new message interface with test data to be
-// used during testing. It also returns the original message struct as the
-// second argument.
-func TestMessageWithStruct(_ testing.TB, k, v string) (Message, *MessageMock) {
+// TestMessage returns a new message with test data to be used during testing.
+func TestMessage(_ testing.TB, k, v string) Message {
 	if k == "" {
 		k = "testKey"
 	}
@@ -25,18 +15,18 @@ func TestMessageWithStruct(_ testing.TB, k, v string) (Message, *MessageMock) {
 		v = "testValue"
 	}
 
-	m := &MessageMock{
-		ValueField:     []byte(v),
-		KeyField:       []byte(k),
-		TimestampField: time.Unix(0, 0),
-		TopicField:     "testTopic",
-		OffsetField:    0,
-		PartitionField: 0,
-		TagsField: map[string][]byte{
+	offset := int64(12)
+	m := Message{
+		Value:     []byte(v),
+		Key:       []byte(k),
+		Timestamp: time.Unix(0, 0),
+		Topic:     "testTopic",
+		Offset:    &offset,
+		Tags: map[string][]byte{
 			"testTagKey1": []byte("testTagValue1"),
 			"testTagKey2": []byte("testTagValue2"),
 		},
 	}
 
-	return Message(m), m
+	return m
 }

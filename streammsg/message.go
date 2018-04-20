@@ -1,87 +1,72 @@
 package streammsg
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
-// Message represents the minimum interface a stream message has to implement to
-// be able to be consumed and produced by a stream client. Stream clients are
-// free to add additional interfaces on top of this one.
-type Message interface {
-	ValueReader
-	ValueWriter
-	Acker
+// Message is what is passed around by the different consumers and producers.
+type Message struct {
+	// Value is the actual body of the message. All stream clients use this field
+	// to handle the message.
+	Value []byte
+
+	// Key is the identifier of the message. Not all stream client implementations
+	// have a specific need for this field. The implementations that do use this
+	// field might behave differently based on the value of this field. For
+	// example, Kafka will use this value to calculate the topic partition to
+	// assign this message to. If you send a message with different properties,
+	// but the same key, they will always end up on the same partition.
+	Key []byte
+
+	// Timestamp can be used to order messages, if so desired. Not all stream
+	// client implementations use this field, and those that do might behave
+	// differently based on the value of this field.
+	Timestamp time.Time
+
+	// Tags is a set of key/value labels assigned to a message. Not all stream
+	// client implementations use this field, and those that do might behave
+	// differently based on the value of this field.
+	Tags map[string][]byte
+
+	// Topic can be used by stream client consumers to expose from where the
+	// message originated, or by the producers to dictate where the message will
+	// be produced. Not all stream client implementations use this field, and
+	// those that do might behave differently based on the value of this field.
+	Topic string
+
+	// Offset can be used by stream client implementations to relay the position
+	// in a list of messages this message has. This is a read-only value, setting
+	// this value on a new message has no effect. Not all stream client
+	// implementations set this field, for those that don't, this field will
+	// always be `nil`.
+	Offset *int64
+
+	// opaque is an internal field used by stream client implementations to store
+	// implementation specific data on the message for later use. For example, the
+	// Kafka implementation uses this field to store `Ack` details on the message.
+	// When you pass the message to `consumer.Ack()`, it will read this field to
+	// know how to acknowledge the message.
+	opaque interface{}
 }
 
-// ValueReader provides access to the value of a message.
-type ValueReader interface {
-	Value() []byte
+// SetMessageOpaque is a semi-private function. It is used by stream client
+// implementations to set the private `opaque` field on a message. This field
+// contains extra data only relevant to that client implementation. This field
+// can only be set once (and is set by the stream clients), so calling this
+// function outside of its intended purpose will result in an error.
+func SetMessageOpaque(m *Message, o interface{}) error {
+	if m.opaque != nil {
+		return errors.New("opaque value can only be set once")
+	}
+
+	m.opaque = o
+	return nil
 }
 
-// ValueWriter allows for setting the value of a message.
-type ValueWriter interface {
-	SetValue([]byte)
-}
-
-// TimestampReader provides access to message timestamps.
-type TimestampReader interface {
-	Timestamp() time.Time
-}
-
-// TimestampWriter allows for setting the timestamp of a message.
-type TimestampWriter interface {
-	SetTimestamp(time.Time)
-}
-
-// KeyReader provides access to the key of a message.
-type KeyReader interface {
-	Key() []byte
-}
-
-// KeyWriter allows for setting the key of a message.
-type KeyWriter interface {
-	SetKey([]byte)
-}
-
-// TopicReader provides access to the topic of a message.
-type TopicReader interface {
-	Topic() string
-}
-
-// TopicWriter allows for setting the topic of a message.
-type TopicWriter interface {
-	SetTopic(string)
-}
-
-// OffsetReader provides access to the offset of a message.
-type OffsetReader interface {
-	Offset() int64
-}
-
-// PartitionReader provides access to the partition of a message.
-type PartitionReader interface {
-	Partition() int32
-}
-
-// TagsReader provides access to key/value tags of a message.
-type TagsReader interface {
-	Tags() map[string][]byte
-	Tag(string) []byte
-}
-
-// TagsWriter allows for setting key/value tags of a message.
-type TagsWriter interface {
-	SetTags(map[string][]byte)
-	SetTag(string, []byte)
-	RemoveTag(string)
-}
-
-// Acker interface allows messages to be acknowledged. Each stream client has
-// its own implementation to determine what it means to ack a message.
-type Acker interface {
-	Ack() error
-}
-
-// Nacker interface allows messages to be "not acknowledged". Each stream client
-// has its own implementation to determine what it means to nack a message.
-type Nacker interface {
-	Nack() error
+// MessageOpqaue returns an interface object, which can be used by the same
+// client implementations to handle any message logic specific to that
+// implementation.
+func MessageOpqaue(m *Message) interface{} {
+	return m.opaque
 }

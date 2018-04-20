@@ -11,10 +11,6 @@ type ProducerMock struct {
 	MessagesChan  chan streammsg.Message
 }
 
-// NewMessage implements the Producer interface for ProducerMock.
-func (p *ProducerMock) NewMessage(value []byte) streammsg.Message {
-	return &streammsg.MessageMock{}
-}
 
 // Messages implements the Producer interface for ProducerMock.
 func (p *ProducerMock) Messages() chan<- streammsg.Message {

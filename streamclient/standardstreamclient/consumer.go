@@ -72,7 +72,7 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 			b := make([]byte, len(scanner.Bytes()))
 			copy(b, scanner.Bytes())
 
-			consumer.messages <- &message{value: b}
+			consumer.messages <- streammsg.Message{Value: b}
 		}
 	}()
 
@@ -83,6 +83,16 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 // stream.
 func (c *Consumer) Messages() <-chan streammsg.Message {
 	return c.messages
+}
+
+// Ack is a no-op implementation to satisfy the stream.Consumer interface.
+func (c *Consumer) Ack(_ streammsg.Message) error {
+	return nil
+}
+
+// Nack is a no-op implementation to satisfy the stream.Consumer interface.
+func (c *Consumer) Nack(_ streammsg.Message) error {
+	return nil
 }
 
 // Close closes the consumer connection.

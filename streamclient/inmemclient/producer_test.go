@@ -54,13 +54,13 @@ func TestNewProducer_Messages(t *testing.T) {
 	producer, closer := inmemclient.TestProducer(t, store)
 	defer closer()
 
-	producer.Messages() <- producer.NewMessage([]byte(expected))
+	producer.Messages() <- streammsg.Message{Value: []byte(expected)}
 
 	waitForMessageCount(t, 1, store.Messages)
 	messages := store.Messages()
 
 	require.NotNil(t, messages[0])
-	assert.Equal(t, expected, string(messages[0].Value()))
+	assert.Equal(t, expected, string(messages[0].Value))
 }
 
 func TestNewProducer_MessageOrdering(t *testing.T) {
@@ -72,13 +72,13 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 	defer closer()
 
 	for i := 0; i < messageCount; i++ {
-		producer.Messages() <- producer.NewMessage([]byte(strconv.Itoa(i)))
+		producer.Messages() <- streammsg.Message{Value: []byte(strconv.Itoa(i))}
 	}
 
 	waitForMessageCount(t, messageCount, store.Messages)
 
 	for i, msg := range store.Messages() {
-		require.Equal(t, strconv.Itoa(i), string(msg.Value()))
+		require.Equal(t, strconv.Itoa(i), string(msg.Value))
 	}
 }
 
@@ -89,7 +89,7 @@ func BenchmarkProducer_Messages(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		producer.Messages() <- producer.NewMessage([]byte(fmt.Sprintf(`{"number":%d}`, i)))
+		producer.Messages() <- streammsg.Message{Value: []byte(fmt.Sprintf(`{"number":%d}`, i))}
 	}
 }
 
