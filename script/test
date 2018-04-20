@@ -25,6 +25,9 @@ script/tests/gometalinter
 echo "==      go-test"
 script/tests/go-test "$@"
 
+echo "==      go-test-cover"
+script/tests/go-test-cover "$@"
+
 echo "==      go-test-race"
 script/tests/go-test-race "$@"
 
