@@ -175,7 +175,11 @@ func (c *Consumer) consume() {
 			c.logger.Info("Received quit signal. Exiting consumer.")
 
 			return
-		case event := <-c.kafka.Events():
+		case event, ok := <-c.kafka.Events():
+			if !ok {
+				return
+			}
+
 			switch e := event.(type) {
 
 			// If we received an `AssignedPartitions` event, we need to make sure we
@@ -273,7 +277,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 		kafka:    kafkaconsumer,
 		errors:   make(chan error),
 		messages: make(chan streammsg.Message),
-		quit:     make(chan bool),
+		quit:     make(chan bool, 1),
 		once:     &sync.Once{},
 	}
 
