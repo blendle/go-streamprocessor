@@ -9,12 +9,16 @@ import (
 )
 
 func TestClient(t *testing.T) {
+	t.Parallel()
+
 	_ = kafkaconfig.Client{
 		Logger: zap.NewNop(),
 	}
 }
 
 func TestClientDefaults(t *testing.T) {
+	t.Parallel()
+
 	config := kafkaconfig.ClientDefaults()
 
 	expected := "*zap.Logger"

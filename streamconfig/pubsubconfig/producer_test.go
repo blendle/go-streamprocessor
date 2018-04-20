@@ -9,10 +9,14 @@ import (
 )
 
 func TestProducer(t *testing.T) {
+	t.Parallel()
+
 	_ = pubsubconfig.Producer{}
 }
 
 func TestProducerDefaults(t *testing.T) {
+	t.Parallel()
+
 	logger := zap.NewExample()
 
 	cc := pubsubconfig.Client{Logger: logger}

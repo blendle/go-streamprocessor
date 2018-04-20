@@ -9,10 +9,14 @@ import (
 )
 
 func TestConsumer(t *testing.T) {
+	t.Parallel()
+
 	_ = standardstreamconfig.Consumer{}
 }
 
 func TestConsumerDefaults(t *testing.T) {
+	t.Parallel()
+
 	logger := zap.NewExample()
 
 	cc := standardstreamconfig.Client{Logger: logger}

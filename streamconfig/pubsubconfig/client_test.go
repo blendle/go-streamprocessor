@@ -9,12 +9,16 @@ import (
 )
 
 func TestClient(t *testing.T) {
+	t.Parallel()
+
 	_ = pubsubconfig.Client{
 		Logger: zap.NewNop(),
 	}
 }
 
 func TestClientDefaults(t *testing.T) {
+	t.Parallel()
+
 	config := pubsubconfig.ClientDefaults()
 
 	expected := "*zap.Logger"

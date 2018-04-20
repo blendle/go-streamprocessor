@@ -8,6 +8,8 @@ import (
 )
 
 func TestMessage(t *testing.T) {
+	t.Parallel()
+
 	_ = stream.Message{
 		Value:     []byte("testValue"),
 		Key:       []byte("testKey"),

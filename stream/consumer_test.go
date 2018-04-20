@@ -24,5 +24,7 @@ func (fc *FakeConsumer) Config() streamconfig.Consumer {
 }
 
 func TestConsumer(t *testing.T) {
+	t.Parallel()
+
 	var _ stream.Consumer = (*FakeConsumer)(nil)
 }

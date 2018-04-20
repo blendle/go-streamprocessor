@@ -9,12 +9,16 @@ import (
 )
 
 func TestClient(t *testing.T) {
+	t.Parallel()
+
 	_ = standardstreamconfig.Client{
 		Logger: zap.NewNop(),
 	}
 }
 
 func TestClientDefaults(t *testing.T) {
+	t.Parallel()
+
 	config := standardstreamconfig.ClientDefaults()
 
 	expected := "*zap.Logger"
