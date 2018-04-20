@@ -142,8 +142,8 @@ func TestConsumer_Messages_ScannerError(t *testing.T) {
 	cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
 	cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
 
-	_, err := cmd.CombinedOutput()
-	require.NotNil(t, err)
+	out, err := cmd.CombinedOutput()
+	require.NotNil(t, err, "output received: %s", string(out))
 
 	assert.False(t, err.(*exec.ExitError).Success())
 }

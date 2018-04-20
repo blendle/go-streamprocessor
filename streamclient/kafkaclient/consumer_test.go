@@ -241,7 +241,7 @@ func TestIntegrationConsumer_Ack(t *testing.T) {
 	assert.Equal(t, int64(2), int64(offsets[0].Offset))
 }
 
-func TestIntegrationMessage_Ack_WithClosedConsumer(t *testing.T) {
+func TestIntegrationConsumer_Ack_WithClosedConsumer(t *testing.T) {
 	t.Parallel()
 	testutils.Integration(t)
 
