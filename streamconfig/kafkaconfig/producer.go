@@ -10,6 +10,10 @@ import (
 // Producer is a value-object, containing all user-configurable configuration
 // values that dictate how the Kafka client's producer will behave.
 type Producer struct {
+	// BatchMessageSize sets the maximum number of messages batched in one
+	// MessageSet. The total MessageSet size is also limited by message.max.bytes.
+	BatchMessageSize int `kafka:"batch.num.messages,omitempty" split_words:"true"`
+
 	// Brokers is a list of host/port pairs to use for establishing the initial
 	// connection to the Kafka cluster. The client will make use of all servers
 	// irrespective of which servers are specified here for bootstrapping — this
@@ -19,6 +23,12 @@ type Producer struct {
 	// list need not contain the full set of servers (you may want more than one,
 	// though, in case a server is down).
 	Brokers []string `kafka:"metadata.broker.list,omitempty" split_words:"true"`
+
+	// CompressionCodec sets the compression codec to use for compressing message
+	// sets. This is the default value for all topics, may be overridden by the
+	// topic configuration property compression.codec. Set tot `Snappy` by
+	// default.
+	CompressionCodec Compression `kafka:"compression.codec,omitempty" split_words:"true"`
 
 	// Debug allows tweaking of the default debug values.
 	Debug Debug `kafka:"debug,omitempty"`
@@ -103,20 +113,12 @@ type staticProducer struct {
 	// accumulator. A lower number yields larger and more effective batches.
 	// Set to 100, and non-configurable for now.
 	QueueBackpressureThreshold int `kafka:"queue.buffering.backpressure.threshold"`
-
-	// CompressionCodec sets the compression codec to use for compressing message
-	// sets. This is the default value for all topics, may be overridden by the
-	// topic configuration property compression.codec. Set tot `Snappy`,
-	// non-configurable.
-	CompressionCodec Compression `kafka:"compression.codec"`
-
-	// BatchMessageSize sets the maximum number of messages batched in one
-	// MessageSet. The total MessageSet size is also limited by message.max.bytes.
-	BatchMessageSize int `kafka:"batch.num.messages"`
 }
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
+	BatchMessageSize:       100000,
+	CompressionCodec:       CompressionSnappy,
 	Debug:                  Debug{},
 	HeartbeatInterval:      10 * time.Second,
 	MaxDeliveryRetries:     0,
@@ -130,8 +132,6 @@ var ProducerDefaults = Producer{
 
 var staticProducerDefaults = &staticProducer{
 	QueueBackpressureThreshold: 100,
-	CompressionCodec:           CompressionSnappy,
-	BatchMessageSize:           100000,
 }
 
 // ConfigMap converts the current configuration into a format known to the

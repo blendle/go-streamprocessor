@@ -167,6 +167,11 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 		return nil, err
 	}
 
+	config.Logger.Info(
+		"Finished parsing Kafka client configurations.",
+		zap.Any("config", kconfig),
+	)
+
 	// Instantiate a new rdkafka-based Kafka producer.
 	kafkaproducer, err := kafka.NewProducer(kconfig)
 	if err != nil {

@@ -5,3 +5,7 @@
 [[constraint]]
   name = "github.com/confluentinc/confluent-kafka-go"
   revision = "767701354ee866ea3a63110035df26a8cccc3dee"
+
+[[constraint]]
+  name = "github.com/kelseyhightower/envconfig"
+  revision = "1f94cfab3dcc47159a6dcb83588baa3d8260e78a"

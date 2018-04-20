@@ -6,6 +6,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
 	"github.com/kelseyhightower/envconfig"
+	"go.uber.org/zap"
 )
 
 // NewConsumer returns a new Consumer configuration struct, containing the
@@ -40,6 +41,11 @@ func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
 			return *config, err
 		}
 	}
+
+	config.Logger.Info(
+		"Finished preparing consumer configuration.",
+		zap.Any("config", config),
+	)
 
 	// We pass the config by-value, to prevent any race-condition where the
 	// original config struct is modified after the fact.
@@ -78,6 +84,11 @@ func NewProducer(options ...func(*Producer)) (Producer, error) {
 			return *config, err
 		}
 	}
+
+	config.Logger.Info(
+		"Finished preparing producer configuration.",
+		zap.Any("config", config),
+	)
 
 	// We pass the config by-value, to prevent any race-condition where the
 	// original config struct is modified after the fact.
