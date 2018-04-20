@@ -7,6 +7,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"github.com/blendle/go-streamprocessor/streammsg"
 )
 
 // maxCapacity represents the maximum number of tokens supported per-line. This
@@ -28,7 +29,7 @@ type Consumer struct {
 	rawConfig streamconfig.Consumer
 
 	wg       sync.WaitGroup
-	messages chan *stream.Message
+	messages chan streammsg.Message
 }
 
 // NewConsumer returns a new standard stream consumer.
@@ -69,7 +70,7 @@ func (c *Client) NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Co
 			b := make([]byte, len(scanner.Bytes()))
 			copy(b, scanner.Bytes())
 
-			consumer.messages <- &stream.Message{Value: b}
+			consumer.messages <- &message{value: b}
 		}
 	}()
 
@@ -78,7 +79,7 @@ func (c *Client) NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Co
 
 // Messages returns the read channel for the messages that are returned by the
 // stream.
-func (c *Consumer) Messages() <-chan *stream.Message {
+func (c *Consumer) Messages() <-chan streammsg.Message {
 	return c.messages
 }
 
@@ -110,7 +111,7 @@ func newConsumer(c *Client, options []func(*streamconfig.Consumer)) (*Consumer, 
 	consumer := &Consumer{
 		config:    config.Standardstream,
 		rawConfig: config,
-		messages:  make(chan *stream.Message),
+		messages:  make(chan streammsg.Message),
 	}
 
 	return consumer, nil

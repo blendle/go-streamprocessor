@@ -7,6 +7,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"github.com/blendle/go-streamprocessor/streammsg"
 )
 
 // Producer implements the stream.Producer interface for the standard stream
@@ -22,12 +23,12 @@ type Producer struct {
 	rawConfig streamconfig.Producer
 
 	wg       sync.WaitGroup
-	messages chan<- *stream.Message
+	messages chan<- streammsg.Message
 }
 
 // NewProducer returns a new standard stream producer.
 func (c *Client) NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, error) {
-	ch := make(chan *stream.Message)
+	ch := make(chan streammsg.Message)
 
 	producer, err := newProducer(c, ch, options)
 	if err != nil {
@@ -42,7 +43,7 @@ func (c *Client) NewProducer(options ...func(*streamconfig.Producer)) (stream.Pr
 		defer producer.wg.Done()
 
 		for msg := range ch {
-			message := msg.Value
+			message := msg.Value()
 
 			// If the original message does not contain a newline at the end, we add
 			// it, as this is used as the message delimiter.
@@ -60,8 +61,13 @@ func (c *Client) NewProducer(options ...func(*streamconfig.Producer)) (stream.Pr
 	return producer, nil
 }
 
+// NewMessage returns a new message with the provided argument as its value.
+func (p *Producer) NewMessage(value []byte) streammsg.Message {
+	return &message{value: value}
+}
+
 // Messages returns the write channel for messages to be produced.
-func (p *Producer) Messages() chan<- *stream.Message {
+func (p *Producer) Messages() chan<- streammsg.Message {
 	return p.messages
 }
 
@@ -82,7 +88,7 @@ func (p *Producer) Config() streamconfig.Producer {
 	return p.rawConfig
 }
 
-func newProducer(c *Client, ch chan *stream.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
+func newProducer(c *Client, ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
 	config, err := streamconfig.NewProducer(c.rawConfig, options...)
 	if err != nil {
 		return nil, err

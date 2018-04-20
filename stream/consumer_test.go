@@ -5,13 +5,14 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streammsg"
 )
 
 type FakeConsumer struct {
-	messages chan *stream.Message
+	messages chan streammsg.Message
 }
 
-func (fc *FakeConsumer) Messages() <-chan *stream.Message {
+func (fc *FakeConsumer) Messages() <-chan streammsg.Message {
 	return fc.messages
 }
 

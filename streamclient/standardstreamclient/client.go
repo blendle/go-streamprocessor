@@ -13,7 +13,7 @@ type Client struct {
 	config standardstreamconfig.Client
 
 	// rawConfig represents the as-is configuration passed into the stream
-	// proceesor its initialization function by the user. This includes the
+	// processor its initialization function by the user. This includes the
 	// configuration of other streamclient implementations, irrelevant to the
 	// current implementation.
 	rawConfig streamconfig.Client
