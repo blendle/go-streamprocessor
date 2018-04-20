@@ -5,6 +5,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"go.uber.org/zap"
 )
 
 // Consumer contains the configuration for all the different consumer that
@@ -17,6 +18,10 @@ type Consumer struct {
 	Kafka          kafkaconfig.Consumer
 	Pubsub         pubsubconfig.Consumer
 	Standardstream standardstreamconfig.Consumer
+
+	// Logger is the configurable logger instance to log messages. If left
+	// undefined, a no-op logger will be used.
+	Logger zap.Logger
 }
 
 // Producer contains the configuration for all the different consumer that
@@ -29,4 +34,18 @@ type Producer struct {
 	Kafka          kafkaconfig.Producer
 	Pubsub         pubsubconfig.Producer
 	Standardstream standardstreamconfig.Producer
+
+	// Logger is the configurable logger instance to log messages. If left
+	// undefined, a no-op logger will be used.
+	Logger zap.Logger
+}
+
+// ConsumerDefaults holds the default values for Consumer.
+var ConsumerDefaults = Consumer{
+	Logger: *zap.NewNop(),
+}
+
+// ProducerDefaults holds the default values for Producer.
+var ProducerDefaults = Producer{
+	Logger: *zap.NewNop(),
 }

@@ -56,8 +56,8 @@ func TestIntegrationNewConsumer_Env(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.env, func(t *testing.T) {
-			os.Setenv("STREAMCLIENT_CONSUMER", tt.env)
-			defer os.Unsetenv("STREAMCLIENT_CONSUMER")
+			_ = os.Setenv("STREAMCLIENT_CONSUMER", tt.env)
+			defer os.Unsetenv("STREAMCLIENT_CONSUMER") // nolint: errcheck
 
 			consumer, err := streamclient.NewConsumer(tt.opts)
 			require.NoError(t, err)
@@ -68,8 +68,8 @@ func TestIntegrationNewConsumer_Env(t *testing.T) {
 }
 
 func TestIntegrationNewConsumer_Pubsub(t *testing.T) {
-	os.Setenv("STREAMCLIENT_CONSUMER", "pubsub")
-	defer os.Unsetenv("STREAMCLIENT_CONSUMER")
+	_ = os.Setenv("STREAMCLIENT_CONSUMER", "pubsub")
+	defer os.Unsetenv("STREAMCLIENT_CONSUMER") // nolint: errcheck
 
 	_, err := streamclient.NewConsumer()
 	assert.Error(t, err)
@@ -89,9 +89,10 @@ func TestIntegrationNewConsumer_PipedData(t *testing.T) {
 
 	stdin, err := cmd.StdinPipe()
 	require.NoError(t, err)
-	defer stdin.Close()
+	defer func() { assert.NoError(t, stdin.Close()) }()
 
-	io.WriteString(stdin, `{ "hello": "world" }`)
+	_, err = io.WriteString(stdin, `{ "hello": "world" }`)
+	require.NoError(t, err)
 
 	b, err := cmd.CombinedOutput()
 	if e, ok := err.(*exec.ExitError); ok {

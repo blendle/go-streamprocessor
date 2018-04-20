@@ -23,6 +23,7 @@ type Producer struct {
 	// other producer implementations, irrelevant to the current implementation.
 	rawConfig streamconfig.Producer
 
+	logger   *zap.Logger
 	wg       sync.WaitGroup
 	messages chan<- streammsg.Message
 }
@@ -56,7 +57,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 
 			_, err := producer.config.Writer.Write(message)
 			if err != nil {
-				producer.config.Logger.Fatal(
+				producer.logger.Fatal(
 					"Unable to write message to stream.",
 					zap.ByteString("messageValue", message),
 					zap.Error(err),
@@ -99,6 +100,7 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 	producer := &Producer{
 		config:    config.Standardstream,
 		rawConfig: config,
+		logger:    &config.Logger,
 		messages:  ch,
 	}
 

@@ -1,7 +1,6 @@
 package kafkaconfig_test
 
 import (
-	"reflect"
 	"testing"
 	"time"
 
@@ -9,7 +8,6 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 )
 
 var producerDefaults = map[string]interface{}{
@@ -31,7 +29,6 @@ func TestProducer(t *testing.T) {
 		Debug:                  kafkaconfig.Debug{All: true},
 		HeartbeatInterval:      time.Duration(0),
 		ID:                     "",
-		Logger:                 *zap.NewNop(),
 		MaxDeliveryRetries:     0,
 		MaxQueueBufferDuration: time.Duration(0),
 		MaxQueueSizeKBytes:     0,
@@ -51,7 +48,6 @@ func TestProducerDefaults(t *testing.T) {
 
 	assert.Equal(t, kafkaconfig.Debug{}, config.Debug)
 	assert.Equal(t, 10*time.Second, config.HeartbeatInterval)
-	assert.Equal(t, "zap.Logger", reflect.TypeOf(config.Logger).String())
 	assert.Equal(t, 0, config.MaxDeliveryRetries)
 	assert.Equal(t, 0*time.Second, config.MaxQueueBufferDuration)
 	assert.Equal(t, 2097151, config.MaxQueueSizeKBytes)
@@ -120,11 +116,6 @@ func TestProducer_ConfigMap(t *testing.T) {
 
 		"ID (empty)": {
 			&kafkaconfig.Producer{ID: ""},
-			&kafka.ConfigMap{},
-		},
-
-		"logger (skipped)": {
-			&kafkaconfig.Producer{Logger: *zap.NewNop()},
 			&kafka.ConfigMap{},
 		},
 

@@ -34,7 +34,7 @@ const (
 
 // handleAssignedPartitions assigns the consumer to a provided partition.
 func (c *Consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
-	log := c.config.Logger.With(
+	log := c.logger.With(
 		zap.String("eventType", eventAssignedPartitions),
 		zap.String("eventDetails", e.String()),
 	)
@@ -52,7 +52,7 @@ func (c *Consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
 
 // handleRevokedPartitions unassigns the consumer from a provided partition.
 func (c *Consumer) handleRevokedPartitions(e kafka.RevokedPartitions) {
-	log := c.config.Logger.With(
+	log := c.logger.With(
 		zap.String("eventType", eventRevokedPartitions),
 		zap.String("eventDetails", e.String()),
 	)
@@ -96,7 +96,7 @@ func (c *Consumer) handleOffsetCommitted(e kafka.OffsetsCommitted) {
 		return
 	}
 
-	c.config.Logger.Error(
+	c.logger.Error(
 		"OffsetsCommitted event returned error.",
 		zap.String("eventType", eventOffsetsCommitted),
 		zap.String("eventDetails", e.String()),
@@ -107,12 +107,12 @@ func (c *Consumer) handleOffsetCommitted(e kafka.OffsetsCommitted) {
 
 // handleError handles all error events for the consumer.
 func (c *Consumer) handleError(e kafka.Error) {
-	handleError(c.config.Logger, e)
+	handleError(c.logger, e)
 }
 
 // handleError handles all error events for the producer.
 func (p *Producer) handleError(e kafka.Error) {
-	handleError(p.config.Logger, e)
+	handleError(p.logger, e)
 }
 
 // handleError handles all error events for both the producer and consumer. If
@@ -128,7 +128,7 @@ func (p *Producer) handleError(e kafka.Error) {
 //       are also considering adding an `Events()` channel of our own, so
 //       perhaps we don't have to handle this situation ourselves, and the
 //       application can dictate what they want to do in the case of an error.
-func handleError(logger zap.Logger, e kafka.Error) {
+func handleError(logger *zap.Logger, e kafka.Error) {
 	logger.Fatal(
 		"Received event from Kafka.",
 		zap.String("eventType", eventError),
@@ -152,7 +152,7 @@ func (c *Consumer) handleMessage(e *kafka.Message) bool {
 	select {
 	case c.messages <- *msg:
 	case <-c.quit:
-		c.config.Logger.Info("Received quit signal while waiting to deliver " +
+		c.logger.Info("Received quit signal while waiting to deliver " +
 			"Kafka message to messages channel. Exiting consumer.")
 
 		return true
@@ -170,7 +170,7 @@ func (p *Producer) handleMessage(e *kafka.Message) {
 		return
 	}
 
-	p.config.Logger.Error(
+	p.logger.Error(
 		"Received failed message delivery event from Kafka.",
 		zap.String("eventType", eventMessage),
 		zap.String("eventDetails", e.String()),

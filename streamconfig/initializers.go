@@ -11,12 +11,13 @@ import (
 // values passed into the function. If any error occurs during configuration
 // validation, an error is returned as the second argument.
 func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
-	config := &Consumer{
-		Inmem:          inmemconfig.ConsumerDefaults,
-		Kafka:          kafkaconfig.ConsumerDefaults,
-		Pubsub:         pubsubconfig.ConsumerDefaults,
-		Standardstream: standardstreamconfig.ConsumerDefaults,
-	}
+	defaults := ConsumerDefaults
+
+	config := &defaults
+	config.Inmem = inmemconfig.ConsumerDefaults
+	config.Kafka = kafkaconfig.ConsumerDefaults
+	config.Pubsub = pubsubconfig.ConsumerDefaults
+	config.Standardstream = standardstreamconfig.ConsumerDefaults
 
 	// After we've defined the default values, we overwrite them with any provided
 	// custom configuration values.
@@ -37,12 +38,13 @@ func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
 // values passed into the function. If any error occurs during configuration
 // validation, an error is returned as the second argument.
 func NewProducer(options ...func(*Producer)) (Producer, error) {
-	config := &Producer{
-		Inmem:          inmemconfig.ProducerDefaults,
-		Kafka:          kafkaconfig.ProducerDefaults,
-		Pubsub:         pubsubconfig.ProducerDefaults,
-		Standardstream: standardstreamconfig.ProducerDefaults,
-	}
+	defaults := ProducerDefaults
+
+	config := &defaults
+	config.Inmem = inmemconfig.ProducerDefaults
+	config.Kafka = kafkaconfig.ProducerDefaults
+	config.Pubsub = pubsubconfig.ProducerDefaults
+	config.Standardstream = standardstreamconfig.ProducerDefaults
 
 	// After we've defined the default values, we overwrite them with any provided
 	// custom configuration values.

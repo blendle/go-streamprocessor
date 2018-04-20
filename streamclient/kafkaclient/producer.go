@@ -24,6 +24,7 @@ type Producer struct {
 	// other producer implementations, irrelevant to the current implementation.
 	rawConfig streamconfig.Producer
 
+	logger   *zap.Logger
 	kafka    *kafka.Producer
 	wg       sync.WaitGroup
 	messages chan<- streammsg.Message
@@ -66,7 +67,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// these cases gracefully, but just in case, we try to close the producer if
 	// any such interrupt signal is intercepted. If closing the producer fails, we
 	// exit 1, and log a fatal message explaining what happened.
-	go streamutils.HandleInterrupts(producer.Close, producer.config.Logger)
+	go streamutils.HandleInterrupts(producer.Close, producer.logger)
 
 	return producer, nil
 }
@@ -108,7 +109,7 @@ func (p *Producer) Close() (err error) {
 
 		// Let's flush all logs still in the buffer, since this producer is no
 		// longer useful after this point.
-		_ = p.config.Logger.Sync() // nolint: gas
+		_ = p.logger.Sync() // nolint: gas
 	})
 
 	return err
@@ -143,6 +144,7 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 	producer := &Producer{
 		config:    config.Kafka,
 		rawConfig: config,
+		logger:    &config.Logger,
 		kafka:     kafkaproducer,
 		messages:  ch,
 		quit:      make(chan bool),
@@ -161,7 +163,7 @@ func (p *Producer) produce(ch <-chan streammsg.Message) {
 	for {
 		select {
 		case <-p.quit:
-			p.config.Logger.Info("Received quit signal. Exiting producer.")
+			p.logger.Info("Received quit signal. Exiting producer.")
 			return
 
 		case m := <-ch:
@@ -176,7 +178,7 @@ func (p *Producer) produce(ch <-chan streammsg.Message) {
 			// These delivery reports are handled by us in `p.checkReports()`.
 			err := p.kafka.Produce(msg, nil)
 			if err != nil {
-				p.config.Logger.Fatal(
+				p.logger.Fatal(
 					"Error while delivering message to Kafka.",
 					zap.Error(err),
 				)

@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"go.uber.org/zap"
 )
 
 // Producer is a value-object, containing all user-configurable configuration
@@ -38,10 +37,6 @@ type Producer struct {
 	// by allowing a logical application name to be included in server-side
 	// request logging.
 	ID string `kafka:"client.id,omitempty"`
-
-	// Logger is the configurable logger instance to log messages. If left
-	// undefined, a no-op logger will be used.
-	Logger zap.Logger
 
 	// MaxDeliveryRetries dictates how many times to retry sending a failing
 	// MessageSet. Note: retrying may cause reordering. Defaults to 0 retries to
@@ -123,7 +118,6 @@ type staticProducer struct {
 var ProducerDefaults = Producer{
 	Debug:                  Debug{},
 	HeartbeatInterval:      10 * time.Second,
-	Logger:                 *zap.NewNop(),
 	MaxDeliveryRetries:     0,
 	MaxQueueBufferDuration: time.Duration(0),
 	MaxQueueSizeKBytes:     2097151,
