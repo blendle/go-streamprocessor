@@ -6,7 +6,6 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -15,14 +14,9 @@ import (
 
 // Consumer implements the stream.Consumer interface for the Kafka client.
 type Consumer struct {
-	// config represents the relevant portion of the configuration passed into the
-	// consumer its initialization function.
-	config kafkaconfig.Consumer
-
-	// rawConfig represents the as-is configuration passed into the consumer its
-	// initialization function by the user. This includes the configuration of
-	// other consumer implementations, irrelevant to the current implementation.
-	rawConfig streamconfig.Consumer
+	// c represents the configuration passed into the consumer on
+	// initialization.
+	c streamconfig.Consumer
 
 	logger   *zap.Logger
 	kafka    *kafka.Consumer
@@ -59,7 +53,12 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// these cases gracefully, but just in case, we try to close the consumer if
 	// any such interrupt signal is intercepted. If closing the consumer fails, we
 	// exit 1, and log a fatal message explaining what happened.
-	go streamutils.HandleInterrupts(consumer.Close, consumer.logger)
+	//
+	// This functionality is enabled by default, but can be disabled through a
+	// configuration flag.
+	if consumer.c.HandleInterrupt {
+		go streamutils.HandleInterrupts(consumer.Close, consumer.logger)
+	}
 
 	return consumer, nil
 }
@@ -129,7 +128,7 @@ func (c *Consumer) Close() (err error) {
 
 // Config returns a read-only representation of the consumer configuration.
 func (c *Consumer) Config() streamconfig.Consumer {
-	return c.rawConfig
+	return c.c
 }
 
 func (c *Consumer) consume() {
@@ -205,35 +204,6 @@ func (c *Consumer) consume() {
 	}
 }
 
-func newMessageFromKafka(m *kafka.Message) *streammsg.Message {
-	oint := int64(m.TopicPartition.Offset)
-	offset := &oint
-
-	// If the offset is set to the special-value `-1001`, that means the offset is
-	// not set yet (or invalid), so we set the offset to `nil`.
-	//
-	// see: https://git.io/vAHI2
-	if oint == -1001 {
-		offset = nil
-	}
-
-	msg := &streammsg.Message{
-		Key:       m.Key,
-		Value:     m.Value,
-		Timestamp: m.Timestamp,
-		Topic:     *m.TopicPartition.Topic,
-		Offset:    offset,
-	}
-
-	// We set the message's opaque field (which is still nil at this point), and
-	// populate it with the `TopicPartition` details of the Kafka message. This
-	// allows us to acknowledge this message at a later point in time, without
-	// having to hold on to the Kafka message itself.
-	_ = streammsg.SetMessageOpaque(msg, opaque{toppar: &m.TopicPartition})
-
-	return msg
-}
-
 func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	// Construct a full configuration object, based on the provided configuration,
 	// the default configurations, and the static configurations.
@@ -266,16 +236,44 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	}
 
 	consumer := &Consumer{
-		config:    config.Kafka,
-		rawConfig: config,
-		logger:    &config.Logger,
-		kafka:     kafkaconsumer,
-		messages:  make(chan streammsg.Message),
-		quit:      make(chan bool),
-		once:      &sync.Once{},
+		c:        config,
+		logger:   &config.Logger,
+		kafka:    kafkaconsumer,
+		messages: make(chan streammsg.Message),
+		quit:     make(chan bool),
+		once:     &sync.Once{},
 	}
 
 	return consumer, nil
+}
+
+func newMessageFromKafka(m *kafka.Message) *streammsg.Message {
+	oint := int64(m.TopicPartition.Offset)
+	offset := &oint
+
+	// If the offset is set to the special-value `-1001`, that means the offset is
+	// not set yet (or invalid), so we set the offset to `nil`.
+	//
+	// see: https://git.io/vAHI2
+	if oint == -1001 {
+		offset = nil
+	}
+
+	msg := &streammsg.Message{
+		Key:       m.Key,
+		Value:     m.Value,
+		Timestamp: m.Timestamp,
+		Topic:     *m.TopicPartition.Topic,
+		Offset:    offset,
+	}
+
+	// We set the message's opaque field (which is still nil at this point), and
+	// populate it with the `TopicPartition` details of the Kafka message. This
+	// allows us to acknowledge this message at a later point in time, without
+	// having to hold on to the Kafka message itself.
+	_ = streammsg.SetMessageOpaque(msg, opaque{toppar: &m.TopicPartition})
+
+	return msg
 }
 
 // storeOffset accepts a `kafka.TopicPartition` and uses the rdkafka-consumer to

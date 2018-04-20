@@ -5,21 +5,16 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"github.com/blendle/go-streamprocessor/streamutils"
 	"go.uber.org/zap"
 )
 
 // Consumer implements the stream.Consumer interface for the inmem client.
 type Consumer struct {
-	// config represents the relevant portion of the configuration passed into the
-	// consumer its initialization function.
-	config inmemconfig.Consumer
-
-	// rawConfig represents the as-is configuration passed into the consumer its
-	// initialization function by the user. This includes the configuration of
-	// other consumer implementations, irrelevant to the current implementation.
-	rawConfig streamconfig.Consumer
+	// c represents the configuration passed into the consumer on
+	// initialization.
+	c streamconfig.Consumer
 
 	logger   *zap.Logger
 	wg       sync.WaitGroup
@@ -39,16 +34,22 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// are completed and the read channel is closed.
 	consumer.wg.Add(1)
 
-	go func() {
-		defer func() {
-			close(consumer.messages)
-			consumer.wg.Done()
-		}()
+	// We start a goroutine to consume any messages currently stored in the inmem
+	// storage. We deliver these messages on a blocking channel, so as long as no
+	// one is listening on the other end of the channel, there's no significant
+	// overhead to starting the goroutine this early.
+	go consumer.consume()
 
-		for _, msg := range consumer.config.Store.Messages() {
-			consumer.messages <- msg
-		}
-	}()
+	// Finally, we monitor for any interrupt signals. Ideally, the user handles
+	// these cases gracefully, but just in case, we try to close the consumer if
+	// any such interrupt signal is intercepted. If closing the consumer fails, we
+	// exit 1, and log a fatal message explaining what happened.
+	//
+	// This functionality is enabled by default, but can be disabled through a
+	// configuration flag.
+	if consumer.c.HandleInterrupt {
+		go streamutils.HandleInterrupts(consumer.Close, consumer.logger)
+	}
 
 	return consumer, nil
 }
@@ -80,7 +81,18 @@ func (c *Consumer) Close() error {
 
 // Config returns a read-only representation of the consumer configuration.
 func (c *Consumer) Config() streamconfig.Consumer {
-	return c.rawConfig
+	return c.c
+}
+
+func (c *Consumer) consume() {
+	defer func() {
+		close(c.messages)
+		c.wg.Done()
+	}()
+
+	for _, msg := range c.c.Inmem.Store.Messages() {
+		c.messages <- msg
+	}
 }
 
 func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
@@ -90,10 +102,9 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	}
 
 	consumer := &Consumer{
-		config:    config.Inmem,
-		rawConfig: config,
-		logger:    &config.Logger,
-		messages:  make(chan streammsg.Message),
+		c:        config,
+		logger:   &config.Logger,
+		messages: make(chan streammsg.Message),
 	}
 
 	return consumer, nil

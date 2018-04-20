@@ -6,7 +6,6 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -15,14 +14,9 @@ import (
 
 // Producer implements the stream.Producer interface for the Kafka client.
 type Producer struct {
-	// config represents the relevant portion of the configuration passed into the
-	// producer its initialization function.
-	config kafkaconfig.Producer
-
-	// rawConfig represents the as-is configuration passed into the producer its
-	// initialization function by the user. This includes the configuration of
-	// other producer implementations, irrelevant to the current implementation.
-	rawConfig streamconfig.Producer
+	// c represents the configuration passed into the producer on
+	// initialization.
+	c streamconfig.Producer
 
 	logger   *zap.Logger
 	kafka    *kafka.Producer
@@ -67,7 +61,12 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// these cases gracefully, but just in case, we try to close the producer if
 	// any such interrupt signal is intercepted. If closing the producer fails, we
 	// exit 1, and log a fatal message explaining what happened.
-	go streamutils.HandleInterrupts(producer.Close, producer.logger)
+	//
+	// This functionality is enabled by default, but can be disabled through a
+	// configuration flag.
+	if producer.c.HandleInterrupt {
+		go streamutils.HandleInterrupts(producer.Close, producer.logger)
+	}
 
 	return producer, nil
 }
@@ -117,41 +116,7 @@ func (p *Producer) Close() (err error) {
 
 // Config returns a read-only representation of the producer configuration.
 func (p *Producer) Config() streamconfig.Producer {
-	return p.rawConfig
-}
-
-func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
-	// Construct a full configuration object, based on the provided configuration,
-	// the default configurations, and the static configurations.
-	config, err := streamconfig.NewProducer(options...)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert the configuration struct into a format that can be sent to the
-	// rdkafka library.
-	kconfig, err := config.Kafka.ConfigMap()
-	if err != nil {
-		return nil, err
-	}
-
-	// Instantiate a new rdkafka-based Kafka producer.
-	kafkaproducer, err := kafka.NewProducer(kconfig)
-	if err != nil {
-		return nil, err
-	}
-
-	producer := &Producer{
-		config:    config.Kafka,
-		rawConfig: config,
-		logger:    &config.Logger,
-		kafka:     kafkaproducer,
-		messages:  ch,
-		quit:      make(chan bool),
-		once:      &sync.Once{},
-	}
-
-	return producer, nil
+	return p.c
 }
 
 func (p *Producer) produce(ch <-chan streammsg.Message) {
@@ -187,6 +152,39 @@ func (p *Producer) produce(ch <-chan streammsg.Message) {
 	}
 }
 
+func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
+	// Construct a full configuration object, based on the provided configuration,
+	// the default configurations, and the static configurations.
+	config, err := streamconfig.NewProducer(options...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert the configuration struct into a format that can be sent to the
+	// rdkafka library.
+	kconfig, err := config.Kafka.ConfigMap()
+	if err != nil {
+		return nil, err
+	}
+
+	// Instantiate a new rdkafka-based Kafka producer.
+	kafkaproducer, err := kafka.NewProducer(kconfig)
+	if err != nil {
+		return nil, err
+	}
+
+	producer := &Producer{
+		c:        config,
+		logger:   &config.Logger,
+		kafka:    kafkaproducer,
+		messages: ch,
+		quit:     make(chan bool),
+		once:     &sync.Once{},
+	}
+
+	return producer, nil
+}
+
 func (p *Producer) newMessage(m streammsg.Message) *kafka.Message {
 	headers := make([]kafka.Header, len(m.Tags))
 	for k, v := range m.Tags {
@@ -212,7 +210,7 @@ func (p *Producer) newMessage(m streammsg.Message) *kafka.Message {
 // determine in which partition the message should end up, based on the key set
 // for the message.
 func (p *Producer) newToppar(m streammsg.Message) kafka.TopicPartition {
-	topic := &p.config.Topic
+	topic := &p.c.Kafka.Topic
 	if m.Topic != "" {
 		topic = &m.Topic
 	}

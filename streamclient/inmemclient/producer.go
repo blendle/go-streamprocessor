@@ -5,21 +5,16 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"github.com/blendle/go-streamprocessor/streamutils"
 	"go.uber.org/zap"
 )
 
 // Producer implements the stream.Producer interface for the inmem client.
 type Producer struct {
-	// config represents the relevant portion of the configuration passed into the
-	// producer its initialization function.
-	config inmemconfig.Producer
-
-	// rawConfig represents the as-is configuration passed into the producer its
-	// initialization function by the user. This includes the configuration of
-	// other producer implementations, irrelevant to the current implementation.
-	rawConfig streamconfig.Producer
+	// c represents the configuration passed into the producer on
+	// initialization.
+	c streamconfig.Producer
 
 	logger   *zap.Logger
 	wg       sync.WaitGroup
@@ -41,13 +36,21 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// are completed and the write channel is closed.
 	producer.wg.Add(1)
 
-	go func() {
-		defer producer.wg.Done()
+	// We listen to the produce channel in a goroutine. Every message delivered to
+	// this producer gets stored in the inmem store. If the producer is closed,
+	// the close is blocked until the channel is closed.
+	go producer.produce(ch)
 
-		for msg := range ch {
-			producer.config.Store.Add(msg)
-		}
-	}()
+	// Finally, we monitor for any interrupt signals. Ideally, the user handles
+	// these cases gracefully, but just in case, we try to close the producer if
+	// any such interrupt signal is intercepted. If closing the producer fails, we
+	// exit 1, and log a fatal message explaining what happened.
+	//
+	// This functionality is enabled by default, but can be disabled through a
+	// configuration flag.
+	if producer.c.HandleInterrupt {
+		go streamutils.HandleInterrupts(producer.Close, producer.logger)
+	}
 
 	return producer, nil
 }
@@ -71,7 +74,15 @@ func (p *Producer) Close() error {
 
 // Config returns a read-only representation of the producer configuration.
 func (p *Producer) Config() streamconfig.Producer {
-	return p.rawConfig
+	return p.c
+}
+
+func (p *Producer) produce(ch <-chan streammsg.Message) {
+	defer p.wg.Done()
+
+	for msg := range ch {
+		p.c.Inmem.Store.Add(msg)
+	}
 }
 
 func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
@@ -81,10 +92,9 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 	}
 
 	producer := &Producer{
-		config:    config.Inmem,
-		rawConfig: config,
-		logger:    &config.Logger,
-		messages:  ch,
+		c:        config,
+		logger:   &config.Logger,
+		messages: ch,
 	}
 
 	return producer, nil
