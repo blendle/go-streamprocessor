@@ -1,5 +1,7 @@
 package standardstreamclient
 
+import "github.com/blendle/go-streamprocessor/streammsg"
+
 // The following interfaces are implemented by standardstreamclient:
 //
 //   streammsg.Message
@@ -7,6 +9,8 @@ package standardstreamclient
 type message struct {
 	value []byte
 }
+
+var _ streammsg.Message = (*message)(nil)
 
 // Value returns the value of the message.
 func (m *message) Value() []byte {

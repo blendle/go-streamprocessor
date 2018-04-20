@@ -33,7 +33,7 @@ func TestTestMessageWithStruct(t *testing.T) {
 	assert.Equal(t, "world", string(str.ValueField))
 	assert.Equal(t, time.Unix(0, 0), str.TimestampField)
 	assert.Equal(t, "testTopic", str.TopicField)
-	assert.Equal(t, int64(1), str.OffsetField)
-	assert.Equal(t, int32(2), str.PartitionField)
-	assert.Equal(t, "value", string(str.TagsField["test"]))
+	assert.Equal(t, int64(0), str.OffsetField)
+	assert.Equal(t, int32(0), str.PartitionField)
+	assert.Equal(t, "testTagValue1", string(str.TagsField["testTagKey1"]))
 }

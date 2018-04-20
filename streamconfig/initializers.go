@@ -18,6 +18,8 @@ func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
 		Standardstream: standardstreamconfig.ConsumerDefaults,
 	}
 
+	// After we've defined the default values, we overwrite them with any provided
+	// custom configuration values.
 	for _, option := range options {
 		option(config)
 	}
@@ -38,6 +40,8 @@ func NewProducer(options ...func(*Producer)) (Producer, error) {
 		Standardstream: standardstreamconfig.ProducerDefaults,
 	}
 
+	// After we've defined the default values, we overwrite them with any provided
+	// custom configuration values.
 	for _, option := range options {
 		option(config)
 	}

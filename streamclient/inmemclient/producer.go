@@ -24,6 +24,8 @@ type Producer struct {
 	messages chan<- streammsg.Message
 }
 
+var _ stream.Producer = (*Producer)(nil)
+
 // NewProducer returns a new inmem producer.
 func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, error) {
 	ch := make(chan streammsg.Message)

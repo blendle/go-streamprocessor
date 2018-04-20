@@ -1,6 +1,10 @@
 package inmemclient
 
-import "time"
+import (
+	"time"
+
+	"github.com/blendle/go-streamprocessor/streammsg"
+)
 
 // The following interfaces are implemented by inmemclient:
 //
@@ -26,6 +30,8 @@ type message struct {
 	partition int32
 	tags      map[string][]byte
 }
+
+var _ streammsg.Message = (*message)(nil)
 
 // Value returns the value of the message.
 func (m message) Value() []byte {
