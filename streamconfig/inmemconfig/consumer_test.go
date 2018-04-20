@@ -1,11 +1,11 @@
 package inmemconfig_test
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
 	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
 
@@ -27,17 +27,6 @@ func TestConsumerDefaults(t *testing.T) {
 	cc := inmemconfig.Client{Logger: logger, Store: store}
 	config := inmemconfig.ConsumerDefaults(cc)
 
-	expected1 := logger
-	actual1 := config.Logger
-
-	if !reflect.DeepEqual(expected1, actual1) {
-		t.Errorf("Expected %v to equal %v", actual1, expected1)
-	}
-
-	expected2 := store
-	actual2 := config.Store
-
-	if !reflect.DeepEqual(expected2, actual2) {
-		t.Errorf("Expected %v to equal %v", actual2, expected2)
-	}
+	assert.EqualValues(t, logger, config.Logger)
+	assert.EqualValues(t, store, config.Store)
 }

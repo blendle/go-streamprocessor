@@ -63,25 +63,25 @@ type PartitionReader interface {
 
 // TagsReader provides access to key/value tags of a message.
 type TagsReader interface {
-	Tags() map[string]string
-	Tag(string) string
+	Tags() map[string][]byte
+	Tag(string) []byte
 }
 
 // TagsWriter allows for setting key/value tags of a message.
 type TagsWriter interface {
-	SetTags(map[string]string)
-	SetTag(string, string)
+	SetTags(map[string][]byte)
+	SetTag(string, []byte)
 	RemoveTag(string)
 }
 
 // Acker interface allows messages to be acknowledged. Each stream client has
 // its own implementation to determine what it means to ack a message.
 type Acker interface {
-	Ack()
+	Ack() error
 }
 
 // Nacker interface allows messages to be "not acknowledged". Each stream client
 // has its own implementation to determine what it means to nack a message.
 type Nacker interface {
-	Nack()
+	Nack() error
 }

@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewClient(t *testing.T) {
@@ -27,12 +29,7 @@ func TestNewClient(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		expected := tt.expected
-		actual := reflect.TypeOf(tt.config).String()
-
-		if actual != expected {
-			t.Errorf("Expected %v to equal %v", actual, expected)
-		}
+		assert.Equal(t, tt.expected, reflect.TypeOf(tt.config).String())
 	}
 }
 
@@ -40,14 +37,10 @@ func TestNewConsumer(t *testing.T) {
 	t.Parallel()
 
 	cc, err := streamconfig.NewClient()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	config, err := streamconfig.NewConsumer(cc)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	tests := []struct {
 		expected string
@@ -61,12 +54,7 @@ func TestNewConsumer(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		expected := tt.expected
-		actual := reflect.TypeOf(tt.config).String()
-
-		if actual != expected {
-			t.Errorf("Expected %v to equal %v", actual, expected)
-		}
+		assert.Equal(t, tt.expected, reflect.TypeOf(tt.config).String())
 	}
 }
 
@@ -74,14 +62,10 @@ func TestNewProducer(t *testing.T) {
 	t.Parallel()
 
 	cc, err := streamconfig.NewClient()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	config, err := streamconfig.NewProducer(cc)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	tests := []struct {
 		expected string
@@ -95,11 +79,6 @@ func TestNewProducer(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		expected := tt.expected
-		actual := reflect.TypeOf(tt.config).String()
-
-		if actual != expected {
-			t.Errorf("Expected %v to equal %v", actual, expected)
-		}
+		assert.Equal(t, tt.expected, reflect.TypeOf(tt.config).String())
 	}
 }

@@ -10,7 +10,7 @@ type message struct {
 	topic     string
 	offset    int64
 	partition int32
-	tags      map[string]string
+	tags      map[string][]byte
 }
 
 // Key returns the key of the message.
@@ -64,22 +64,22 @@ func (m message) Partition() int32 {
 }
 
 // Tags returns the tags of the message.
-func (m message) Tags() map[string]string {
+func (m message) Tags() map[string][]byte {
 	return m.tags
 }
 
 // Tag returns a single tag of the message.
-func (m message) Tag(v string) string {
+func (m message) Tag(v string) []byte {
 	return m.tags[v]
 }
 
 // SetTags sets the tags of the message.
-func (m *message) SetTags(v map[string]string) {
+func (m *message) SetTags(v map[string][]byte) {
 	m.tags = v
 }
 
 // SetTag sets a single tag of the message.
-func (m *message) SetTag(k, v string) {
+func (m *message) SetTag(k string, v []byte) {
 	m.tags[k] = v
 }
 
@@ -89,7 +89,11 @@ func (m *message) RemoveTag(v string) {
 }
 
 // Ack is a no-op implementation of the streammsg.Acker interface.
-func (m *message) Ack() {}
+func (m *message) Ack() error {
+	return nil
+}
 
 // Nack is a no-op implementation of the streammsg.Nacker interface.
-func (m *message) Nack() {}
+func (m *message) Nack() error {
+	return nil
+}

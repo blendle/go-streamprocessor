@@ -3,16 +3,14 @@ package standardstreamclient_test
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
 	"reflect"
 	"strconv"
 	"testing"
 
-	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConsumer(t *testing.T) {
@@ -25,105 +23,65 @@ func TestNewConsumer(t *testing.T) {
 	t.Parallel()
 
 	client, err := standardstreamclient.New()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	consumer, err := client.NewConsumer()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
-	expected := "*standardstreamclient.Consumer"
-	actual := reflect.TypeOf(consumer).String()
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "*standardstreamclient.Consumer", reflect.TypeOf(consumer).String())
 }
 
 func TestNewConsumer_WithOptions(t *testing.T) {
 	t.Parallel()
 
-	f, closer := createTestFile(t, nil)
-	defer closer()
+	f := standardstreamclient.TestBuffer(t)
 
 	client, err := standardstreamclient.New()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	options := func(c *streamconfig.Consumer) {
 		c.Standardstream.Reader = f
 	}
 
 	consumer, err := client.NewConsumer(options)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
-	expected := f
-	actual := consumer.Config().Standardstream.Reader
-
-	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.EqualValues(t, f, consumer.Config().Standardstream.Reader)
 }
 
 func TestNewConsumer_Messages(t *testing.T) {
 	t.Parallel()
 
-	f, closer := createTestFile(t, []byte("hello world\nhello universe!"))
-	defer closer()
-
-	consumer, closer := newConsumer(t, f)
+	buffer := standardstreamclient.TestBuffer(t, "hello world", "hello universe!")
+	consumer, closer := standardstreamclient.TestConsumer(t, buffer)
 	defer closer()
 
 	msg := <-consumer.Messages()
-
-	expected := "hello world"
-	actual := string(msg.Value())
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "hello world", string(msg.Value()))
 
 	msg = <-consumer.Messages()
-
-	expected = "hello universe!"
-	actual = string(msg.Value())
-
-	if actual != expected {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.Equal(t, "hello universe!", string(msg.Value()))
 
 	_, ok := <-consumer.Messages()
-	if ok {
-		t.Errorf("Channel is not closed")
-	}
+	assert.False(t, ok, "consumer did not close after last message")
 }
 
 func TestNewConsumer_MessageOrdering(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
-	fileContents := []byte("")
-
+	buffer := standardstreamclient.TestBuffer(t)
 	for i := 0; i < messageCount; i++ {
-		fileContents = append(fileContents, []byte(strconv.Itoa(i)+"\n")...)
+		_, err := buffer.Write([]byte(strconv.Itoa(i) + "\n"))
+		require.NoError(t, err)
 	}
 
-	f, closer := createTestFile(t, fileContents)
-	defer closer()
-
-	consumer, closer := newConsumer(t, f)
+	consumer, closer := standardstreamclient.TestConsumer(t, buffer)
 	defer closer()
 
 	i := 0
 	for msg := range consumer.Messages() {
-		if strconv.Itoa(i) != string(msg.Value()) {
-			t.Fatalf("Expected %q to equal %d", msg.Value, i)
-		}
+		assert.Equal(t, strconv.Itoa(i), string(msg.Value()))
 
 		i++
 	}
@@ -133,17 +91,13 @@ func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
-	fileContents := []byte("")
-	line := `{"number":%d}` + "\n"
-
+	buffer := standardstreamclient.TestBuffer(t)
 	for i := 0; i < messageCount; i++ {
-		fileContents = append(fileContents, []byte(fmt.Sprintf(line, i))...)
+		_, err := buffer.Write([]byte(fmt.Sprintf(`{"number":%d}`+"\n", i)))
+		require.NoError(t, err)
 	}
 
-	f, closer := createTestFile(t, fileContents)
-	defer closer()
-
-	consumer, closer := newConsumer(t, f)
+	consumer, closer := standardstreamclient.TestConsumer(t, buffer)
 	defer closer()
 
 	i := 0
@@ -156,79 +110,23 @@ func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
 		m := bytes.Split(msg.Value(), []byte(`"number":`))
 		m = bytes.Split(m[1], []byte(`}`))
 
-		expected := strconv.Itoa(i)
-		actual := string(m[0])
-		if actual != expected {
-			t.Errorf("Unexpected return value, expected %s, got %s", expected, actual)
-		}
+		assert.Equal(t, strconv.Itoa(i), string(m[0]))
 
 		i++
 	}
 }
 
 func BenchmarkConsumer_Messages(b *testing.B) {
-	fileContents := []byte("")
-	line := `{"number":%d}` + "\n"
-
+	buffer := standardstreamclient.TestBuffer(b)
 	for i := 1; i <= b.N; i++ {
-		fileContents = append(fileContents, []byte(fmt.Sprintf(line, i))...)
+		_, _ = buffer.Write([]byte(fmt.Sprintf(`{"number":%d}`+"\n", i)))
 	}
-
-	f, closer := createTestFile(b, fileContents)
-	defer closer()
 
 	b.ResetTimer()
 
-	consumer, closer := newConsumer(b, f)
+	consumer, closer := standardstreamclient.TestConsumer(b, buffer)
 	defer closer()
 
 	for range consumer.Messages() {
 	}
-}
-
-func newConsumer(tb testing.TB, r io.ReadCloser) (stream.Consumer, func()) {
-	client, err := standardstreamclient.New()
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	options := func(c *streamconfig.Consumer) {
-		c.Standardstream.Reader = r
-	}
-
-	consumer, err := client.NewConsumer(options)
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	fn := func() {
-		err = consumer.Close()
-		if err != nil {
-			tb.Fatalf("Unexpected error: %v", err)
-		}
-	}
-
-	return consumer, fn
-}
-
-func createTestFile(tb testing.TB, b []byte) (*os.File, func()) {
-	f, _ := ioutil.TempFile("", "")
-	_, err := f.Write(b)
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	_, err = f.Seek(0, 0)
-	if err != nil {
-		tb.Fatalf("Unexpected error: %v", err)
-	}
-
-	fn := func() {
-		err := os.Remove(f.Name())
-		if err != nil {
-			tb.Fatalf("Unexpected error: %v", err)
-		}
-	}
-
-	return f, fn
 }

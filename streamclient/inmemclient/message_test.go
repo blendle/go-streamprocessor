@@ -1,11 +1,11 @@
 package inmemclient
 
 import (
-	"reflect"
 	"testing"
 	"time"
 
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"github.com/stretchr/testify/assert"
 )
 
 type testMessage interface {
@@ -34,202 +34,128 @@ func TestMessage_Value(t *testing.T) {
 	t.Parallel()
 
 	_, msg := newMessage()
-
-	actual := string(msg.Value())
-	expected := "testValue"
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, "testValue", string(msg.Value()))
 }
 
 func TestMessage_SetValue(t *testing.T) {
 	t.Parallel()
 
 	str, msg := newMessage()
+
 	msg.SetValue([]byte("testValue2"))
-
-	actual := string(str.value)
-	expected := "testValue2"
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, "testValue2", string(str.value))
 }
 
 func TestMessage_Key(t *testing.T) {
 	t.Parallel()
 
 	_, msg := newMessage()
-
-	actual := string(msg.Key())
-	expected := "testKey"
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, "testKey", string(msg.Key()))
 }
 
 func TestMessage_SetKey(t *testing.T) {
 	t.Parallel()
 
 	str, msg := newMessage()
+
 	msg.SetKey([]byte("testKey2"))
-
-	actual := string(str.key)
-	expected := "testKey2"
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, "testKey2", string(str.key))
 }
 
 func TestMessage_Timestamp(t *testing.T) {
 	t.Parallel()
 
 	_, msg := newMessage()
-
-	actual := msg.Timestamp()
-	expected := time.Unix(0, 0)
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, time.Unix(0, 0), msg.Timestamp())
 }
 
 func TestMessage_SetTimestamp(t *testing.T) {
 	t.Parallel()
 
 	str, msg := newMessage()
+
 	msg.SetTimestamp(time.Unix(10, 0))
-
-	actual := str.timestamp
-	expected := time.Unix(10, 0)
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, time.Unix(10, 0), str.timestamp)
 }
 
 func TestMessage_Topic(t *testing.T) {
 	t.Parallel()
 
 	_, msg := newMessage()
-
-	actual := msg.Topic()
-	expected := "testTopic"
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, "testTopic", msg.Topic())
 }
 
 func TestMessage_SetTopic(t *testing.T) {
 	t.Parallel()
 
 	str, msg := newMessage()
+
 	msg.SetTopic("testTopic2")
-
-	actual := str.topic
-	expected := "testTopic2"
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, "testTopic2", str.topic)
 }
 
 func TestMessage_Offset(t *testing.T) {
 	t.Parallel()
 
 	_, msg := newMessage()
-
-	actual := msg.Offset()
-	expected := int64(1)
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, int64(1), msg.Offset())
 }
 
 func TestMessage_Partition(t *testing.T) {
 	t.Parallel()
 
 	_, msg := newMessage()
-
-	actual := msg.Partition()
-	expected := int32(2)
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, int32(2), msg.Partition())
 }
 
 func TestMessage_Tags(t *testing.T) {
 	t.Parallel()
 
+	expected := map[string][]byte{"test": []byte("value"), "test2": []byte("value2")}
+
 	_, msg := newMessage()
-
-	actual := msg.Tags()
-	expected := map[string]string{"test": "value", "test2": "value2"}
-
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.EqualValues(t, expected, msg.Tags())
 }
 
 func TestMessage_Tag(t *testing.T) {
 	t.Parallel()
 
 	_, msg := newMessage()
-
-	actual := msg.Tag("test2")
-	expected := "value2"
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.EqualValues(t, []byte("value2"), msg.Tag("test2"))
 }
 
 func TestMessage_SetTags(t *testing.T) {
 	t.Parallel()
 
+	expected := map[string][]byte{"test3": []byte("value3")}
 	str, msg := newMessage()
-	msg.SetTags(map[string]string{"test3": "value3"})
 
-	actual := str.tags
-	expected := map[string]string{"test3": "value3"}
-
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	msg.SetTags(expected)
+	assert.EqualValues(t, expected, str.tags)
 }
 
 func TestMessage_SetTag(t *testing.T) {
 	t.Parallel()
 
 	str, msg := newMessage()
-	msg.SetTag("test3", "value3")
-
-	actual := str.tags
-	expected := map[string]string{"test": "value", "test2": "value2", "test3": "value3"}
-
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
+	expected := map[string][]byte{
+		"test":  []byte("value"),
+		"test2": []byte("value2"),
+		"test3": []byte("value3"),
 	}
+
+	msg.SetTag("test3", expected["test3"])
+	assert.EqualValues(t, expected, str.tags)
 }
 
 func TestMessage_RemoveTag(t *testing.T) {
 	t.Parallel()
 
+	expected := map[string][]byte{"test2": []byte("value2")}
 	str, msg := newMessage()
+
 	msg.RemoveTag("test")
-
-	actual := str.tags
-	expected := map[string]string{"test2": "value2"}
-
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.EqualValues(t, expected, str.tags)
 }
 
 func newMessage() (*message, testMessage) {
@@ -240,7 +166,10 @@ func newMessage() (*message, testMessage) {
 		topic:     "testTopic",
 		offset:    1,
 		partition: 2,
-		tags:      map[string]string{"test": "value", "test2": "value2"},
+		tags: map[string][]byte{
+			"test":  []byte("value"),
+			"test2": []byte("value2"),
+		},
 	}
 
 	return m, testMessage(m)

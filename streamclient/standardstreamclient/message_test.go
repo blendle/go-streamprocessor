@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"github.com/stretchr/testify/assert"
 )
 
 type testMessage interface {
@@ -20,13 +21,7 @@ func TestMessage_Value(t *testing.T) {
 	t.Parallel()
 
 	_, msg := newMessage()
-
-	actual := string(msg.Value())
-	expected := "testValue"
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, "testValue", string(msg.Value()))
 }
 
 func TestMessage_SetValue(t *testing.T) {
@@ -35,12 +30,7 @@ func TestMessage_SetValue(t *testing.T) {
 	str, msg := newMessage()
 	msg.SetValue([]byte("testValue2"))
 
-	actual := string(str.value)
-	expected := "testValue2"
-
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, "testValue2", string(str.value))
 }
 
 func newMessage() (*message, testMessage) {

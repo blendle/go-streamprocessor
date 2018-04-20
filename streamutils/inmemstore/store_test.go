@@ -6,18 +6,16 @@ import (
 	"time"
 
 	"github.com/blendle/go-streamprocessor/streammsg"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNew(t *testing.T) {
 	t.Parallel()
 
 	store := New()
-	expected := "*inmemstore.Store"
-	actual := reflect.TypeOf(store).String()
 
-	if actual != expected {
-		t.Errorf("Unexpected outcome. Expected: %v, got: %v", expected, actual)
-	}
+	assert.Equal(t, "*inmemstore.Store", reflect.TypeOf(store).String())
 }
 
 func TestAddMessage(t *testing.T) {
@@ -31,15 +29,13 @@ func TestAddMessage(t *testing.T) {
 		topic:     "testTopic",
 		offset:    1,
 		partition: 2,
-		tags:      map[string]string{"test": "value", "test2": "value2"},
+		tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	store.AddMessage(m)
 
 	sm, ok := store.store[0].(fakeImplementation)
-	if !ok {
-		t.Fatal("unable to convert message to correct interface")
-	}
+	require.True(t, ok, "unable to convert message to correct interface")
 
 	var tests = []struct {
 		expected interface{}
@@ -55,9 +51,7 @@ func TestAddMessage(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		if !reflect.DeepEqual(tt.expected, tt.actual) {
-			t.Errorf("Expected %v to equal %v", tt.actual, tt.expected)
-		}
+		assert.EqualValues(t, tt.expected, tt.actual)
 	}
 }
 
@@ -72,7 +66,7 @@ func TestAdd(t *testing.T) {
 		topic:     "testTopic",
 		offset:    1,
 		partition: 2,
-		tags:      map[string]string{"test": "value", "test2": "value2"},
+		tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	store.Add(m.key, m.value, m.timestamp, m.topic, m.offset, m.partition, m.tags)
@@ -93,9 +87,7 @@ func TestAdd(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		if !reflect.DeepEqual(tt.expected, tt.actual) {
-			t.Errorf("Expected %v to equal %v", tt.actual, tt.expected)
-		}
+		assert.EqualValues(t, tt.expected, tt.actual)
 	}
 }
 
@@ -110,17 +102,12 @@ func TestMessages(t *testing.T) {
 		topic:     "testTopic",
 		offset:    1,
 		partition: 2,
-		tags:      map[string]string{"test": "value", "test2": "value2"},
+		tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	store.store = append(store.store, m)
 
-	actual := store.Messages()[0].Value()
-	expected := m.value
-
-	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("Expected %v to equal %v", actual, expected)
-	}
+	assert.EqualValues(t, m.value, store.Messages()[0].Value())
 }
 
 type fakeImplementation interface {
@@ -141,7 +128,7 @@ type fakeMessage struct {
 	topic     string
 	offset    int64
 	partition int32
-	tags      map[string]string
+	tags      map[string][]byte
 }
 
 func (m *fakeMessage) Value() []byte {
@@ -162,11 +149,11 @@ func (m *fakeMessage) Partition() int32 {
 	return m.partition
 }
 
-func (m *fakeMessage) Tag(v string) string {
+func (m *fakeMessage) Tag(v string) []byte {
 	return m.tags[v]
 }
 
-func (m *fakeMessage) Tags() map[string]string {
+func (m *fakeMessage) Tags() map[string][]byte {
 	return m.tags
 }
 
@@ -178,4 +165,6 @@ func (m *fakeMessage) Topic() string {
 	return m.topic
 }
 
-func (m *fakeMessage) Ack() {}
+func (m *fakeMessage) Ack() error {
+	return nil
+}
