@@ -6,9 +6,11 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streamcore"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -21,6 +23,7 @@ type Producer struct {
 	logger   *zap.Logger
 	kafka    *kafka.Producer
 	wg       sync.WaitGroup
+	errors   chan error
 	messages chan<- streammsg.Message
 	quit     chan bool
 	once     *sync.Once
@@ -40,6 +43,17 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// add one to the WaitGroup. We reduce this count once Close() is called, and
 	// the messages channel is closed.
 	producer.wg.Add(1)
+
+	// We start a goroutine to listen for errors on the errors channel, and log a
+	// fatal error (terminating the application in the process) when an error is
+	// received.
+	//
+	// This functionality is enabled by default, but can be disabled through a
+	// configuration flag. If the auto-error functionality is disabled, the user
+	// needs to manually listen to the `Errors()` channel and act accordingly.
+	if producer.c.HandleErrors {
+		go streamcore.HandleErrors(producer.errors, producer.logger.Fatal)
+	}
 
 	// We listen to the produce channel in a goroutine. Every message delivered to
 	// this producer gets prepared for a Kafka deliver, and then added to a queue
@@ -76,6 +90,12 @@ func (p *Producer) Messages() chan<- streammsg.Message {
 	return p.messages
 }
 
+// Errors returns the read channel for the errors that are returned by the
+// stream.
+func (p *Producer) Errors() <-chan error {
+	return streamcore.ErrorsChan(p.errors, p.c.HandleErrors)
+}
+
 // Close closes the producer connection. This function blocks until all messages
 // still in the channel have been processed, and the channel is properly closed.
 // Close is safe to call more than once, but it will only effectively close the
@@ -107,6 +127,10 @@ func (p *Producer) Close() (err error) {
 		// This synchronous call closes the Kafka producer. There are no errors to
 		// handle from this close call, unlike the consumer's Close() method.
 		p.kafka.Close()
+
+		// At this point, no more errors are expected, so we can close the errors
+		// channel.
+		close(p.errors)
 
 		// Let's flush all logs still in the buffer, since this producer is no
 		// longer useful after this point. We ignore any errors returned by sync, as
@@ -146,10 +170,7 @@ func (p *Producer) produce(ch <-chan streammsg.Message) {
 			// These delivery reports are handled by us in `p.checkReports()`.
 			err := p.kafka.Produce(msg, nil)
 			if err != nil {
-				p.logger.Fatal(
-					"Error while delivering message to Kafka.",
-					zap.Error(err),
-				)
+				p.errors <- errors.Wrap(err, "unable to produce message")
 			}
 		}
 	}
@@ -185,6 +206,7 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 		c:        config,
 		logger:   &config.Logger,
 		kafka:    kafkaproducer,
+		errors:   make(chan error),
 		messages: ch,
 		quit:     make(chan bool),
 		once:     &sync.Once{},

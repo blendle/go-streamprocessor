@@ -122,6 +122,38 @@ func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 	}
 }
 
+func TestConsumer_Errors(t *testing.T) {
+	t.Parallel()
+
+	options := func(c *streamconfig.Consumer) {
+		c.HandleErrors = true
+	}
+
+	consumer, closer := inmemclient.TestConsumer(t, nil, options)
+	defer closer()
+
+	err := <-consumer.Errors()
+	require.Error(t, err)
+	assert.Equal(t, "unable to manually consume errors while HandleErrors is true", err.Error())
+}
+
+func TestConsumer_Errors_Manual(t *testing.T) {
+	t.Parallel()
+
+	options := func(c *streamconfig.Consumer) {
+		c.HandleErrors = false
+	}
+
+	consumer, closer := inmemclient.TestConsumer(t, nil, options)
+	defer closer()
+
+	select {
+	case err := <-consumer.Errors():
+		t.Fatalf("expected no error, got %s", err.Error())
+	case <-time.After(10 * time.Millisecond):
+	}
+}
+
 func TestConsumer_Close(t *testing.T) {
 	t.Parallel()
 

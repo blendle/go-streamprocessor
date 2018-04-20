@@ -25,6 +25,7 @@ func TestNewConsumer(tb testing.TB, defaults bool, options ...func(*Consumer)) C
 		c.Standardstream = standardstreamconfig.Consumer{}
 		c.Logger = zap.Logger{}
 		c.HandleInterrupt = false
+		c.HandleErrors = false
 		c.Name = ""
 		c.AllowEnvironmentBasedConfiguration = false
 	}
@@ -70,6 +71,7 @@ func TestNewProducer(tb testing.TB, defaults bool, options ...func(*Producer)) P
 		p.Standardstream = standardstreamconfig.Producer{}
 		p.Logger = zap.Logger{}
 		p.HandleInterrupt = false
+		p.HandleErrors = false
 		p.Name = ""
 		p.AllowEnvironmentBasedConfiguration = false
 	}

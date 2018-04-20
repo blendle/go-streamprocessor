@@ -127,6 +127,56 @@ func TestIntegrationConsumer_Messages_Ordering(t *testing.T) {
 	assert.Equal(t, messageCount, i)
 }
 
+func TestIntegrationConsumer_Errors(t *testing.T) {
+	t.Parallel()
+	testutils.Integration(t)
+
+	options := func(c *streamconfig.Consumer) {
+		c.HandleErrors = true
+	}
+
+	consumer, closer := kafkaclient.TestConsumer(t, testutils.Random(t), options)
+	defer closer()
+
+	// Give the consumer some time to start.
+	//
+	// See: https://git.io/vpt2L
+	// See: https://git.io/vpqKr
+	time.Sleep(100 * time.Millisecond)
+
+	select {
+	case err := <-consumer.Errors():
+		require.Error(t, err)
+		assert.Equal(t, "unable to manually consume errors while HandleErrors is true", err.Error())
+	case <-time.After(1 * time.Second):
+		t.Fatal("expected error, got none")
+	}
+}
+
+func TestIntegrationConsumer_Errors_Manual(t *testing.T) {
+	t.Parallel()
+	testutils.Integration(t)
+
+	options := func(c *streamconfig.Consumer) {
+		c.HandleErrors = false
+	}
+
+	consumer, closer := kafkaclient.TestConsumer(t, testutils.Random(t), options)
+	defer closer()
+
+	// Give the consumer some time to start.
+	//
+	// See: https://git.io/vpt2L
+	// See: https://git.io/vpqKr
+	time.Sleep(100 * time.Millisecond)
+
+	select {
+	case err := <-consumer.Errors():
+		t.Fatalf("expected no error, got %s", err.Error())
+	case <-time.After(1000 * time.Millisecond):
+	}
+}
+
 func TestIntegrationConsumer_Ack(t *testing.T) {
 	t.Parallel()
 	testutils.Integration(t)

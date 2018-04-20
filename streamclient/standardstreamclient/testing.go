@@ -49,14 +49,14 @@ func TestConsumer(tb testing.TB, r io.ReadCloser, options ...func(c *streamconfi
 //
 // The return value is the producer, and a function that should be deferred to
 // clean up resources.
-func TestProducer(tb testing.TB, w io.Writer) (stream.Producer, func()) {
+func TestProducer(tb testing.TB, w io.Writer, options ...func(c *streamconfig.Producer)) (stream.Producer, func()) {
 	tb.Helper()
 
-	options := func(c *streamconfig.Producer) {
+	options = append(options, func(c *streamconfig.Producer) {
 		c.Standardstream.Writer = w
-	}
+	})
 
-	producer, err := NewProducer(options)
+	producer, err := NewProducer(options...)
 	require.NoError(tb, err)
 
 	return producer, func() { require.NoError(tb, producer.Close()) }

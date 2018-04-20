@@ -83,6 +83,38 @@ func TestProducer_MessageOrdering(t *testing.T) {
 	}
 }
 
+func TestProducer_Errors(t *testing.T) {
+	t.Parallel()
+
+	options := func(c *streamconfig.Producer) {
+		c.HandleErrors = true
+	}
+
+	producer, closer := inmemclient.TestProducer(t, nil, options)
+	defer closer()
+
+	err := <-producer.Errors()
+	require.Error(t, err)
+	assert.Equal(t, "unable to manually consume errors while HandleErrors is true", err.Error())
+}
+
+func TestProducer_Errors_Manual(t *testing.T) {
+	t.Parallel()
+
+	options := func(c *streamconfig.Producer) {
+		c.HandleErrors = false
+	}
+
+	producer, closer := inmemclient.TestProducer(t, nil, options)
+	defer closer()
+
+	select {
+	case err := <-producer.Errors():
+		t.Fatalf("expected no error, got %s", err.Error())
+	case <-time.After(10 * time.Millisecond):
+	}
+}
+
 func TestProducer_Close(t *testing.T) {
 	t.Parallel()
 

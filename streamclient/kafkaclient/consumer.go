@@ -6,6 +6,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streamcore"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -21,6 +22,7 @@ type Consumer struct {
 	logger   *zap.Logger
 	kafka    *kafka.Consumer
 	wg       sync.WaitGroup
+	errors   chan error
 	messages chan streammsg.Message
 	quit     chan bool
 	once     *sync.Once
@@ -42,6 +44,17 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// add one to the WaitGroup. We reduce this count once Close() is called, and
 	// the messages channel is closed.
 	consumer.wg.Add(1)
+
+	// We start a goroutine to listen for errors on the errors channel, and log a
+	// fatal error (terminating the application in the process) when an error is
+	// received.
+	//
+	// This functionality is enabled by default, but can be disabled through a
+	// configuration flag. If the auto-error functionality is disabled, the user
+	// needs to manually listen to the `Errors()` channel and act accordingly.
+	if consumer.c.HandleErrors {
+		go streamcore.HandleErrors(consumer.errors, consumer.logger.Fatal)
+	}
 
 	// We start a goroutine to consume any messages being delivered to us from
 	// Kafka. We deliver these messages on a blocking channel, so as long as no
@@ -67,6 +80,12 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 // stream.
 func (c *Consumer) Messages() <-chan streammsg.Message {
 	return c.messages
+}
+
+// Errors returns the read channel for the errors that are returned by the
+// stream.
+func (c *Consumer) Errors() <-chan error {
+	return streamcore.ErrorsChan(c.errors, c.c.HandleErrors)
 }
 
 // Ack acknowledges that a message was processed. See `Consumer.storeOffset` for
@@ -109,6 +128,10 @@ func (c *Consumer) Close() (err error) {
 		// close call until the reader has been closed, to prevent an application
 		// from quiting before we are fully done with all the clean-up.
 		c.wg.Wait()
+
+		// At this point, no more errors are expected, so we can close the errors
+		// channel.
+		close(c.errors)
 
 		// we set the quit channel to nil, indicating that this consumer can't be
 		// used anymore. There's a potential for race conditions here, but that's
@@ -243,6 +266,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 		c:        config,
 		logger:   &config.Logger,
 		kafka:    kafkaconsumer,
+		errors:   make(chan error),
 		messages: make(chan streammsg.Message),
 		quit:     make(chan bool),
 		once:     &sync.Once{},
