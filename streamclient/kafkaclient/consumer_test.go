@@ -257,6 +257,16 @@ func TestIntegrationMessage_Ack_WithClosedConsumer(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestIntegrationConsumer_Nack(t *testing.T) {
+	t.Parallel()
+	testutils.Integration(t)
+
+	consumer, closer := kafkaclient.TestConsumer(t, testutils.Random(t))
+	defer closer()
+
+	assert.Nil(t, consumer.Nack(streammsg.Message{}))
+}
+
 func BenchmarkIntegrationConsumer_Messages(b *testing.B) {
 	testutils.Integration(b)
 

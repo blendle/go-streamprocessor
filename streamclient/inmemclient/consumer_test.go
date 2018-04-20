@@ -154,6 +154,24 @@ func TestConsumer_Errors_Manual(t *testing.T) {
 	}
 }
 
+func TestConsumer_Ack(t *testing.T) {
+	t.Parallel()
+
+	consumer, closer := inmemclient.TestConsumer(t, nil)
+	defer closer()
+
+	assert.Nil(t, consumer.Ack(streammsg.Message{}))
+}
+
+func TestConsumer_Nack(t *testing.T) {
+	t.Parallel()
+
+	consumer, closer := inmemclient.TestConsumer(t, nil)
+	defer closer()
+
+	assert.Nil(t, consumer.Nack(streammsg.Message{}))
+}
+
 func TestConsumer_Close(t *testing.T) {
 	t.Parallel()
 

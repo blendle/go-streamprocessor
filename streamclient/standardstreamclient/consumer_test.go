@@ -12,6 +12,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -179,6 +180,26 @@ func TestConsumer_Errors_Manual(t *testing.T) {
 		t.Fatalf("expected no error, got %s", err.Error())
 	case <-time.After(10 * time.Millisecond):
 	}
+}
+
+func TestConsumer_Ack(t *testing.T) {
+	t.Parallel()
+
+	b := standardstreamclient.TestBuffer(t)
+	consumer, closer := standardstreamclient.TestConsumer(t, b)
+	defer closer()
+
+	assert.Nil(t, consumer.Ack(streammsg.Message{}))
+}
+
+func TestConsumer_Nack(t *testing.T) {
+	t.Parallel()
+
+	b := standardstreamclient.TestBuffer(t)
+	consumer, closer := standardstreamclient.TestConsumer(t, b)
+	defer closer()
+
+	assert.Nil(t, consumer.Nack(streammsg.Message{}))
 }
 
 func BenchmarkConsumer_Messages(b *testing.B) {
