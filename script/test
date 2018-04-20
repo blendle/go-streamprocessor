@@ -6,14 +6,27 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+if [ -z "$*" ] && ! nc -z -G1 127.0.0.1 9092 2>/dev/null; then
+  echo >&2 "No response received from 127.0.0.1:9092." \
+           "Unable to run integration tests."
+  echo >&2
+  echo >&2 "Running script with \"-short ./...\" arguments."
+  echo >&2
+  echo >&2 "To run integration tests, first run \"docker-compose up\"."
+  echo >&2
+
+  $0 -short ./...
+  exit $?
+fi
+
 echo "==      gometalinter"
 script/tests/gometalinter
 
 echo "==      go-test"
-script/tests/go-test
+script/tests/go-test "$@"
 
 echo "==      go-test-race"
-script/tests/go-test-race
+script/tests/go-test-race "$@"
 
 echo "==      go-test-bench"
-script/tests/go-test-bench
+script/tests/go-test-bench "$@"

@@ -30,4 +30,6 @@ gometalinter \
   --line-length=100 \
   --disable=dupl \
   --linter='lll:lll -e func -g -l {maxlinelength}:PATH:LINE:MESSAGE' \
+  --linter='test:go test -short:PATH:LINE:MESSAGE' \
+  --linter='testify:go test -short:PATH:LINE:MESSAGE' \
   ${@:-./...}

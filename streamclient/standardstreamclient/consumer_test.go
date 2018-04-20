@@ -43,7 +43,7 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 	assert.EqualValues(t, f, consumer.Config().Standardstream.Reader)
 }
 
-func TestNewConsumer_Messages(t *testing.T) {
+func TestConsumer_Messages(t *testing.T) {
 	t.Parallel()
 
 	buffer := standardstreamclient.TestBuffer(t, "hello world", "hello universe!")
@@ -60,7 +60,7 @@ func TestNewConsumer_Messages(t *testing.T) {
 	assert.False(t, ok, "consumer did not close after last message")
 }
 
-func TestNewConsumer_MessageOrdering(t *testing.T) {
+func TestConsumer_Messages_Ordering(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
@@ -79,9 +79,11 @@ func TestNewConsumer_MessageOrdering(t *testing.T) {
 
 		i++
 	}
+
+	assert.Equal(t, messageCount, i)
 }
 
-func TestNewConsumer_PerMessageMemoryAllocation(t *testing.T) {
+func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000

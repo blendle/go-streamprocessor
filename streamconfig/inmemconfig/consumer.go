@@ -10,7 +10,7 @@ import (
 type Consumer struct {
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
-	Logger *zap.Logger
+	Logger zap.Logger
 
 	// Store is the inmem store from which to consume messages. If left undefined,
 	// an internal store will be used.
@@ -19,6 +19,6 @@ type Consumer struct {
 
 // ConsumerDefaults holds the default values for Consumer.
 var ConsumerDefaults = Consumer{
-	Logger: zap.NewNop(),
+	Logger: *zap.NewNop(),
 	Store:  inmemstore.New(),
 }

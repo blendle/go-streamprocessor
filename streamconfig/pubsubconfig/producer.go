@@ -7,10 +7,10 @@ import "go.uber.org/zap"
 type Producer struct {
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
-	Logger *zap.Logger
+	Logger zap.Logger
 }
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
-	Logger: zap.NewNop(),
+	Logger: *zap.NewNop(),
 }

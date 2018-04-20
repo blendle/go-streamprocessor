@@ -1,3 +1,7 @@
 [[constraint]]
   name = "go.uber.org/zap"
   version = "1.7.1"
+
+[[constraint]]
+  name = "github.com/confluentinc/confluent-kafka-go"
+  revision = "767701354ee866ea3a63110035df26a8cccc3dee"

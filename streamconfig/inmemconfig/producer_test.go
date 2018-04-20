@@ -14,7 +14,7 @@ func TestProducer(t *testing.T) {
 	t.Parallel()
 
 	_ = inmemconfig.Producer{
-		Logger: zap.NewNop(),
+		Logger: *zap.NewNop(),
 		Store:  inmemstore.New(),
 	}
 }
@@ -24,6 +24,6 @@ func TestProducerDefaults(t *testing.T) {
 
 	config := inmemconfig.ProducerDefaults
 
-	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
+	assert.Equal(t, "zap.Logger", reflect.TypeOf(config.Logger).String())
 	assert.Equal(t, "*inmemstore.Store", reflect.TypeOf(config.Store).String())
 }

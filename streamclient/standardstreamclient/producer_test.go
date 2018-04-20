@@ -48,7 +48,7 @@ func TestNewProducer_WithOptions(t *testing.T) {
 	assert.EqualValues(t, buffer, producer.Config().Standardstream.Writer)
 }
 
-func TestNewProducer_Messages(t *testing.T) {
+func TestProducer_Messages(t *testing.T) {
 	t.Parallel()
 
 	expected := "hello world\n"
@@ -63,7 +63,7 @@ func TestNewProducer_Messages(t *testing.T) {
 	assert.Equal(t, expected, string(b))
 }
 
-func TestNewProducer_AppendNewline(t *testing.T) {
+func TestProducer_Messages_AppendNewline(t *testing.T) {
 	t.Parallel()
 
 	buffer := standardstreamclient.TestBuffer(t)
@@ -77,7 +77,7 @@ func TestNewProducer_AppendNewline(t *testing.T) {
 	assert.Equal(t, "hello world\n", string(b))
 }
 
-func TestNewProducer_MessageOrdering(t *testing.T) {
+func TestProducer_Messages_Ordering(t *testing.T) {
 	t.Parallel()
 
 	messageCount := 100000
@@ -100,6 +100,7 @@ func TestNewProducer_MessageOrdering(t *testing.T) {
 		i++
 	}
 
+	assert.Equal(t, messageCount, i)
 	assert.NoError(t, scanner.Err())
 }
 

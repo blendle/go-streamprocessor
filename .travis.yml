@@ -4,12 +4,20 @@ go:
 - 1.x
 - 1.6
 - 1.7.x
+- 1.8.x
+- 1.9.x
+- 1.10.x
 - master
+
+services:
+- docker
 
 cache:
   directories:
   - $GOPATH/pkg/dep
 
-before_install: script/bootstrap
+before_install:
+- docker-compose up -d
+- script/cisetup
 install: dep ensure -vendor-only
 script: script/test

@@ -14,7 +14,7 @@ func TestConsumer(t *testing.T) {
 	t.Parallel()
 
 	_ = inmemconfig.Consumer{
-		Logger: zap.NewNop(),
+		Logger: *zap.NewNop(),
 		Store:  inmemstore.New(),
 	}
 }
@@ -24,6 +24,6 @@ func TestConsumerDefaults(t *testing.T) {
 
 	config := inmemconfig.ConsumerDefaults
 
-	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
+	assert.Equal(t, "zap.Logger", reflect.TypeOf(config.Logger).String())
 	assert.Equal(t, "*inmemstore.Store", reflect.TypeOf(config.Store).String())
 }

@@ -7,10 +7,10 @@ import "go.uber.org/zap"
 type Consumer struct {
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
-	Logger *zap.Logger
+	Logger zap.Logger
 }
 
 // ConsumerDefaults holds the default values for Consumer.
 var ConsumerDefaults = Consumer{
-	Logger: zap.NewNop(),
+	Logger: *zap.NewNop(),
 }
