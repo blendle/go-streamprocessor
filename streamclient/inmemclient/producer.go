@@ -70,6 +70,11 @@ func (p *Producer) Close() error {
 		// Wait until the WaitGroup counter is zero. This makes sure we block the
 		// close call until all messages have been delivered, to prevent data-loss.
 		p.wg.Wait()
+
+		// Let's flush all logs still in the buffer, since this producer is no
+		// longer useful after this point. We ignore any errors returned by sync, as
+		// it is known to return unexpected errors. See: https://git.io/vpJFk
+		_ = p.logger.Sync() // nolint: gas
 	})
 
 	return nil

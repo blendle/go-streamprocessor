@@ -41,24 +41,6 @@ func TestProducer(tb testing.TB, topic string, options ...func(c *streamconfig.P
 	return producer, func() { require.NoError(tb, producer.Close()) }
 }
 
-// TestMessageFromConsumer returns a single message, consumed from the provided
-// consumer. It has a built-in timeout mechanism to prevent the test from
-// getting stuck.
-func TestMessageFromConsumer(tb testing.TB, consumer stream.Consumer) streammsg.Message {
-	tb.Helper()
-
-	select {
-	case m := <-consumer.Messages():
-		require.NotNil(tb, m)
-
-		return m
-	case <-time.After(time.Duration(5*TestTimeoutMultiplier) * time.Second):
-		require.Fail(tb, "Timeout while waiting for message to be returned.")
-	}
-
-	return streammsg.Message{}
-}
-
 // TestMessageFromTopic returns a single message, consumed from the provided
 // topic. It has a built-in timeout mechanism to prevent the test from getting
 // stuck.
@@ -158,8 +140,8 @@ func TestOffsets(tb testing.TB, message streammsg.Message) []kafka.TopicPartitio
 	consumer, closer := testKafkaConsumer(tb, message.Topic, false)
 	defer closer()
 
-	o := streammsg.MessageOpqaue(&message).(opaque)
-	offsets, err := consumer.Committed([]kafka.TopicPartition{*o.toppar}, 1000*testutils.TimeoutMultiplier)
+	tp := []kafka.TopicPartition{*streammsg.MessageOpqaue(&message).(opaque).toppar}
+	offsets, err := consumer.Committed(tp, 2000*testutils.TimeoutMultiplier)
 	require.NoError(tb, err)
 
 	return offsets
@@ -169,6 +151,12 @@ func TestOffsets(tb testing.TB, message streammsg.Message) []kafka.TopicPartitio
 // kafkaclient consumer implementation.
 func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *streamconfig.Consumer)) []func(c *streamconfig.Consumer) {
 	var allOptions []func(c *streamconfig.Consumer)
+
+	opts := func(c *streamconfig.Consumer) {
+		c.Kafka = kafkaconfig.TestConsumer(tb)
+		c.Kafka.GroupID = topicAndGroup
+		c.Kafka.Topics = []string{topicAndGroup}
+	}
 
 	if testing.Verbose() {
 		logger, err := zap.NewDevelopment()
@@ -180,17 +168,6 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 		}
 
 		allOptions = append(allOptions, verbose)
-	}
-
-	opts := func(c *streamconfig.Consumer) {
-		c.Kafka.ID = "testConsumer"
-		c.Kafka.SessionTimeout = time.Duration(1000*TestTimeoutMultiplier) * time.Millisecond
-		c.Kafka.HeartbeatInterval = time.Duration(150*TestTimeoutMultiplier) * time.Millisecond
-		c.Kafka.CommitInterval = time.Duration(500*TestTimeoutMultiplier) * time.Millisecond
-		c.Kafka.Brokers = []string{TestBrokerAddress}
-		c.Kafka.GroupID = topicAndGroup
-		c.Kafka.Topics = []string{topicAndGroup}
-		c.Kafka.InitialOffset = kafkaconfig.OffsetBeginning
 	}
 
 	return append(append(allOptions, opts), options...)

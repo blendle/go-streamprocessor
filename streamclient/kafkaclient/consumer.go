@@ -122,8 +122,9 @@ func (c *Consumer) Close() (err error) {
 		c.quit = nil
 
 		// Let's flush all logs still in the buffer, since this consumer is no
-		// longer useful after this point.
-		err = c.logger.Sync()
+		// longer useful after this point. We ignore any errors returned by sync, as
+		// it is known to return unexpected errors. See: https://git.io/vpJFk
+		_ = c.logger.Sync() // nolint: gas
 	})
 
 	return err

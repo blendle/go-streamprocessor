@@ -2,6 +2,7 @@ package testutils
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -43,5 +44,5 @@ func Random(tb testing.TB) string {
 	rand.Seed(time.Now().Unix())
 	name := strings.Replace(tb.Name(), "/", "_", -1)
 	name = validRandomName.FindString(name)
-	return fmt.Sprintf("%s-%d", name, rand.Intn(1000000))
+	return fmt.Sprintf("%s-%d", name, rand.Intn(math.MaxInt64))
 }
