@@ -6,4 +6,4 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
-go test -bench . -benchmem ${@:-./...}
+go test -bench . -run='^$' -v -benchmem ${@:-./...}
