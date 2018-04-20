@@ -22,10 +22,7 @@ func TestProducer(t *testing.T) {
 func TestNewProducer(t *testing.T) {
 	t.Parallel()
 
-	client, err := inmemclient.New()
-	require.NoError(t, err)
-
-	producer, err := client.NewProducer()
+	producer, err := inmemclient.NewProducer()
 	require.NoError(t, err)
 	defer require.NoError(t, producer.Close())
 
@@ -36,14 +33,11 @@ func TestNewProducer_WithOptions(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.New()
-	client, err := inmemclient.New()
-	require.NoError(t, err)
-
 	options := func(c *streamconfig.Producer) {
 		c.Inmem.Store = store
 	}
 
-	producer, err := client.NewProducer(options)
+	producer, err := inmemclient.NewProducer(options)
 	require.NoError(t, err)
 	defer require.NoError(t, producer.Close())
 

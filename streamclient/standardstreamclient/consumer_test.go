@@ -22,10 +22,7 @@ func TestConsumer(t *testing.T) {
 func TestNewConsumer(t *testing.T) {
 	t.Parallel()
 
-	client, err := standardstreamclient.New()
-	require.NoError(t, err)
-
-	consumer, err := client.NewConsumer()
+	consumer, err := standardstreamclient.NewConsumer()
 	require.NoError(t, err)
 
 	assert.Equal(t, "*standardstreamclient.Consumer", reflect.TypeOf(consumer).String())
@@ -36,14 +33,11 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 
 	f := standardstreamclient.TestBuffer(t)
 
-	client, err := standardstreamclient.New()
-	require.NoError(t, err)
-
 	options := func(c *streamconfig.Consumer) {
 		c.Standardstream.Reader = f
 	}
 
-	consumer, err := client.NewConsumer(options)
+	consumer, err := standardstreamclient.NewConsumer(options)
 	require.NoError(t, err)
 
 	assert.EqualValues(t, f, consumer.Config().Standardstream.Reader)

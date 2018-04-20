@@ -24,10 +24,7 @@ func TestConsumer(t *testing.T) {
 func TestNewConsumer(t *testing.T) {
 	t.Parallel()
 
-	client, err := inmemclient.New()
-	require.NoError(t, err)
-
-	consumer, err := client.NewConsumer()
+	consumer, err := inmemclient.NewConsumer()
 	require.NoError(t, err)
 	defer func() { require.NoError(t, consumer.Close()) }()
 
@@ -38,14 +35,11 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.New()
-	client, err := inmemclient.New()
-	require.NoError(t, err)
-
 	options := func(c *streamconfig.Consumer) {
 		c.Inmem.Store = store
 	}
 
-	consumer, err := client.NewConsumer(options)
+	consumer, err := inmemclient.NewConsumer(options)
 	require.NoError(t, err)
 	defer func() { require.NoError(t, consumer.Close()) }()
 

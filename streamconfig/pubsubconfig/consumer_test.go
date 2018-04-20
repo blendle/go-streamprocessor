@@ -1,6 +1,7 @@
 package pubsubconfig_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
@@ -11,16 +12,15 @@ import (
 func TestConsumer(t *testing.T) {
 	t.Parallel()
 
-	_ = pubsubconfig.Consumer{}
+	_ = pubsubconfig.Consumer{
+		Logger: zap.NewNop(),
+	}
 }
 
 func TestConsumerDefaults(t *testing.T) {
 	t.Parallel()
 
-	logger := zap.NewExample()
+	config := pubsubconfig.ConsumerDefaults
 
-	cc := pubsubconfig.Client{Logger: logger}
-	config := pubsubconfig.ConsumerDefaults(cc)
-
-	assert.EqualValues(t, logger, config.Logger)
+	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
 }

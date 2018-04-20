@@ -25,10 +25,10 @@ type Producer struct {
 }
 
 // NewProducer returns a new inmem producer.
-func (c *Client) NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, error) {
+func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, error) {
 	ch := make(chan streammsg.Message)
 
-	producer, err := newProducer(c, ch, options)
+	producer, err := newProducer(ch, options)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +75,8 @@ func (p *Producer) Config() streamconfig.Producer {
 	return p.rawConfig
 }
 
-func newProducer(c *Client, ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
-	config, err := streamconfig.NewProducer(c.rawConfig, options...)
+func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
+	config, err := streamconfig.NewProducer(options...)
 	if err != nil {
 		return nil, err
 	}

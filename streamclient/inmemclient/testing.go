@@ -15,9 +15,6 @@ import (
 // You can either pass a pre-configured inmemstore to this function as its
 // second argument, or pass in `nil`, to have one be instantiated for you.
 func TestConsumer(tb testing.TB, s *inmemstore.Store) (stream.Consumer, func()) {
-	client, err := New()
-	require.NoError(tb, err)
-
 	if s == nil {
 		s = inmemstore.New()
 	}
@@ -26,7 +23,7 @@ func TestConsumer(tb testing.TB, s *inmemstore.Store) (stream.Consumer, func()) 
 		c.Inmem.Store = s
 	}
 
-	consumer, err := client.NewConsumer(options)
+	consumer, err := NewConsumer(options)
 	require.NoError(tb, err)
 
 	return consumer, func() { require.NoError(tb, consumer.Close()) }
@@ -38,9 +35,6 @@ func TestConsumer(tb testing.TB, s *inmemstore.Store) (stream.Consumer, func()) 
 // You can either pass a pre-configured inmemstore to this function as its
 // second argument, or pass in `nil`, to have one be instantiated for you.
 func TestProducer(tb testing.TB, s *inmemstore.Store) (stream.Producer, func()) {
-	client, err := New()
-	require.NoError(tb, err)
-
 	if s == nil {
 		s = inmemstore.New()
 	}
@@ -49,7 +43,7 @@ func TestProducer(tb testing.TB, s *inmemstore.Store) (stream.Producer, func()) 
 		c.Inmem.Store = s
 	}
 
-	producer, err := client.NewProducer(options)
+	producer, err := NewProducer(options)
 	require.NoError(tb, err)
 
 	return producer, func() { require.NoError(tb, producer.Close()) }
