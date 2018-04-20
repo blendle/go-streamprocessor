@@ -21,7 +21,7 @@ func TestMessageFromConsumer(tb testing.TB, consumer stream.Consumer) streammsg.
 		require.NotNil(tb, m)
 
 		return m
-	case <-time.After(time.Duration(5*testutils.TimeoutMultiplier) * time.Second):
+	case <-time.After(time.Duration(3*testutils.TimeoutMultiplier) * time.Second):
 		require.Fail(tb, "Timeout while waiting for message to be returned.")
 	}
 

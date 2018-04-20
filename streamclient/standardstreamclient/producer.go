@@ -25,6 +25,7 @@ type Producer struct {
 	errors   chan error
 	messages chan<- streammsg.Message
 	signals  chan os.Signal
+	once     *sync.Once
 }
 
 var _ stream.Producer = (*Producer)(nil)
@@ -88,23 +89,25 @@ func (p *Producer) Errors() <-chan error {
 // Close closes the producer connection. This function blocks until all messages
 // still in the channel have been processed, and the channel is properly closed.
 func (p *Producer) Close() error {
-	close(p.messages)
+	p.once.Do(func() {
+		close(p.messages)
 
-	// Wait until the WaitGroup counter is zero. This makes sure we block the
-	// close call until all messages have been delivered, to prevent data-loss.
-	p.wg.Wait()
+		// Wait until the WaitGroup counter is zero. This makes sure we block the
+		// close call until all messages have been delivered, to prevent data-loss.
+		p.wg.Wait()
 
-	// At this point, no more errors are expected, so we can close the errors
-	// channel.
-	close(p.errors)
+		// At this point, no more errors are expected, so we can close the errors
+		// channel.
+		close(p.errors)
 
-	// Let's flush all logs still in the buffer, since this producer is no
-	// longer useful after this point. We ignore any errors returned by sync, as
-	// it is known to return unexpected errors. See: https://git.io/vpJFk
-	_ = p.logger.Sync() // nolint: gas
+		// Let's flush all logs still in the buffer, since this producer is no
+		// longer useful after this point. We ignore any errors returned by sync, as
+		// it is known to return unexpected errors. See: https://git.io/vpJFk
+		_ = p.logger.Sync() // nolint: gas
 
-	// Finally, close the signals channel, as it's no longer needed
-	close(p.signals)
+		// Finally, close the signals channel, as it's no longer needed
+		close(p.signals)
+	})
 
 	return nil
 }
@@ -144,6 +147,7 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 		logger:   &config.Logger,
 		errors:   make(chan error),
 		messages: ch,
+		once:     &sync.Once{},
 	}
 
 	return producer, nil

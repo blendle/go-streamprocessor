@@ -6,33 +6,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	// eventAssignedPartitions represents the assigned partition set for this
-	// client following a rebalance. Requires `go.application.rebalance.enable`.
-	eventAssignedPartitions = "AssignedPartitions"
-
-	// eventRevokedPartitions represents the counter part to `AssignedPartitions`
-	// following a rebalance. `AssignedPartitions` and `RevokedPartitions` are
-	// symmetrical. Requires `go.application.rebalance.enable`.
-	eventRevokedPartitions = "RevokedPartitions"
-
-	// eventOffsetsCommitted represents the offset commit results (when
-	// `enable.auto.commit` is enabled).
-	eventOffsetsCommitted = "OffsetsCommitted"
-
-	// eventError represents a client (error codes are prefixed with _) or broker
-	// error. These errors are normally just informational since the client will
-	// try its best to automatically recover (eventually).
-	eventError = "Error"
-
-	// eventMessage has two meanings, depending on if it's sent to the consumer or
-	// the producer:
-	//
-	// consumer: a fetched message.
-	// producer: delivery report for produced message.
-	eventMessage = "Message"
-)
-
 // handleAssignedPartitions assigns the consumer to a provided partition.
 func (c *Consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
 	c.logger.Info(
@@ -43,6 +16,14 @@ func (c *Consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
 
 	err := c.kafka.Assign(e.Partitions)
 	if err != nil {
+		// Ignore the `Local: Broker handle destroyed` error.
+		//
+		// See: https://git.io/vpt2L
+		// See: https://git.io/vpt2y
+		if err.(kafka.Error).Code() == kafka.ErrDestroy {
+			return
+		}
+
 		c.errors <- errors.Wrap(err, "failed to assinging partitions")
 	}
 }
@@ -50,7 +31,7 @@ func (c *Consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
 // handleRevokedPartitions unassigns the consumer from a provided partition.
 func (c *Consumer) handleRevokedPartitions(e kafka.RevokedPartitions) {
 	log := c.logger.With(
-		zap.String("eventType", eventRevokedPartitions),
+		zap.String("eventType", "RevokedPartitions"),
 		zap.String("eventDetails", e.String()),
 	)
 
@@ -89,7 +70,6 @@ func (c *Consumer) handleOffsetCommitted(e kafka.OffsetsCommitted) {
 
 	c.logger.Error(
 		"OffsetsCommitted event returned error.",
-		zap.String("eventType", eventOffsetsCommitted),
 		zap.String("eventDetails", e.String()),
 		zap.Any("offsets", e.Offsets),
 		zap.Error(e.Error),

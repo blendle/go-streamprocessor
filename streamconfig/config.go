@@ -117,18 +117,20 @@ var ProducerDefaults = Producer{
 }
 
 // Usage calls the usage() function and returns a byte array.
+// Usage returns a byte array with a table-based explanation on how to set the
+// configuration values using environment variables. This can be used to explain
+// usage details to the user of the application.
 func (c Consumer) Usage() []byte {
 	return usage(c.Name, c)
 }
 
-// Usage calls the usage() function and returns a byte array.
+// Usage returns a byte array with a table-based explanation on how to set the
+// configuration values using environment variables. This can be used to explain
+// usage details to the user of the application.
 func (p Producer) Usage() []byte {
 	return usage(p.Name, p)
 }
 
-// usage returns a byte array with a table-based explanation on how to set the
-// configuration values using environment variables. This can be used to explain
-// usage details to the user of the application.
 func usage(name string, inf interface{}) []byte {
 	var err error
 	b := &bytes.Buffer{}

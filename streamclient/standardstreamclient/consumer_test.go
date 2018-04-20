@@ -12,6 +12,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -141,8 +142,8 @@ func TestConsumer_Messages_ScannerError(t *testing.T) {
 	cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
 	cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
 
-	_, err := cmd.CombinedOutput()
-	require.NotNil(t, err)
+	out, err := cmd.CombinedOutput()
+	require.NotNil(t, err, "output received: %s", string(out))
 
 	assert.False(t, err.(*exec.ExitError).Success())
 }
@@ -179,6 +180,26 @@ func TestConsumer_Errors_Manual(t *testing.T) {
 		t.Fatalf("expected no error, got %s", err.Error())
 	case <-time.After(10 * time.Millisecond):
 	}
+}
+
+func TestConsumer_Ack(t *testing.T) {
+	t.Parallel()
+
+	b := standardstreamclient.TestBuffer(t)
+	consumer, closer := standardstreamclient.TestConsumer(t, b)
+	defer closer()
+
+	assert.Nil(t, consumer.Ack(streammsg.Message{}))
+}
+
+func TestConsumer_Nack(t *testing.T) {
+	t.Parallel()
+
+	b := standardstreamclient.TestBuffer(t)
+	consumer, closer := standardstreamclient.TestConsumer(t, b)
+	defer closer()
+
+	assert.Nil(t, consumer.Nack(streammsg.Message{}))
 }
 
 func BenchmarkConsumer_Messages(b *testing.B) {
