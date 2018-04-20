@@ -13,6 +13,10 @@ type Consumer interface {
 	// The channel returns each message as a `streammsg.Message` value object.
 	Messages() <-chan streammsg.Message
 
+	// Errors is a read-only channel on which the consumer delivers any errors
+	// that occurred while consuming from the stream.
+	Errors() <-chan error
+
 	// Ack can be used to acknowledge that a message was processed and should not
 	// be delivered again.
 	Ack(streammsg.Message) error

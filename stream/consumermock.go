@@ -9,6 +9,7 @@ import (
 type ConsumerMock struct {
 	Configuration streamconfig.Consumer
 	MessagesChan  chan streammsg.Message
+	ErrorsChan    chan error
 }
 
 var _ Consumer = (*ConsumerMock)(nil)
@@ -16,6 +17,11 @@ var _ Consumer = (*ConsumerMock)(nil)
 // Messages implements the Consumer interface for ConsumerMock.
 func (c *ConsumerMock) Messages() <-chan streammsg.Message {
 	return c.MessagesChan
+}
+
+// Errors implements the Consumer interface for ConsumerMock.
+func (c *ConsumerMock) Errors() <-chan error {
+	return c.ErrorsChan
 }
 
 // Ack implements the Consumer interface for ConsumerMock.
@@ -31,6 +37,7 @@ func (c *ConsumerMock) Nack(_ streammsg.Message) error {
 // Close implements the Consumer interface for ConsumerMock.
 func (c *ConsumerMock) Close() error {
 	close(c.MessagesChan)
+	close(c.ErrorsChan)
 	return nil
 }
 

@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
@@ -102,6 +103,40 @@ func TestProducer_Messages_Ordering(t *testing.T) {
 
 	assert.Equal(t, messageCount, i)
 	assert.NoError(t, scanner.Err())
+}
+
+func TestProducer_Errors(t *testing.T) {
+	t.Parallel()
+
+	options := func(c *streamconfig.Producer) {
+		c.HandleErrors = true
+	}
+
+	b := standardstreamclient.TestBuffer(t)
+	producer, closer := standardstreamclient.TestProducer(t, b, options)
+	defer closer()
+
+	err := <-producer.Errors()
+	require.Error(t, err)
+	assert.Equal(t, "unable to manually consume errors while HandleErrors is true", err.Error())
+}
+
+func TestProducer_Errors_Manual(t *testing.T) {
+	t.Parallel()
+
+	options := func(c *streamconfig.Producer) {
+		c.HandleErrors = false
+	}
+
+	b := standardstreamclient.TestBuffer(t)
+	producer, closer := standardstreamclient.TestProducer(t, b, options)
+	defer closer()
+
+	select {
+	case err := <-producer.Errors():
+		t.Fatalf("expected no error, got %s", err.Error())
+	case <-time.After(10 * time.Millisecond):
+	}
 }
 
 func BenchmarkProducer_Messages(b *testing.B) {

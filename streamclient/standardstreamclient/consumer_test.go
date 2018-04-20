@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
@@ -127,6 +128,11 @@ func TestConsumer_Messages_ScannerError(t *testing.T) {
 		defer closer()
 
 		<-consumer.Messages()
+
+		// Give the errors channel a few milliseconds to receive the error, and
+		// terminate the program.
+		time.Sleep(5 * time.Millisecond)
+
 		return
 	}
 
@@ -139,6 +145,40 @@ func TestConsumer_Messages_ScannerError(t *testing.T) {
 	require.NotNil(t, err)
 
 	assert.False(t, err.(*exec.ExitError).Success())
+}
+
+func TestConsumer_Errors(t *testing.T) {
+	t.Parallel()
+
+	options := func(c *streamconfig.Consumer) {
+		c.HandleErrors = true
+	}
+
+	b := standardstreamclient.TestBuffer(t)
+	consumer, closer := standardstreamclient.TestConsumer(t, b, options)
+	defer closer()
+
+	err := <-consumer.Errors()
+	require.Error(t, err)
+	assert.Equal(t, "unable to manually consume errors while HandleErrors is true", err.Error())
+}
+
+func TestConsumer_Errors_Manual(t *testing.T) {
+	t.Parallel()
+
+	options := func(c *streamconfig.Consumer) {
+		c.HandleErrors = false
+	}
+
+	b := standardstreamclient.TestBuffer(t)
+	consumer, closer := standardstreamclient.TestConsumer(t, b, options)
+	defer closer()
+
+	select {
+	case err := <-consumer.Errors():
+		t.Fatalf("expected no error, got %s", err.Error())
+	case <-time.After(10 * time.Millisecond):
+	}
 }
 
 func BenchmarkConsumer_Messages(b *testing.B) {

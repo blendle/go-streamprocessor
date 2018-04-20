@@ -13,6 +13,10 @@ type Producer interface {
 	// The channel accepts `streammsg.Message` value objects.
 	Messages() chan<- streammsg.Message
 
+	// Errors is a read-only channel on which the producer delivers any errors
+	// that occurred while producing to the stream.
+	Errors() <-chan error
+
 	// Close closes the producer. After calling this method, the producer is no
 	// longer in a usable state, and subsequent method calls can result in
 	// panics.

@@ -6,8 +6,10 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streamcore"
 	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -26,6 +28,7 @@ type Consumer struct {
 
 	logger   *zap.Logger
 	wg       sync.WaitGroup
+	errors   chan error
 	messages chan streammsg.Message
 }
 
@@ -41,6 +44,17 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// add one to the WaitGroup. We remove this one only after all reads (below)
 	// are completed and the read channel is closed.
 	consumer.wg.Add(1)
+
+	// We start a goroutine to listen for errors on the errors channel, and log a
+	// fatal error (terminating the application in the process) when an error is
+	// received.
+	//
+	// This functionality is enabled by default, but can be disabled through a
+	// configuration flag. If the auto-error functionality is disabled, the user
+	// needs to manually listen to the `Errors()` channel and act accordingly.
+	if consumer.c.HandleErrors {
+		go streamcore.HandleErrors(consumer.errors, consumer.logger.Fatal)
+	}
 
 	// We start a goroutine to consume any messages sent to us from the configured
 	// reader. We deliver these messages on a blocking channel, so as long as no
@@ -68,6 +82,12 @@ func (c *Consumer) Messages() <-chan streammsg.Message {
 	return c.messages
 }
 
+// Errors returns the read channel for the errors that are returned by the
+// stream.
+func (c *Consumer) Errors() <-chan error {
+	return streamcore.ErrorsChan(c.errors, c.c.HandleErrors)
+}
+
 // Ack is a no-op implementation to satisfy the stream.Consumer interface.
 func (c *Consumer) Ack(_ streammsg.Message) error {
 	return nil
@@ -88,6 +108,10 @@ func (c *Consumer) Close() error {
 	// Wait until the WaitGroup counter is zero. This makes sure we block the
 	// close call until the reader has been closed, to prevent reading errors.
 	c.wg.Wait()
+
+	// At this point, no more errors are expected, so we can close the errors
+	// channel.
+	close(c.errors)
 
 	// Let's flush all logs still in the buffer, since this consumer is no
 	// longer useful after this point. We ignore any errors returned by sync, as
@@ -133,10 +157,7 @@ func (c *Consumer) consume() {
 	}
 
 	if err := scanner.Err(); err != nil {
-		c.logger.Fatal(
-			"Error while reading messages from stream.",
-			zap.Error(err),
-		)
+		c.errors <- errors.Wrap(err, "unable to read message from stream")
 	}
 }
 
@@ -149,6 +170,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	consumer := &Consumer{
 		c:        config,
 		logger:   &config.Logger,
+		errors:   make(chan error),
 		messages: make(chan streammsg.Message),
 	}
 

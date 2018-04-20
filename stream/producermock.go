@@ -9,6 +9,7 @@ import (
 type ProducerMock struct {
 	Configuration streamconfig.Producer
 	MessagesChan  chan streammsg.Message
+	ErrorsChan    chan error
 }
 
 var _ Producer = (*ProducerMock)(nil)
@@ -18,9 +19,15 @@ func (p *ProducerMock) Messages() chan<- streammsg.Message {
 	return p.MessagesChan
 }
 
+// Errors implements the Producer interface for ProducerMock.
+func (p *ProducerMock) Errors() <-chan error {
+	return p.ErrorsChan
+}
+
 // Close implements the Producer interface for ProducerMock.
 func (p *ProducerMock) Close() error {
 	close(p.MessagesChan)
+	close(p.ErrorsChan)
 	return nil
 }
 

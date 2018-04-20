@@ -2,6 +2,7 @@ package kafkaclient
 
 import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -34,19 +35,15 @@ const (
 
 // handleAssignedPartitions assigns the consumer to a provided partition.
 func (c *Consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
-	log := c.logger.With(
-		zap.String("eventType", eventAssignedPartitions),
+	c.logger.Info(
+		"Received event from Kafka.",
+		zap.String("eventType", "AssignedPartitions"),
 		zap.String("eventDetails", e.String()),
 	)
 
-	log.Info("Received event from Kafka.")
-
 	err := c.kafka.Assign(e.Partitions)
 	if err != nil {
-		log.Fatal(
-			"Error while assigning partitions.",
-			zap.Error(err),
-		)
+		c.errors <- errors.Wrap(err, "failed to assinging partitions")
 	}
 }
 
@@ -66,10 +63,7 @@ func (c *Consumer) handleRevokedPartitions(e kafka.RevokedPartitions) {
 	// reprocess any messages that where lost in the store.
 	p, err := c.commit()
 	if err != nil {
-		log.Fatal(
-			"Error while unassigning partitions. Failed to commit offsets before unassignment.",
-			zap.Error(err),
-		)
+		c.errors <- errors.Wrap(err, "failed to commit offsets before partition unassignment")
 	}
 
 	log.Debug(
@@ -79,10 +73,7 @@ func (c *Consumer) handleRevokedPartitions(e kafka.RevokedPartitions) {
 
 	err = c.kafka.Unassign()
 	if err != nil {
-		log.Fatal(
-			"Error while unassigning partitions. Failed to unassign partitions.",
-			zap.Error(err),
-		)
+		c.errors <- errors.Wrap(err, "failed to unassign partitions")
 	}
 }
 
@@ -105,36 +96,36 @@ func (c *Consumer) handleOffsetCommitted(e kafka.OffsetsCommitted) {
 	)
 }
 
-// handleError handles all error events for the consumer.
+// handleError handles all error events for the consumer. If an error event is
+// received, we terminate the application, as this brings us into an unknown and
+// potentially unrecoverable state.
+//
+// NOTE: the rdkafka documentation states the following:
+//
+//   > These errors are normally just informational since the client will
+//   > try its best to automatically recover (eventually).
+//
+// We'll monitor this and see if we need to change this in the future. If you
+// want to handle this situation manually, use the `Events()` method to receive
+// the raised errors.
 func (c *Consumer) handleError(e kafka.Error) {
-	handleError(c.logger, e)
+	c.errors <- errors.Wrap(e, "received error from event stream")
 }
 
-// handleError handles all error events for the producer.
+// handleError handles all error events for the producer. If an error event is
+// received, we terminate the application, as this brings us into an unknown and
+// potentially unrecoverable state.
+//
+// NOTE: the rdkafka documentation states the following:
+//
+//   > These errors are normally just informational since the client will
+//   > try its best to automatically recover (eventually).
+//
+// We'll monitor this and see if we need to change this in the future. If you
+// want to handle this situation manually, use the `Events()` method to receive
+// the raised errors.
 func (p *Producer) handleError(e kafka.Error) {
-	handleError(p.logger, e)
-}
-
-// handleError handles all error events for both the producer and consumer. If
-// an error event is received, we terminate the application, as this brings us
-// into an unknown and potentially unrecoverable state.
-//
-// TODO: the rdkafka documentation states the following:
-//
-//       > These errors are normally just informational since the client will
-//       > try its best to automatically recover (eventually).
-//
-//       We'll monitor this and see if we need to change this in the future. We
-//       are also considering adding an `Events()` channel of our own, so
-//       perhaps we don't have to handle this situation ourselves, and the
-//       application can dictate what they want to do in the case of an error.
-func handleError(logger *zap.Logger, e kafka.Error) {
-	logger.Fatal(
-		"Received event from Kafka.",
-		zap.String("eventType", eventError),
-		zap.String("eventDetails", e.String()),
-		zap.Error(e),
-	)
+	p.errors <- errors.Wrap(e, "received error from event stream")
 }
 
 // handleMessage handles all Kafka messages by converting the message to a
@@ -170,10 +161,5 @@ func (p *Producer) handleMessage(e *kafka.Message) {
 		return
 	}
 
-	p.logger.Error(
-		"Received failed message delivery event from Kafka.",
-		zap.String("eventType", eventMessage),
-		zap.String("eventDetails", e.String()),
-		zap.Error(e.TopicPartition.Error),
-	)
+	p.errors <- errors.Wrap(e.TopicPartition.Error, "message delivery failure error")
 }

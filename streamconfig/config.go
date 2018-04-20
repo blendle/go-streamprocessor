@@ -29,6 +29,13 @@ type Consumer struct { // nolint:malign
 	// the stream client without any outside influence.
 	AllowEnvironmentBasedConfiguration bool `ignored:"true"`
 
+	// HandleErrors determines whether the consumer should handle any stream
+	// errors by itself, and terminate the application if any error occurs. This
+	// defaults to true. If manually set to false, the `Errors()` channel needs to
+	// be consumed manually, and any appropriate action needs to be taken when an
+	// errors occurs, otherwise the consumer will get stuck once an error occurs.
+	HandleErrors bool `ignored:"true"`
+
 	// HandleInterrupt determines whether the consumer should close itself
 	// gracefully when an interrupt signal (^C) is received. This defaults to true
 	// to increase first-time ease-of-use, but if the application wants to handle
@@ -65,6 +72,13 @@ type Producer struct { // nolint:malign
 	// the stream client without any outside influence.
 	AllowEnvironmentBasedConfiguration bool `ignored:"true"`
 
+	// HandleErrors determines whether the consumer should handle any stream
+	// errors by itself, and terminate the application if any error occurs. This
+	// defaults to true. If manually set to false, the `Errors()` channel needs to
+	// be consumed manually, and any appropriate action needs to be taken when an
+	// errors occurs, otherwise the consumer will get stuck once an error occurs.
+	HandleErrors bool `ignored:"true"`
+
 	// HandleInterrupt determines whether the producer should close itself
 	// gracefully when an interrupt signal (^C) is received. This defaults to true
 	// to increase first-time ease-of-use, but if the application wants to handle
@@ -87,6 +101,7 @@ type Producer struct { // nolint:malign
 // ConsumerDefaults holds the default values for Consumer.
 var ConsumerDefaults = Consumer{
 	Logger:          *zap.NewNop(),
+	HandleErrors:    true,
 	HandleInterrupt: true,
 	Name:            "consumer",
 	AllowEnvironmentBasedConfiguration: true,
@@ -95,6 +110,7 @@ var ConsumerDefaults = Consumer{
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
 	Logger:          *zap.NewNop(),
+	HandleErrors:    true,
 	HandleInterrupt: true,
 	Name:            "producer",
 	AllowEnvironmentBasedConfiguration: true,

@@ -106,6 +106,44 @@ func TestIntegrationProducer_Messages_Ordering(t *testing.T) {
 	}
 }
 
+func TestIntegrationProducer_Errors(t *testing.T) {
+	t.Parallel()
+	testutils.Integration(t)
+
+	options := func(c *streamconfig.Producer) {
+		c.HandleErrors = true
+	}
+
+	producer, closer := kafkaclient.TestProducer(t, testutils.Random(t), options)
+	defer closer()
+
+	select {
+	case err := <-producer.Errors():
+		require.Error(t, err)
+		assert.Equal(t, "unable to manually consume errors while HandleErrors is true", err.Error())
+	case <-time.After(1 * time.Second):
+		t.Fatal("expected error, got none")
+	}
+}
+
+func TestIntegrationProducer_Errors_Manual(t *testing.T) {
+	t.Parallel()
+	testutils.Integration(t)
+
+	options := func(c *streamconfig.Producer) {
+		c.HandleErrors = false
+	}
+
+	producer, closer := kafkaclient.TestProducer(t, testutils.Random(t), options)
+	defer closer()
+
+	select {
+	case err := <-producer.Errors():
+		t.Fatalf("expected no error, got %s", err.Error())
+	case <-time.After(10 * time.Millisecond):
+	}
+}
+
 func BenchmarkIntegrationProducer_Messages(b *testing.B) {
 	testutils.Integration(b)
 
