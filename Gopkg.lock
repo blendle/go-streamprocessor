@@ -10,14 +10,14 @@
 [[projects]]
   name = "github.com/Shopify/sarama"
   packages = ["."]
-  revision = "f7be6aa2bc7b2e38edf816b08b582782194a1c02"
-  version = "v1.16.0"
+  revision = "3b1b38866a79f06deddf0487d5c27ba0697ccd65"
+  version = "v1.15.0"
 
 [[projects]]
   name = "github.com/bsm/sarama-cluster"
   packages = ["."]
-  revision = "cf455bc755fe41ac9bb2861e7a961833d9c2ecc3"
-  version = "v2.1.13"
+  revision = "24016d206c730276dfb58f802999066f2f4bfeaa"
+  version = "v2.1.11"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -88,6 +88,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ab726e7453c424d97b78b3f3b1b098363462b9c3f0b5496d7d927df479f76106"
+  inputs-digest = "ba6bd096a17dc7c5443aa86e16ffe8b3ebcb42012014c1cfcf758d4bf178171d"
   solver-name = "gps-cdcl"
   solver-version = 1
