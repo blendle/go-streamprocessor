@@ -25,8 +25,10 @@ script/tests/gometalinter
 echo "==      go-test"
 script/tests/go-test "$@"
 
-echo "==      go-test-cover"
-script/tests/go-test-cover "$@"
+if echo "$*" | grep -qv -- "-short"; then
+  echo "==      go-test-cover"
+  script/tests/go-test-cover "$@"
+fi
 
 echo "==      go-test-race"
 script/tests/go-test-race "$@"
