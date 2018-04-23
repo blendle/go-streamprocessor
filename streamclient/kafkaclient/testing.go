@@ -164,7 +164,8 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 
 		verbose := func(c *streamconfig.Consumer) {
 			c.Logger = *logger.Named("TestConsumer")
-			c.Kafka.Debug.All = true
+			c.Kafka.Debug.CGRP = true
+			c.Kafka.Debug.Topic = true
 		}
 
 		allOptions = append(allOptions, verbose)
@@ -184,7 +185,8 @@ func TestProducerConfig(tb testing.TB, topic string, options ...func(c *streamco
 
 		verbose := func(c *streamconfig.Producer) {
 			c.Logger = *logger.Named("TestProducer")
-			c.Kafka.Debug.All = true
+			c.Kafka.Debug.CGRP = true
+			c.Kafka.Debug.Topic = true
 		}
 
 		allOptions = append(allOptions, verbose)
@@ -209,6 +211,10 @@ func testKafkaProducer(tb testing.TB) (*kafka.Producer, func()) {
 		"metadata.broker.list": kafkaconfig.TestBrokerAddress,
 		"go.batch.producer":    false,
 		"default.topic.config": kafka.ConfigMap{"acks": 1},
+	}
+
+	if testutils.Verbose(tb) {
+		_ = config.SetKey("debug", "cgrp,topic")
 	}
 
 	producer, err := kafka.NewProducer(config)

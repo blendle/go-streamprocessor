@@ -27,7 +27,8 @@ func TestConsumer(tb testing.TB) Consumer {
 	config.Topics = []string{"testTopic"}
 
 	if testutils.Verbose(tb) {
-		config.Debug.All = true
+		config.Debug.CGRP = true
+		config.Debug.Topic = true
 	}
 
 	return config
