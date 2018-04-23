@@ -6,21 +6,33 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-VERSION=7101c2310341ab3f4675fc565f64f0967e135a6a
-
 if [ -z "$CI" ]; then
   echo >&2 "\$CI not set, refusing to run $0."
   exit 1
 fi
 
-pushd "$(mktemp -d)"
+libpath="tmp-build/$LIBRDKAFKA_VERSION"
+if [ ! -d "$libpath" ]; then
+  dir="$(pwd)"
+  rm -rf tmp-build
+  mkdir -p "$libpath/librdkafka"
+  cd "$libpath/librdkafka"
 
-curl -sL "https://github.com/edenhill/librdkafka/archive/$VERSION.tar.gz" | \
-  tar -xz --strip-components=1 -f -
+  curl -sL "https://github.com/edenhill/librdkafka/archive/$LIBRDKAFKA_VERSION.tar.gz" | \
+    tar -xz --strip-components=1 -f -
 
-./configure
-make -j
-make install
-popd
+  ./configure --prefix="$dir/$libpath"
+  make -j
+  make install
+  cd "$dir"
+fi
 
-script/bootstrap
+docker-compose up -d
+
+printf "waiting for Kafka to boot..."
+while ! nc -z -w1 127.0.0.1 9092 </dev/null; do
+  printf .
+  sleep 3
+done
+
+echo
