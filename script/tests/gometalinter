@@ -6,8 +6,6 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
-[ -z "$CI" ] || cd "$GOPATH/src/github.com/blendle/stream-processor-pipe"
-
 matches=$(find . \( -name vendor -prune \) \
   -o \( -type f -name '*' \) \
   -exec grep -i '^// [a-z]* \.\.\.$' {} \; || true)
@@ -30,7 +28,7 @@ gometalinter \
   --line-length=100 \
   --cyclo-over=11 \
   --disable=dupl \
+  --disable=testify \
+  --disable=test \
   --linter='lll:lll -e func -g -l {maxlinelength}:PATH:LINE:MESSAGE' \
-  --linter='test:go test -short:PATH:LINE:MESSAGE' \
-  --linter='testify:go test -short:PATH:LINE:MESSAGE' \
   "${@:-./...}"
