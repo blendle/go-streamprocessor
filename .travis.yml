@@ -1,23 +1,35 @@
+sudo: required
+
 language: go
 
 go:
-- 1.x
-- 1.6
-- 1.7.x
-- 1.8.x
-- 1.9.x
-- 1.10.x
-- master
+- "1.10.1"
 
 services:
 - docker
 
 cache:
   directories:
-  - $GOPATH/pkg/dep
+  - tmp-build
+  - $GOPATH/bin
+  - $GOPATH/pkg
+  - $HOME/.cache/go-build
+
+env:
+  global:
+  - LIBRDKAFKA_VERSION=v0.11.4
+  - PKG_CONFIG_PATH="$GOPATH/src/github.com/blendle/go-streamprocessor/tmp-build/$LIBRDKAFKA_VERSION/lib/pkgconfig"
+  - LD_LIBRARY_PATH="$GOPATH/src/github.com/blendle/go-streamprocessor/tmp-build/$LIBRDKAFKA_VERSION/lib"
+  - DYLD_LIBRARY_PATH="$GOPATH/src/github.com/blendle/go-streamprocessor/tmp-build/$LIBRDKAFKA_VERSION/lib"
+  - PATH="$PATH:$GOPATH/bin"
+  - DOCKER_COMPOSE_VERSION=1.21.0
 
 before_install:
-- docker-compose up -d
+- sudo rm /usr/local/bin/docker-compose
+- curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+- chmod +x docker-compose
+- sudo mv docker-compose /usr/local/bin
 - script/cisetup
-install: dep ensure -vendor-only
+
+install: script/setup
 script: script/test

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/blendle/go-streamprocessor/streamcore"
+	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
@@ -76,7 +77,7 @@ func TestHandleErrors(t *testing.T) {
 			}
 
 			go streamcore.HandleErrors(ch, logger.Log)
-			time.Sleep(5 * time.Millisecond)
+			time.Sleep(testutils.MultipliedDuration(t, 20*time.Millisecond))
 
 			require.Len(t, logger.Logs(), len(tt.results))
 

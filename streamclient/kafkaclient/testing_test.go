@@ -146,6 +146,7 @@ func TestIntegrationTestMessagesFromTopic(t *testing.T) {
 }
 
 func TestIntegrationTestProduceMessages(t *testing.T) {
+	t.Parallel()
 	testutils.Integration(t)
 
 	var tests = map[string]struct {
@@ -180,10 +181,7 @@ func TestIntegrationTestProduceMessages(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			topicAndGroup := testutils.Random(t)
-			println(topicAndGroup)
 
 			config := &kafka.ConfigMap{
 				"metadata.broker.list":     kafkaconfig.TestBrokerAddress,
@@ -261,28 +259,28 @@ func TestIntegrationTestOffsets(t *testing.T) {
 	assert.Equal(t, kafka.Offset(1), tp[0].Offset)
 }
 
-func TestIntegrationTestConsumerConfig(t *testing.T) {
+func TestTestConsumerConfig(t *testing.T) {
 	t.Parallel()
 
 	topicAndGroup := testutils.Random(t)
 	config := kafkaclient.TestConsumerConfig(t, topicAndGroup)
 
 	size := 1
-	if testing.Verbose() {
+	if testutils.Verbose(t) {
 		size = 2
 	}
 
 	assert.Len(t, config, size)
 }
 
-func TestIntegrationTestProducerConfig(t *testing.T) {
+func TestTestProducerConfig(t *testing.T) {
 	t.Parallel()
 
 	topicAndGroup := testutils.Random(t)
 	config := kafkaclient.TestProducerConfig(t, topicAndGroup)
 
 	size := 1
-	if testing.Verbose() {
+	if testutils.Verbose(t) {
 		size = 2
 	}
 

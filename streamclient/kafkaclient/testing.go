@@ -50,7 +50,7 @@ func TestMessageFromTopic(tb testing.TB, topic string) streammsg.Message {
 	consumer, closer := testKafkaConsumer(tb, topic, false)
 	defer closer()
 
-	m, err := consumer.ReadMessage(time.Duration(3000*testutils.TimeoutMultiplier) * time.Millisecond)
+	m, err := consumer.ReadMessage(testutils.MultipliedDuration(tb, 3*time.Second))
 	require.NoError(tb, err)
 
 	return *newMessageFromKafka(m)
@@ -125,12 +125,10 @@ func TestProduceMessages(tb testing.TB, topic string, values ...interface{}) {
 
 		select {
 		case <-producer.Events():
-		case <-time.After(time.Duration(5*testutils.TimeoutMultiplier) * time.Second):
+		case <-time.After(testutils.MultipliedDuration(tb, 5*time.Second)):
 			require.Fail(tb, "Timeout while waiting for message to be delivered.")
 		}
 	}
-
-	require.Zero(tb, producer.Flush(10000), "Messages remain in queue after Flush()")
 }
 
 // TestOffsets returns a list of `kafka.TopicPartition`s.
@@ -158,13 +156,14 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 		c.Kafka.Topics = []string{topicAndGroup}
 	}
 
-	if testing.Verbose() {
+	if testutils.Verbose(tb) {
 		logger, err := zap.NewDevelopment()
 		require.NoError(tb, err)
 
 		verbose := func(c *streamconfig.Consumer) {
 			c.Logger = *logger.Named("TestConsumer")
-			c.Kafka.Debug.All = true
+			c.Kafka.Debug.CGRP = true
+			c.Kafka.Debug.Topic = true
 		}
 
 		allOptions = append(allOptions, verbose)
@@ -178,13 +177,14 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 func TestProducerConfig(tb testing.TB, topic string, options ...func(c *streamconfig.Producer)) []func(c *streamconfig.Producer) {
 	var allOptions []func(c *streamconfig.Producer)
 
-	if testing.Verbose() {
+	if testutils.Verbose(tb) {
 		logger, err := zap.NewDevelopment()
 		require.NoError(tb, err)
 
 		verbose := func(c *streamconfig.Producer) {
 			c.Logger = *logger.Named("TestProducer")
-			c.Kafka.Debug.All = true
+			c.Kafka.Debug.CGRP = true
+			c.Kafka.Debug.Topic = true
 		}
 
 		allOptions = append(allOptions, verbose)
@@ -192,8 +192,8 @@ func TestProducerConfig(tb testing.TB, topic string, options ...func(c *streamco
 
 	opts := func(p *streamconfig.Producer) {
 		p.Kafka.ID = "testProducer"
-		p.Kafka.SessionTimeout = time.Duration(1000*testutils.TimeoutMultiplier) * time.Millisecond
-		p.Kafka.HeartbeatInterval = time.Duration(150*testutils.TimeoutMultiplier) * time.Millisecond
+		p.Kafka.SessionTimeout = 1 * time.Second
+		p.Kafka.HeartbeatInterval = 150 * time.Millisecond
 		p.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 		p.Kafka.Topic = topic
 	}
@@ -211,11 +211,15 @@ func testKafkaProducer(tb testing.TB) (*kafka.Producer, func()) {
 		"default.topic.config": kafka.ConfigMap{"acks": 1},
 	}
 
+	if testutils.Verbose(tb) {
+		_ = config.SetKey("debug", "cgrp,topic")
+	}
+
 	producer, err := kafka.NewProducer(config)
 	require.NoError(tb, err)
 
 	closer := func() {
-		i := producer.Flush(1000 * testutils.TimeoutMultiplier)
+		i := producer.Flush(testutils.MultipliedInt(tb, 1000))
 		require.Zero(tb, i, "expected all messages to be flushed")
 
 		producer.Close()

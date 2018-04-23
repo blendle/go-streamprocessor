@@ -17,8 +17,6 @@ import (
 )
 
 func TestNewConsumer(t *testing.T) {
-	t.Parallel()
-
 	_, err := streamclient.NewConsumer()
 	assert.Error(t, err)
 }
@@ -67,7 +65,7 @@ func TestIntegrationNewConsumer_Env(t *testing.T) {
 	}
 }
 
-func TestIntegrationNewConsumer_Pubsub(t *testing.T) {
+func TestNewConsumer_Pubsub(t *testing.T) {
 	_ = os.Setenv("STREAMCLIENT_CONSUMER", "pubsub")
 	defer os.Unsetenv("STREAMCLIENT_CONSUMER") // nolint: errcheck
 
@@ -75,7 +73,7 @@ func TestIntegrationNewConsumer_Pubsub(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestIntegrationNewConsumer_PipedData(t *testing.T) {
+func TestNewConsumer_PipedData(t *testing.T) {
 	if os.Getenv("BE_TESTING_STDIN") == "1" {
 		consumer, err := streamclient.NewConsumer()
 		require.NoError(t, err)
@@ -100,7 +98,7 @@ func TestIntegrationNewConsumer_PipedData(t *testing.T) {
 	}
 }
 
-func TestIntegrationNewConsumer_Unknown(t *testing.T) {
+func TestNewConsumer_Unknown(t *testing.T) {
 	_, err := streamclient.NewConsumer()
 	assert.Error(t, err)
 }

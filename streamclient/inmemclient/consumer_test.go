@@ -192,7 +192,7 @@ func TestConsumer_Close(t *testing.T) {
 		select {
 		case err := <-ch:
 			assert.NoError(t, err)
-		case <-time.After(time.Duration(1*testutils.TimeoutMultiplier) * time.Second):
+		case <-time.After(testutils.MultipliedDuration(t, 1*time.Second)):
 			t.Fatal("timeout while waiting for close to finish")
 		}
 	}

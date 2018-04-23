@@ -1,7 +1,7 @@
 version: '2'
 services:
   kafka:
-    image: wurstmeister/kafka:1.0.0
+    image: wurstmeister/kafka:1.1.0
     ports:
     - "9092:9092"
     environment:
@@ -10,10 +10,10 @@ services:
       KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 100
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
-  pubsub:
-    image: bigtruedata/gcloud-pubsub-emulator:latest # no non-latest tag available
-    ports:
-    - "8538:8538"
+  # pubsub:
+  #   image: bigtruedata/gcloud-pubsub-emulator:latest # no non-latest tag available
+  #   ports:
+  #   - "8538:8538"
 
   zookeeper:
     image: wurstmeister/zookeeper:latest # no non-latest tag available

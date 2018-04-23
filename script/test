@@ -6,7 +6,7 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-if [ -z "$*" ] && ! nc -z -G1 127.0.0.1 9092 2>/dev/null; then
+if [ -z "$*" ] && ! nc -z -w1 127.0.0.1 9092 2>/dev/null; then
   echo >&2 "No response received from 127.0.0.1:9092." \
            "Unable to run integration tests."
   echo >&2
@@ -25,11 +25,15 @@ script/tests/gometalinter
 echo "==      go-test"
 script/tests/go-test "$@"
 
-echo "==      go-test-cover"
-script/tests/go-test-cover "$@"
+if echo "$*" | grep -qv -- "-short"; then
+  echo "==      go-test-cover"
+  script/tests/go-test-cover "$@"
+fi
 
 echo "==      go-test-race"
 script/tests/go-test-race "$@"
 
-echo "==      go-test-bench"
-script/tests/go-test-bench "$@"
+if [ -z "$CI" ]; then
+  echo "==      go-test-bench"
+  script/tests/go-test-bench "$@"
+fi
