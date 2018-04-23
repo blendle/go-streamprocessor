@@ -63,7 +63,7 @@ func TestIntegrationNewProducer_Env(t *testing.T) {
 	}
 }
 
-func TestIntegrationNewProducer_Pubsub(t *testing.T) {
+func TestNewProducer_Pubsub(t *testing.T) {
 	_ = os.Setenv("STREAMCLIENT_PRODUCER", "pubsub")
 	defer os.Unsetenv("STREAMCLIENT_PRODUCER") // nolint: errcheck
 
@@ -71,7 +71,7 @@ func TestIntegrationNewProducer_Pubsub(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestIntegrationNewProducer_Env_DryRun(t *testing.T) {
+func TestNewProducer_Env_DryRun(t *testing.T) {
 	_ = os.Setenv("DRY_RUN", "1")
 	defer os.Unsetenv("DRY_RUN") // nolint: errcheck
 
@@ -81,7 +81,7 @@ func TestIntegrationNewProducer_Env_DryRun(t *testing.T) {
 	assert.Equal(t, "*standardstreamclient.Producer", reflect.TypeOf(producer).String())
 }
 
-func TestIntegrationNewProducer_Env_DryRun_Overridden(t *testing.T) {
+func TestNewProducer_Env_DryRun_Overridden(t *testing.T) {
 	_ = os.Setenv("STREAMCLIENT_PRODUCER", "inmem")
 	defer os.Unsetenv("STREAMCLIENT_PRODUCER") // nolint: errcheck
 
@@ -94,7 +94,7 @@ func TestIntegrationNewProducer_Env_DryRun_Overridden(t *testing.T) {
 	assert.Equal(t, "*inmemclient.Producer", reflect.TypeOf(producer).String())
 }
 
-func TestIntegrationNewProducer_Unknown(t *testing.T) {
+func TestNewProducer_Unknown(t *testing.T) {
 	_, err := streamclient.NewProducer()
 	assert.Error(t, err)
 }

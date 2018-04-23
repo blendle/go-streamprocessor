@@ -261,7 +261,7 @@ func TestIntegrationTestOffsets(t *testing.T) {
 	assert.Equal(t, kafka.Offset(1), tp[0].Offset)
 }
 
-func TestIntegrationTestConsumerConfig(t *testing.T) {
+func TestTestConsumerConfig(t *testing.T) {
 	t.Parallel()
 
 	topicAndGroup := testutils.Random(t)
@@ -275,7 +275,7 @@ func TestIntegrationTestConsumerConfig(t *testing.T) {
 	assert.Len(t, config, size)
 }
 
-func TestIntegrationTestProducerConfig(t *testing.T) {
+func TestTestProducerConfig(t *testing.T) {
 	t.Parallel()
 
 	topicAndGroup := testutils.Random(t)
