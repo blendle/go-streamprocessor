@@ -1,6 +1,7 @@
 package testutils_test
 
 import (
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -11,6 +12,24 @@ import (
 
 func TestIntegration_Test(t *testing.T) {
 	testutils.Integration(t)
+}
+
+func TestVerbose(t *testing.T) {
+	if ci, ok := os.LookupEnv("CI"); ok {
+		_ = os.Unsetenv("CI")
+		defer func() { _ = os.Setenv("CI", ci) }()
+	}
+
+	v := testutils.Verbose(t)
+
+	assert.Equal(t, testing.Verbose(), v)
+}
+
+func TestVerbose_CI(t *testing.T) {
+	_ = os.Setenv("CI", "true")
+	defer func() { _ = os.Unsetenv("CI") }()
+
+	assert.True(t, testutils.Verbose(t))
 }
 
 func TestRandom(t *testing.T) {

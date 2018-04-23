@@ -158,7 +158,7 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 		c.Kafka.Topics = []string{topicAndGroup}
 	}
 
-	if testing.Verbose() {
+	if testutils.Verbose(tb) {
 		logger, err := zap.NewDevelopment()
 		require.NoError(tb, err)
 
@@ -178,7 +178,7 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 func TestProducerConfig(tb testing.TB, topic string, options ...func(c *streamconfig.Producer)) []func(c *streamconfig.Producer) {
 	var allOptions []func(c *streamconfig.Producer)
 
-	if testing.Verbose() {
+	if testutils.Verbose(tb) {
 		logger, err := zap.NewDevelopment()
 		require.NoError(tb, err)
 

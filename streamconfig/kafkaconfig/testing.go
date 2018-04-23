@@ -13,7 +13,7 @@ var TestBrokerAddress = "127.0.0.1:9092"
 
 // TestConsumer returns a kafkaconfig.Consumer struct with its options tweaked
 // for testing purposes.
-func TestConsumer(_ testing.TB) Consumer {
+func TestConsumer(tb testing.TB) Consumer {
 	config := ConsumerDefaults
 
 	config.Brokers = []string{TestBrokerAddress}
@@ -26,7 +26,7 @@ func TestConsumer(_ testing.TB) Consumer {
 	config.SessionTimeout = 1 * time.Second
 	config.Topics = []string{"testTopic"}
 
-	if testing.Verbose() {
+	if testutils.Verbose(tb) {
 		config.Debug.All = true
 	}
 

@@ -266,7 +266,7 @@ func TestTestConsumerConfig(t *testing.T) {
 	config := kafkaclient.TestConsumerConfig(t, topicAndGroup)
 
 	size := 1
-	if testing.Verbose() {
+	if testutils.Verbose(t) {
 		size = 2
 	}
 
@@ -280,7 +280,7 @@ func TestTestProducerConfig(t *testing.T) {
 	config := kafkaclient.TestProducerConfig(t, topicAndGroup)
 
 	size := 1
-	if testing.Verbose() {
+	if testutils.Verbose(t) {
 		size = 2
 	}
 
