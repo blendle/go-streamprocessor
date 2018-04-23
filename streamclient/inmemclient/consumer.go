@@ -7,6 +7,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamutil"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -165,7 +166,9 @@ func (c *Consumer) consume() {
 		default:
 			for _, msg := range c.c.Inmem.Store.Messages() {
 				c.messages <- msg
-				c.c.Inmem.Store.Delete(msg)
+				if err := c.c.Inmem.Store.Del(msg); err != nil {
+					c.errors <- errors.Wrap(err, "unable to delete message")
+				}
 			}
 		}
 	}

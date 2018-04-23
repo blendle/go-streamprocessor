@@ -5,7 +5,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamutil/inmemstore"
+	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,7 +17,7 @@ import (
 //
 // You can optionally provide extra options to be used when instantiating the
 // consumer.
-func TestConsumer(tb testing.TB, s *inmemstore.Store, options ...func(c *streamconfig.Consumer)) (stream.Consumer, func()) {
+func TestConsumer(tb testing.TB, s stream.Store, options ...func(c *streamconfig.Consumer)) (stream.Consumer, func()) {
 	tb.Helper()
 
 	if s == nil {
@@ -39,7 +39,7 @@ func TestConsumer(tb testing.TB, s *inmemstore.Store, options ...func(c *streamc
 //
 // You can either pass a pre-configured inmemstore to this function as its
 // second argument, or pass in `nil`, to have one be instantiated for you.
-func TestProducer(tb testing.TB, s *inmemstore.Store, options ...func(c *streamconfig.Producer)) (stream.Producer, func()) {
+func TestProducer(tb testing.TB, s stream.Store, options ...func(c *streamconfig.Producer)) (stream.Producer, func()) {
 	tb.Helper()
 
 	if s == nil {

@@ -7,6 +7,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamutil"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -118,7 +119,9 @@ func (p *Producer) produce(ch <-chan stream.Message) {
 	defer p.wg.Done()
 
 	for msg := range ch {
-		p.c.Inmem.Store.Add(msg)
+		if err := p.c.Inmem.Store.Add(msg); err != nil {
+			p.errors <- errors.Wrap(err, "unable to add message to store")
+		}
 	}
 }
 
