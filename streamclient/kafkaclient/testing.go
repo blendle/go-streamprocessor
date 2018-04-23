@@ -129,8 +129,6 @@ func TestProduceMessages(tb testing.TB, topic string, values ...interface{}) {
 			require.Fail(tb, "Timeout while waiting for message to be delivered.")
 		}
 	}
-
-	require.Zero(tb, producer.Flush(10000), "Messages remain in queue after Flush()")
 }
 
 // TestOffsets returns a list of `kafka.TopicPartition`s.
@@ -221,7 +219,7 @@ func testKafkaProducer(tb testing.TB) (*kafka.Producer, func()) {
 	require.NoError(tb, err)
 
 	closer := func() {
-		i := producer.Flush(1000 * testutils.TimeoutMultiplier)
+		i := producer.Flush(testutils.MultipliedInt(tb, 1000))
 		require.Zero(tb, i, "expected all messages to be flushed")
 
 		producer.Close()
