@@ -14,8 +14,6 @@ import (
 )
 
 func TestNewProducer(t *testing.T) {
-	t.Parallel()
-
 	_, err := streamclient.NewProducer()
 	assert.Error(t, err)
 }

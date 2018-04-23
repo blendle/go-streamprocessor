@@ -146,6 +146,7 @@ func TestIntegrationTestMessagesFromTopic(t *testing.T) {
 }
 
 func TestIntegrationTestProduceMessages(t *testing.T) {
+	t.Parallel()
 	testutils.Integration(t)
 
 	var tests = map[string]struct {
@@ -180,10 +181,7 @@ func TestIntegrationTestProduceMessages(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
 			topicAndGroup := testutils.Random(t)
-			println(topicAndGroup)
 
 			config := &kafka.ConfigMap{
 				"metadata.broker.list":     kafkaconfig.TestBrokerAddress,

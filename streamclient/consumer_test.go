@@ -17,8 +17,6 @@ import (
 )
 
 func TestNewConsumer(t *testing.T) {
-	t.Parallel()
-
 	_, err := streamclient.NewConsumer()
 	assert.Error(t, err)
 }
