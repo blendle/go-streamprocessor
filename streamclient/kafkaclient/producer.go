@@ -8,7 +8,6 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamcore"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -24,7 +23,7 @@ type Producer struct {
 	kafka    *kafka.Producer
 	wg       sync.WaitGroup
 	errors   chan error
-	messages chan<- streammsg.Message
+	messages chan<- stream.Message
 	signals  chan os.Signal
 	quit     chan bool
 	once     *sync.Once
@@ -34,7 +33,7 @@ var _ stream.Producer = (*Producer)(nil)
 
 // NewProducer returns a new Kafka producer.
 func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, error) {
-	ch := make(chan streammsg.Message)
+	ch := make(chan stream.Message)
 
 	producer, err := newProducer(ch, options)
 	if err != nil {
@@ -88,7 +87,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 }
 
 // Messages returns the write channel for messages to be produced.
-func (p *Producer) Messages() chan<- streammsg.Message {
+func (p *Producer) Messages() chan<- stream.Message {
 	return p.messages
 }
 
@@ -146,12 +145,14 @@ func (p *Producer) Close() (err error) {
 	return err
 }
 
-// Config returns a read-only representation of the producer configuration.
-func (p *Producer) Config() streamconfig.Producer {
+// Config returns a read-only representation of the producer configuration as an
+// interface. To access the underlying configuration struct, cast the interface
+// to `streamconfig.Producer`.
+func (p *Producer) Config() interface{} {
 	return p.c
 }
 
-func (p *Producer) produce(ch <-chan streammsg.Message) {
+func (p *Producer) produce(ch <-chan stream.Message) {
 	defer func() {
 		close(p.messages)
 		p.wg.Done()
@@ -181,7 +182,7 @@ func (p *Producer) produce(ch <-chan streammsg.Message) {
 	}
 }
 
-func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
+func newProducer(ch chan stream.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
 	// Construct a full configuration object, based on the provided configuration,
 	// the default configurations, and the static configurations.
 	config, err := streamconfig.NewProducer(options...)
@@ -220,7 +221,7 @@ func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Produce
 	return producer, nil
 }
 
-func (p *Producer) newMessage(m streammsg.Message) *kafka.Message {
+func (p *Producer) newMessage(m stream.Message) *kafka.Message {
 	headers := make([]kafka.Header, len(m.Tags))
 	for k, v := range m.Tags {
 		headers = append(headers, kafka.Header{Key: k, Value: v})
@@ -244,7 +245,7 @@ func (p *Producer) newMessage(m streammsg.Message) *kafka.Message {
 // The partition is set to `kafka.PartitionAny`, to allow the Kafka broker to
 // determine in which partition the message should end up, based on the key set
 // for the message.
-func (p *Producer) newToppar(m streammsg.Message) kafka.TopicPartition {
+func (p *Producer) newToppar(m stream.Message) kafka.TopicPartition {
 	topic := &p.c.Kafka.Topic
 	if m.Topic != "" {
 		topic = &m.Topic

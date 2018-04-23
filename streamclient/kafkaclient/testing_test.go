@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient"
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/assert"
@@ -26,7 +26,7 @@ func TestIntegrationTestConsumer(t *testing.T) {
 	defer closer()
 
 	assert.Equal(t, "*kafkaclient.Consumer", reflect.TypeOf(consumer).String())
-	assert.Equal(t, topicAndGroup, consumer.Config().Kafka.Topics[0])
+	assert.Equal(t, topicAndGroup, consumer.Config().(streamconfig.Consumer).Kafka.Topics[0])
 }
 
 func TestIntegrationTestConsumer_WithOptions(t *testing.T) {
@@ -41,8 +41,9 @@ func TestIntegrationTestConsumer_WithOptions(t *testing.T) {
 	consumer, closer := kafkaclient.TestConsumer(t, topicAndGroup, options)
 	defer closer()
 
-	assert.Equal(t, "TestTestConsumer_WithOptions", consumer.Config().Kafka.ID)
-	assert.Equal(t, topicAndGroup, consumer.Config().Kafka.Topics[0])
+	cfg := consumer.Config().(streamconfig.Consumer)
+	assert.Equal(t, "TestTestConsumer_WithOptions", cfg.Kafka.ID)
+	assert.Equal(t, topicAndGroup, cfg.Kafka.Topics[0])
 }
 
 func TestIntegrationTestProducer(t *testing.T) {
@@ -69,8 +70,9 @@ func TestIntegrationTestProducer_WithOptions(t *testing.T) {
 	producer, closer := kafkaclient.TestProducer(t, topic, options)
 	defer closer()
 
-	assert.Equal(t, "TestTestProducer_WithOptions", producer.Config().Kafka.ID)
-	assert.Equal(t, topic, producer.Config().Kafka.Topic)
+	cfg := producer.Config().(streamconfig.Producer)
+	assert.Equal(t, "TestTestProducer_WithOptions", cfg.Kafka.ID)
+	assert.Equal(t, topic, cfg.Kafka.Topic)
 }
 
 func TestIntegrationTestMessageFromTopic(t *testing.T) {
@@ -168,8 +170,8 @@ func TestIntegrationTestProduceMessages(t *testing.T) {
 			[]string{"hello world", "hello universe!"},
 		},
 
-		"streammsg.Message": {
-			[]interface{}{streammsg.Message{Value: []byte("hello world")}},
+		"stream.Message": {
+			[]interface{}{stream.Message{Value: []byte("hello world")}},
 			[]string{"hello world"},
 		},
 

@@ -5,10 +5,10 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient"
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,7 +21,7 @@ func TestTestMessageFromConsumer(t *testing.T) {
 	producer, closer := inmemclient.TestProducer(t, store)
 	defer closer()
 
-	producer.Messages() <- streammsg.TestMessage(t, "hello", "world")
+	producer.Messages() <- stream.TestMessage(t, "hello", "world")
 
 	opts := func(c *streamconfig.Consumer) {
 		c.Inmem.ConsumeOnce = false

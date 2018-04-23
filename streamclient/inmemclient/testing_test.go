@@ -26,7 +26,7 @@ func TestTestConsumer_WithStore(t *testing.T) {
 	consumer, closer := inmemclient.TestConsumer(t, store)
 	defer closer()
 
-	assert.EqualValues(t, store, consumer.Config().Inmem.Store)
+	assert.EqualValues(t, store, consumer.Config().(streamconfig.Consumer).Inmem.Store)
 }
 
 func TestTestConsumer_WithOptions(t *testing.T) {
@@ -43,7 +43,7 @@ func TestTestConsumer_WithOptions(t *testing.T) {
 	consumer, closer := inmemclient.TestConsumer(t, nil, options)
 	defer closer()
 
-	assert.EqualValues(t, store, consumer.Config().Inmem.Store)
+	assert.EqualValues(t, store, consumer.Config().(streamconfig.Consumer).Inmem.Store)
 }
 
 func TestTestProducer(t *testing.T) {
@@ -62,7 +62,7 @@ func TestTestProducer_WithStore(t *testing.T) {
 	producer, closer := inmemclient.TestProducer(t, store)
 	defer closer()
 
-	assert.EqualValues(t, store, producer.Config().Inmem.Store)
+	assert.EqualValues(t, store, producer.Config().(streamconfig.Producer).Inmem.Store)
 }
 
 func TestTestProducer_WithOptions(t *testing.T) {
@@ -79,5 +79,5 @@ func TestTestProducer_WithOptions(t *testing.T) {
 	producer, closer := inmemclient.TestProducer(t, nil, options)
 	defer closer()
 
-	assert.EqualValues(t, store, producer.Config().Inmem.Store)
+	assert.EqualValues(t, store, producer.Config().(streamconfig.Producer).Inmem.Store)
 }

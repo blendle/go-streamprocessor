@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -51,9 +51,9 @@ func TestIntegrationNewProducer_WithOptions(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { require.NoError(t, producer.Close()) }()
 
-	assert.Equal(t, false, producer.Config().Kafka.Debug.Broker)
-	assert.Equal(t, true, producer.Config().Kafka.Debug.Msg)
-	assert.Equal(t, "test", producer.Config().Kafka.SSL.KeyPassword)
+	assert.Equal(t, false, producer.Config().(streamconfig.Producer).Kafka.Debug.Broker)
+	assert.Equal(t, true, producer.Config().(streamconfig.Producer).Kafka.Debug.Msg)
+	assert.Equal(t, "test", producer.Config().(streamconfig.Producer).Kafka.SSL.KeyPassword)
 }
 
 func TestIntegrationProducer_Messages(t *testing.T) {
@@ -61,7 +61,7 @@ func TestIntegrationProducer_Messages(t *testing.T) {
 	testutils.Integration(t)
 
 	topic := testutils.Random(t)
-	message := streammsg.Message{Value: []byte("Hello Universe!")}
+	message := stream.Message{Value: []byte("Hello Universe!")}
 
 	producer, closer := kafkaclient.TestProducer(t, topic)
 	defer closer()
@@ -88,7 +88,7 @@ func TestIntegrationProducer_Messages_Ordering(t *testing.T) {
 
 	for i := 0; i < messageCount; i++ {
 		select {
-		case producer.Messages() <- streammsg.Message{Value: []byte(strconv.Itoa(i))}:
+		case producer.Messages() <- stream.Message{Value: []byte(strconv.Itoa(i))}:
 		case <-time.After(1 * time.Second):
 			require.Fail(t, "Timeout while waiting for message to be delivered.")
 		}
@@ -165,7 +165,7 @@ func BenchmarkIntegrationProducer_Messages(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		msg := streammsg.TestMessage(b, strconv.Itoa(i), fmt.Sprintf(`{"number":%d}`, i))
+		msg := stream.TestMessage(b, strconv.Itoa(i), fmt.Sprintf(`{"number":%d}`, i))
 		msg.Topic = topic
 
 		producer.Messages() <- msg

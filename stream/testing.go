@@ -1,4 +1,4 @@
-package streammsg
+package stream
 
 import (
 	"testing"

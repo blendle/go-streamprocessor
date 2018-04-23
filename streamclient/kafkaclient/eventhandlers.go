@@ -109,9 +109,9 @@ func (p *Producer) handleError(e kafka.Error) {
 }
 
 // handleMessage handles all Kafka messages by converting the message to a
-// `streammsg.Message` format, and delivers it to the receiver using the
-// messages channel. The return value indicates whether or not the quit signal
-// was received while waiting to deliver the message. This value is used by the
+// `stream.Message` format, and delivers it to the receiver using the messages
+// channel. The return value indicates whether or not the quit signal was
+// received while waiting to deliver the message. This value is used by the
 // consumer to close up shop.
 func (c *Consumer) handleMessage(e *kafka.Message) bool {
 	msg := newMessageFromKafka(e)

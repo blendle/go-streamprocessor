@@ -8,7 +8,6 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamcore"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -29,7 +28,7 @@ type Consumer struct {
 	logger   *zap.Logger
 	wg       sync.WaitGroup
 	errors   chan error
-	messages chan streammsg.Message
+	messages chan stream.Message
 	signals  chan os.Signal
 	once     *sync.Once
 }
@@ -81,7 +80,7 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 
 // Messages returns the read channel for the messages that are returned by the
 // stream.
-func (c *Consumer) Messages() <-chan streammsg.Message {
+func (c *Consumer) Messages() <-chan stream.Message {
 	return c.messages
 }
 
@@ -92,12 +91,12 @@ func (c *Consumer) Errors() <-chan error {
 }
 
 // Ack is a no-op implementation to satisfy the stream.Consumer interface.
-func (c *Consumer) Ack(_ streammsg.Message) error {
+func (c *Consumer) Ack(_ stream.Message) error {
 	return nil
 }
 
 // Nack is a no-op implementation to satisfy the stream.Consumer interface.
-func (c *Consumer) Nack(_ streammsg.Message) error {
+func (c *Consumer) Nack(_ stream.Message) error {
 	return nil
 }
 
@@ -129,8 +128,10 @@ func (c *Consumer) Close() (err error) {
 	return nil
 }
 
-// Config returns a read-only representation of the consumer configuration.
-func (c *Consumer) Config() streamconfig.Consumer {
+// Config returns a read-only representation of the consumer configuration as an
+// interface. To access the underlying configuration struct, cast the interface
+// to `streamconfig.Consumer`.
+func (c *Consumer) Config() interface{} {
 	return c.c
 }
 
@@ -161,7 +162,7 @@ func (c *Consumer) consume() {
 		b := make([]byte, len(scanner.Bytes()))
 		copy(b, scanner.Bytes())
 
-		c.messages <- streammsg.Message{Value: b}
+		c.messages <- stream.Message{Value: b}
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -179,7 +180,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 		c:        config,
 		logger:   &config.Logger,
 		errors:   make(chan error),
-		messages: make(chan streammsg.Message),
+		messages: make(chan stream.Message),
 		once:     &sync.Once{},
 	}
 

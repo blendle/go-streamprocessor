@@ -8,7 +8,6 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/require"
@@ -44,7 +43,7 @@ func TestProducer(tb testing.TB, topic string, options ...func(c *streamconfig.P
 // TestMessageFromTopic returns a single message, consumed from the provided
 // topic. It has a built-in timeout mechanism to prevent the test from getting
 // stuck.
-func TestMessageFromTopic(tb testing.TB, topic string) streammsg.Message {
+func TestMessageFromTopic(tb testing.TB, topic string) stream.Message {
 	tb.Helper()
 
 	consumer, closer := testKafkaConsumer(tb, topic, false)
@@ -57,13 +56,13 @@ func TestMessageFromTopic(tb testing.TB, topic string) streammsg.Message {
 }
 
 // TestMessagesFromTopic returns all messages in a topic.
-func TestMessagesFromTopic(tb testing.TB, topic string) []streammsg.Message {
+func TestMessagesFromTopic(tb testing.TB, topic string) []stream.Message {
 	tb.Helper()
 
 	consumer, closer := testKafkaConsumer(tb, topic, true)
 	defer closer()
 
-	var messages []streammsg.Message
+	var messages []stream.Message
 	for event := range consumer.Events() {
 		switch e := event.(type) {
 		case *kafka.Message:
@@ -86,8 +85,8 @@ func TestMessagesFromTopic(tb testing.TB, topic string) []streammsg.Message {
 // * `[]string` – The first value is used as the kafka message key, the second
 // as the message value, all other values are ignored.
 //
-// * `streammsg.Message` – The value (and, if applicable, the key) are set on a
-// new `kafka.Message`.
+// * `stream.Message` – The value (and, if applicable, the key) are set on a new
+// `kafka.Message`.
 //
 // * `*kafka.Message` – The message is delivered to Kafka as-is. If
 // `kafka.TopicPartition` is empty, the passed in topic value is used instead.
@@ -109,7 +108,7 @@ func TestProduceMessages(tb testing.TB, topic string, values ...interface{}) {
 
 			m.Key = []byte(value[0])
 			m.Value = []byte(value[1])
-		case streammsg.Message:
+		case stream.Message:
 			m.Value = value.Value
 			m.Key = value.Key
 		case kafka.Message:
@@ -132,13 +131,13 @@ func TestProduceMessages(tb testing.TB, topic string, values ...interface{}) {
 }
 
 // TestOffsets returns a list of `kafka.TopicPartition`s.
-func TestOffsets(tb testing.TB, message streammsg.Message) []kafka.TopicPartition {
+func TestOffsets(tb testing.TB, message stream.Message) []kafka.TopicPartition {
 	tb.Helper()
 
 	consumer, closer := testKafkaConsumer(tb, message.Topic, false)
 	defer closer()
 
-	tp := []kafka.TopicPartition{*streammsg.MessageOpqaue(&message).(opaque).toppar}
+	tp := []kafka.TopicPartition{*stream.MessageOpqaue(&message).(opaque).toppar}
 	offsets, err := consumer.Committed(tp, 2000)
 	require.NoError(tb, err)
 
