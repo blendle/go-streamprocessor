@@ -78,7 +78,7 @@ func TestIntegrationConsumer_Messages(t *testing.T) {
 	select {
 	case actual := <-consumer.Messages():
 		assert.EqualValues(t, message.Value, actual.Value)
-	case <-time.After(time.Duration(5*testutils.TimeoutMultiplier) * time.Second):
+	case <-time.After(testutils.MultipliedDuration(t, 5*time.Second)):
 		require.Fail(t, "Timeout while waiting for message to be returned.")
 	}
 }
@@ -148,7 +148,7 @@ func TestIntegrationConsumer_Errors(t *testing.T) {
 	case err := <-consumer.Errors():
 		require.Error(t, err)
 		assert.Equal(t, "unable to manually consume errors while HandleErrors is true", err.Error())
-	case <-time.After(1 * time.Second):
+	case <-time.After(testutils.MultipliedDuration(t, 1*time.Second)):
 		t.Fatal("expected error, got none")
 	}
 }

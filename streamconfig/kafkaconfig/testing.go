@@ -17,13 +17,13 @@ func TestConsumer(_ testing.TB) Consumer {
 	config := ConsumerDefaults
 
 	config.Brokers = []string{TestBrokerAddress}
-	config.CommitInterval = time.Duration(500*testutils.TimeoutMultiplier) * time.Millisecond
+	config.CommitInterval = 500 * time.Millisecond
 	config.GroupID = "testGroup"
-	config.HeartbeatInterval = time.Duration(150*testutils.TimeoutMultiplier) * time.Millisecond
+	config.HeartbeatInterval = 150 * time.Millisecond
 	config.ID = "testConsumer"
 	config.InitialOffset = OffsetBeginning
 	config.SecurityProtocol = ProtocolPlaintext
-	config.SessionTimeout = time.Duration(1000*testutils.TimeoutMultiplier) * time.Millisecond
+	config.SessionTimeout = 1 * time.Second
 	config.Topics = []string{"testTopic"}
 
 	if testing.Verbose() {

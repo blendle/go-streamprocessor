@@ -50,7 +50,7 @@ func TestMessageFromTopic(tb testing.TB, topic string) streammsg.Message {
 	consumer, closer := testKafkaConsumer(tb, topic, false)
 	defer closer()
 
-	m, err := consumer.ReadMessage(time.Duration(3000*testutils.TimeoutMultiplier) * time.Millisecond)
+	m, err := consumer.ReadMessage(testutils.MultipliedDuration(tb, 3*time.Second))
 	require.NoError(tb, err)
 
 	return *newMessageFromKafka(m)
@@ -125,7 +125,7 @@ func TestProduceMessages(tb testing.TB, topic string, values ...interface{}) {
 
 		select {
 		case <-producer.Events():
-		case <-time.After(time.Duration(5*testutils.TimeoutMultiplier) * time.Second):
+		case <-time.After(testutils.MultipliedDuration(tb, 5*time.Second)):
 			require.Fail(tb, "Timeout while waiting for message to be delivered.")
 		}
 	}
@@ -192,8 +192,8 @@ func TestProducerConfig(tb testing.TB, topic string, options ...func(c *streamco
 
 	opts := func(p *streamconfig.Producer) {
 		p.Kafka.ID = "testProducer"
-		p.Kafka.SessionTimeout = time.Duration(1000*testutils.TimeoutMultiplier) * time.Millisecond
-		p.Kafka.HeartbeatInterval = time.Duration(150*testutils.TimeoutMultiplier) * time.Millisecond
+		p.Kafka.SessionTimeout = 1 * time.Second
+		p.Kafka.HeartbeatInterval = 150 * time.Millisecond
 		p.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 		p.Kafka.Topic = topic
 	}
