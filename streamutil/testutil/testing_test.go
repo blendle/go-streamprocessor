@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
