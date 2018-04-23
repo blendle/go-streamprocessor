@@ -33,5 +33,7 @@ fi
 echo "==      go-test-race"
 script/tests/go-test-race "$@"
 
-echo "==      go-test-bench"
-script/tests/go-test-bench "$@"
+if [ -z "$CI" ]; then
+  echo "==      go-test-bench"
+  script/tests/go-test-bench "$@"
+fi
