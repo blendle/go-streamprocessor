@@ -8,7 +8,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streamutil/testutils"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -49,7 +49,7 @@ func TestMessageFromTopic(tb testing.TB, topic string) stream.Message {
 	consumer, closer := testKafkaConsumer(tb, topic, false)
 	defer closer()
 
-	m, err := consumer.ReadMessage(testutils.MultipliedDuration(tb, 3*time.Second))
+	m, err := consumer.ReadMessage(testutil.MultipliedDuration(tb, 3*time.Second))
 	require.NoError(tb, err)
 
 	return *newMessageFromKafka(m)
@@ -124,7 +124,7 @@ func TestProduceMessages(tb testing.TB, topic string, values ...interface{}) {
 
 		select {
 		case <-producer.Events():
-		case <-time.After(testutils.MultipliedDuration(tb, 5*time.Second)):
+		case <-time.After(testutil.MultipliedDuration(tb, 5*time.Second)):
 			require.Fail(tb, "Timeout while waiting for message to be delivered.")
 		}
 	}
@@ -155,7 +155,7 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 		c.Kafka.Topics = []string{topicAndGroup}
 	}
 
-	if testutils.Verbose(tb) {
+	if testutil.Verbose(tb) {
 		logger, err := zap.NewDevelopment()
 		require.NoError(tb, err)
 
@@ -176,7 +176,7 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 func TestProducerConfig(tb testing.TB, topic string, options ...func(c *streamconfig.Producer)) []func(c *streamconfig.Producer) {
 	var allOptions []func(c *streamconfig.Producer)
 
-	if testutils.Verbose(tb) {
+	if testutil.Verbose(tb) {
 		logger, err := zap.NewDevelopment()
 		require.NoError(tb, err)
 
@@ -210,7 +210,7 @@ func testKafkaProducer(tb testing.TB) (*kafka.Producer, func()) {
 		"default.topic.config": kafka.ConfigMap{"acks": 1},
 	}
 
-	if testutils.Verbose(tb) {
+	if testutil.Verbose(tb) {
 		_ = config.SetKey("debug", "cgrp,topic")
 	}
 
@@ -218,7 +218,7 @@ func testKafkaProducer(tb testing.TB) (*kafka.Producer, func()) {
 	require.NoError(tb, err)
 
 	closer := func() {
-		i := producer.Flush(testutils.MultipliedInt(tb, 1000))
+		i := producer.Flush(testutil.MultipliedInt(tb, 1000))
 		require.Zero(tb, i, "expected all messages to be flushed")
 
 		producer.Close()

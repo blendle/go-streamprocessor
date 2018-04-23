@@ -1,4 +1,4 @@
-package testutils_test
+package testutil_test
 
 import (
 	"os"
@@ -6,12 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/streamutil/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestIntegration_Test(t *testing.T) {
-	testutils.Integration(t)
+	testutil.Integration(t)
 }
 
 func TestVerbose(t *testing.T) {
@@ -20,7 +19,7 @@ func TestVerbose(t *testing.T) {
 		defer func() { _ = os.Setenv("CI", ci) }()
 	}
 
-	v := testutils.Verbose(t)
+	v := testutil.Verbose(t)
 
 	assert.Equal(t, testing.Verbose(), v)
 }
@@ -29,11 +28,11 @@ func TestVerbose_CI(t *testing.T) {
 	_ = os.Setenv("CI", "true")
 	defer func() { _ = os.Unsetenv("CI") }()
 
-	assert.True(t, testutils.Verbose(t))
+	assert.True(t, testutil.Verbose(t))
 }
 
 func TestRandom(t *testing.T) {
-	s := testutils.Random(t)
+	s := testutil.Random(t)
 
 	assert.True(t, strings.HasPrefix(s, "TestRandom-"), s)
 }
@@ -65,11 +64,11 @@ func TestMultipliedDuration(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			curr := testutils.TestMultiplier
-			defer func() { testutils.TestMultiplier = curr }()
+			curr := testutil.TestMultiplier
+			defer func() { testutil.TestMultiplier = curr }()
 
-			testutils.TestMultiplier = tt.multiplier
-			actual := testutils.MultipliedDuration(t, tt.in)
+			testutil.TestMultiplier = tt.multiplier
+			actual := testutil.MultipliedDuration(t, tt.in)
 			assert.Equal(t, tt.out, actual)
 		})
 	}
@@ -96,11 +95,11 @@ func TestMultipliedInt(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			curr := testutils.TestMultiplier
-			defer func() { testutils.TestMultiplier = curr }()
+			curr := testutil.TestMultiplier
+			defer func() { testutil.TestMultiplier = curr }()
 
-			testutils.TestMultiplier = tt.multiplier
-			actual := testutils.MultipliedInt(t, tt.in)
+			testutil.TestMultiplier = tt.multiplier
+			actual := testutil.MultipliedInt(t, tt.in)
 			assert.Equal(t, tt.out, actual)
 		})
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streamutil/testutils"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -25,9 +25,9 @@ func TestProducer(t *testing.T) {
 
 func TestIntegrationNewProducer(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topic := testutils.Random(t)
+	topic := testutil.Random(t)
 	options := kafkaclient.TestProducerConfig(t, topic)
 
 	producer, err := kafkaclient.NewProducer(options...)
@@ -39,9 +39,9 @@ func TestIntegrationNewProducer(t *testing.T) {
 
 func TestIntegrationNewProducer_WithOptions(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topic := testutils.Random(t)
+	topic := testutil.Random(t)
 	options := kafkaclient.TestProducerConfig(t, topic, func(c *streamconfig.Producer) {
 		c.Kafka.Debug.Msg = true
 		c.Kafka.SSL.KeyPassword = "test"
@@ -58,9 +58,9 @@ func TestIntegrationNewProducer_WithOptions(t *testing.T) {
 
 func TestIntegrationProducer_Messages(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topic := testutils.Random(t)
+	topic := testutil.Random(t)
 	message := stream.Message{Value: []byte("Hello Universe!")}
 
 	producer, closer := kafkaclient.TestProducer(t, topic)
@@ -68,7 +68,7 @@ func TestIntegrationProducer_Messages(t *testing.T) {
 
 	select {
 	case producer.Messages() <- message:
-	case <-time.After(testutils.MultipliedDuration(t, 5*time.Second)):
+	case <-time.After(testutil.MultipliedDuration(t, 5*time.Second)):
 		require.Fail(t, "Timeout while waiting for message to be delivered.")
 	}
 
@@ -78,10 +78,10 @@ func TestIntegrationProducer_Messages(t *testing.T) {
 
 func TestIntegrationProducer_Messages_Ordering(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
 	messageCount := 5000
-	topic := testutils.Random(t)
+	topic := testutil.Random(t)
 
 	producer, closer := kafkaclient.TestProducer(t, topic)
 	defer closer()
@@ -108,13 +108,13 @@ func TestIntegrationProducer_Messages_Ordering(t *testing.T) {
 
 func TestIntegrationProducer_Errors(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
 	options := func(c *streamconfig.Producer) {
 		c.HandleErrors = true
 	}
 
-	producer, closer := kafkaclient.TestProducer(t, testutils.Random(t), options)
+	producer, closer := kafkaclient.TestProducer(t, testutil.Random(t), options)
 	defer closer()
 
 	select {
@@ -128,13 +128,13 @@ func TestIntegrationProducer_Errors(t *testing.T) {
 
 func TestIntegrationProducer_Errors_Manual(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
 	options := func(c *streamconfig.Producer) {
 		c.HandleErrors = false
 	}
 
-	producer, closer := kafkaclient.TestProducer(t, testutils.Random(t), options)
+	producer, closer := kafkaclient.TestProducer(t, testutil.Random(t), options)
 	defer closer()
 
 	select {
@@ -145,9 +145,9 @@ func TestIntegrationProducer_Errors_Manual(t *testing.T) {
 }
 
 func BenchmarkIntegrationProducer_Messages(b *testing.B) {
-	testutils.Integration(b)
+	testutil.Integration(b)
 
-	topic := testutils.Random(b)
+	topic := testutil.Random(b)
 	logger, err := zap.NewDevelopment()
 	require.NoError(b, err, logger)
 

@@ -12,7 +12,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streamutil/testutils"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -26,9 +26,9 @@ func TestConsumer(t *testing.T) {
 
 func TestIntegrationNewConsumer(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 	options := kafkaclient.TestConsumerConfig(t, topicAndGroup)
 
 	consumer, err := kafkaclient.NewConsumer(options...)
@@ -40,9 +40,9 @@ func TestIntegrationNewConsumer(t *testing.T) {
 
 func TestIntegrationNewConsumer_WithOptions(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 	options := kafkaclient.TestConsumerConfig(t, topicAndGroup, func(c *streamconfig.Consumer) {
 		c.Kafka.Debug.Msg = true
 		c.Kafka.SSL.KeyPassword = "test"
@@ -59,9 +59,9 @@ func TestIntegrationNewConsumer_WithOptions(t *testing.T) {
 
 func TestIntegrationConsumer_Messages(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 	message := kafka.Message{
 		TopicPartition: kafka.TopicPartition{
 			Topic:     &topicAndGroup,
@@ -78,17 +78,17 @@ func TestIntegrationConsumer_Messages(t *testing.T) {
 	select {
 	case actual := <-consumer.Messages():
 		assert.EqualValues(t, message.Value, actual.Value)
-	case <-time.After(testutils.MultipliedDuration(t, 5*time.Second)):
+	case <-time.After(testutil.MultipliedDuration(t, 5*time.Second)):
 		require.Fail(t, "Timeout while waiting for message to be returned.")
 	}
 }
 
 func TestIntegrationConsumer_Messages_Ordering(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
 	messageCount := 5000
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 
 	messages := []interface{}{}
 	for i := 0; i < messageCount; i++ {
@@ -129,13 +129,13 @@ func TestIntegrationConsumer_Messages_Ordering(t *testing.T) {
 
 func TestIntegrationConsumer_Errors(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
 	options := func(c *streamconfig.Consumer) {
 		c.HandleErrors = true
 	}
 
-	consumer, closer := kafkaclient.TestConsumer(t, testutils.Random(t), options)
+	consumer, closer := kafkaclient.TestConsumer(t, testutil.Random(t), options)
 	defer closer()
 
 	// Give the consumer some time to start.
@@ -148,20 +148,20 @@ func TestIntegrationConsumer_Errors(t *testing.T) {
 	case err := <-consumer.Errors():
 		require.Error(t, err)
 		assert.Equal(t, "unable to manually consume errors while HandleErrors is true", err.Error())
-	case <-time.After(testutils.MultipliedDuration(t, 1*time.Second)):
+	case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
 		t.Fatal("expected error, got none")
 	}
 }
 
 func TestIntegrationConsumer_Errors_Manual(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
 	options := func(c *streamconfig.Consumer) {
 		c.HandleErrors = false
 	}
 
-	consumer, closer := kafkaclient.TestConsumer(t, testutils.Random(t), options)
+	consumer, closer := kafkaclient.TestConsumer(t, testutil.Random(t), options)
 	defer closer()
 
 	// Give the consumer some time to properly start, before shutting it down.
@@ -179,9 +179,9 @@ func TestIntegrationConsumer_Errors_Manual(t *testing.T) {
 
 func TestIntegrationConsumer_Ack(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topicOrGroup := testutils.Random(t)
+	topicOrGroup := testutil.Random(t)
 
 	kafkaclient.TestProduceMessages(t, topicOrGroup, "hello world", "hello universe!")
 
@@ -243,9 +243,9 @@ func TestIntegrationConsumer_Ack(t *testing.T) {
 
 func TestIntegrationConsumer_Ack_WithClosedConsumer(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topicOrGroup := testutils.Random(t)
+	topicOrGroup := testutil.Random(t)
 
 	kafkaclient.TestProduceMessages(t, topicOrGroup, "hello world")
 
@@ -259,18 +259,18 @@ func TestIntegrationConsumer_Ack_WithClosedConsumer(t *testing.T) {
 
 func TestIntegrationConsumer_Nack(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	consumer, closer := kafkaclient.TestConsumer(t, testutils.Random(t))
+	consumer, closer := kafkaclient.TestConsumer(t, testutil.Random(t))
 	defer closer()
 
 	assert.Nil(t, consumer.Nack(stream.Message{}))
 }
 
 func BenchmarkIntegrationConsumer_Messages(b *testing.B) {
-	testutils.Integration(b)
+	testutil.Integration(b)
 
-	topicAndGroup := testutils.Random(b)
+	topicAndGroup := testutil.Random(b)
 	line := `{"number":%d}` + "\n"
 
 	config := &kafka.ConfigMap{
