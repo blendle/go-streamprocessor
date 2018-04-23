@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/blendle/go-streamprocessor/stream"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -13,7 +12,7 @@ import (
 // TestMessageFromConsumer returns a single message, consumed from the provided
 // consumer. It has a built-in timeout mechanism to prevent the test from
 // getting stuck.
-func TestMessageFromConsumer(tb testing.TB, consumer stream.Consumer) streammsg.Message {
+func TestMessageFromConsumer(tb testing.TB, consumer stream.Consumer) stream.Message {
 	tb.Helper()
 
 	select {
@@ -25,5 +24,5 @@ func TestMessageFromConsumer(tb testing.TB, consumer stream.Consumer) streammsg.
 		require.Fail(tb, "Timeout while waiting for message to be returned.")
 	}
 
-	return streammsg.Message{}
+	return stream.Message{}
 }

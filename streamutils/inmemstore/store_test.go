@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/streammsg"
+	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -22,7 +22,7 @@ func TestAdd(t *testing.T) {
 	t.Parallel()
 
 	store := New()
-	m := streammsg.Message{
+	m := stream.Message{
 		Value:     []byte("testValue"),
 		Key:       []byte("testKey"),
 		Timestamp: time.Unix(0, 0),
@@ -54,7 +54,7 @@ func TestDelete(t *testing.T) {
 	t.Parallel()
 
 	store := New()
-	m1 := streammsg.Message{
+	m1 := stream.Message{
 		Value:     []byte("testValue1"),
 		Key:       []byte("testKey1"),
 		Timestamp: time.Unix(0, 0),
@@ -62,7 +62,7 @@ func TestDelete(t *testing.T) {
 		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
-	m2 := streammsg.Message{
+	m2 := stream.Message{
 		Value:     []byte("testValue2"),
 		Key:       []byte("testKey2"),
 		Timestamp: time.Unix(0, 0),
@@ -70,7 +70,7 @@ func TestDelete(t *testing.T) {
 		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
-	m3 := streammsg.Message{
+	m3 := stream.Message{
 		Value:     []byte("testValue3"),
 		Key:       []byte("testKey3"),
 		Timestamp: time.Unix(0, 0),
@@ -97,7 +97,7 @@ func TestMessages(t *testing.T) {
 	t.Parallel()
 
 	store := New()
-	m := streammsg.Message{
+	m := stream.Message{
 		Value:     []byte("testValue"),
 		Key:       []byte("testKey"),
 		Timestamp: time.Unix(0, 0),

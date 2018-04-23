@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/stretchr/testify/assert"
@@ -45,15 +45,15 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { require.NoError(t, consumer.Close()) }()
 
-	assert.Equal(t, store, consumer.Config().Inmem.Store)
+	assert.Equal(t, store, consumer.Config().(streamconfig.Consumer).Inmem.Store)
 }
 
 func TestConsumer_Messages(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.New()
-	store.Add(streammsg.TestMessage(t, "key1", "hello world"))
-	store.Add(streammsg.TestMessage(t, "key2", "hello universe!"))
+	store.Add(stream.TestMessage(t, "key1", "hello world"))
+	store.Add(stream.TestMessage(t, "key2", "hello universe!"))
 
 	consumer, closer := inmemclient.TestConsumer(t, store)
 	defer closer()
@@ -75,7 +75,7 @@ func TestConsumer_Messages_Ordering(t *testing.T) {
 	store := inmemstore.New()
 
 	for i := 0; i < messageCount; i++ {
-		store.Add(streammsg.TestMessage(t, strconv.Itoa(i), "hello world"+strconv.Itoa(i)))
+		store.Add(stream.TestMessage(t, strconv.Itoa(i), "hello world"+strconv.Itoa(i)))
 	}
 
 	consumer, closer := inmemclient.TestConsumer(t, store)
@@ -100,7 +100,7 @@ func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 	line := `{"number":%d}` + "\n"
 
 	for i := 0; i < messageCount; i++ {
-		store.Add(streammsg.TestMessage(t, strconv.Itoa(i), fmt.Sprintf(line, i)))
+		store.Add(stream.TestMessage(t, strconv.Itoa(i), fmt.Sprintf(line, i)))
 	}
 
 	consumer, closer := inmemclient.TestConsumer(t, store)
@@ -160,7 +160,7 @@ func TestConsumer_Ack(t *testing.T) {
 	consumer, closer := inmemclient.TestConsumer(t, nil)
 	defer closer()
 
-	assert.Nil(t, consumer.Ack(streammsg.Message{}))
+	assert.Nil(t, consumer.Ack(stream.Message{}))
 }
 
 func TestConsumer_Nack(t *testing.T) {
@@ -169,7 +169,7 @@ func TestConsumer_Nack(t *testing.T) {
 	consumer, closer := inmemclient.TestConsumer(t, nil)
 	defer closer()
 
-	assert.Nil(t, consumer.Nack(streammsg.Message{}))
+	assert.Nil(t, consumer.Nack(stream.Message{}))
 }
 
 func TestConsumer_Close(t *testing.T) {
@@ -203,7 +203,7 @@ func BenchmarkConsumer_Messages(b *testing.B) {
 	line := `{"number":%d}` + "\n"
 
 	for i := 1; i <= b.N; i++ {
-		store.Add(streammsg.TestMessage(b, strconv.Itoa(i), fmt.Sprintf(line, i)))
+		store.Add(stream.TestMessage(b, strconv.Itoa(i), fmt.Sprintf(line, i)))
 	}
 
 	b.ResetTimer()

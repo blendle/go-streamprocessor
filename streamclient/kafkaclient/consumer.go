@@ -8,7 +8,6 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamcore"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"go.uber.org/zap"
 )
@@ -23,7 +22,7 @@ type Consumer struct {
 	kafka    *kafka.Consumer
 	wg       sync.WaitGroup
 	errors   chan error
-	messages chan streammsg.Message
+	messages chan stream.Message
 	signals  chan os.Signal
 	quit     chan bool
 	once     *sync.Once
@@ -80,7 +79,7 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 
 // Messages returns the read channel for the messages that are returned by the
 // stream.
-func (c *Consumer) Messages() <-chan streammsg.Message {
+func (c *Consumer) Messages() <-chan stream.Message {
 	return c.messages
 }
 
@@ -93,8 +92,8 @@ func (c *Consumer) Errors() <-chan error {
 // Ack acknowledges that a message was processed. See `Consumer.storeOffset` for
 // more details on how message acknowledgment works for the Kafka consumer. If
 // the consumer is unable to acknowledge a message, an error is returned.
-func (c *Consumer) Ack(m streammsg.Message) error {
-	o, ok := streammsg.MessageOpqaue(&m).(opaque)
+func (c *Consumer) Ack(m stream.Message) error {
+	o, ok := stream.MessageOpqaue(&m).(opaque)
 	if !ok {
 		return errors.New("unsuccessful type assertion")
 	}
@@ -105,7 +104,7 @@ func (c *Consumer) Ack(m streammsg.Message) error {
 // Nack is a no-op implementation to satisfy the `stream.Consumer` interface. We
 // don't need an actual implementation, since not acknowledging a message will
 // eventually result in the message being redelivered.
-func (c *Consumer) Nack(m streammsg.Message) error {
+func (c *Consumer) Nack(m stream.Message) error {
 	return nil
 }
 
@@ -158,8 +157,10 @@ func (c *Consumer) Close() (err error) {
 	return err
 }
 
-// Config returns a read-only representation of the consumer configuration.
-func (c *Consumer) Config() streamconfig.Consumer {
+// Config returns a read-only representation of the consumer configuration as an
+// interface. To access the underlying configuration struct, cast the interface
+// to `streamconfig.Consumer`.
+func (c *Consumer) Config() interface{} {
 	return c.c
 }
 
@@ -276,7 +277,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 		logger:   &config.Logger,
 		kafka:    kafkaconsumer,
 		errors:   make(chan error),
-		messages: make(chan streammsg.Message),
+		messages: make(chan stream.Message),
 		quit:     make(chan bool, 1),
 		once:     &sync.Once{},
 	}
@@ -285,8 +286,8 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 }
 
 // newMessageFromKafka takes a *kafka.Message (provided by librdkafka), and
-// converts it to this package's `streammsg.Message` format.
-func newMessageFromKafka(m *kafka.Message) *streammsg.Message {
+// converts it to this package's `stream.Message` format.
+func newMessageFromKafka(m *kafka.Message) *stream.Message {
 	oint := int64(m.TopicPartition.Offset)
 	offset := &oint
 
@@ -298,7 +299,7 @@ func newMessageFromKafka(m *kafka.Message) *streammsg.Message {
 		offset = nil
 	}
 
-	msg := &streammsg.Message{
+	msg := &stream.Message{
 		Key:       m.Key,
 		Value:     m.Value,
 		Timestamp: m.Timestamp,
@@ -310,7 +311,7 @@ func newMessageFromKafka(m *kafka.Message) *streammsg.Message {
 	// populate it with the `TopicPartition` details of the Kafka message. This
 	// allows us to acknowledge this message at a later point in time, without
 	// having to hold on to the Kafka message itself.
-	_ = streammsg.SetMessageOpaque(msg, opaque{toppar: &m.TopicPartition})
+	_ = stream.SetMessageOpaque(msg, opaque{toppar: &m.TopicPartition})
 
 	return msg
 }

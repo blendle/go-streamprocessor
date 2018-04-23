@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient"
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/assert"
@@ -52,9 +52,9 @@ func TestIntegrationNewConsumer_WithOptions(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { require.NoError(t, consumer.Close()) }()
 
-	assert.Equal(t, false, consumer.Config().Kafka.Debug.Broker)
-	assert.Equal(t, true, consumer.Config().Kafka.Debug.Msg)
-	assert.Equal(t, "test", consumer.Config().Kafka.SSL.KeyPassword)
+	assert.Equal(t, false, consumer.Config().(streamconfig.Consumer).Kafka.Debug.Broker)
+	assert.Equal(t, true, consumer.Config().(streamconfig.Consumer).Kafka.Debug.Msg)
+	assert.Equal(t, "test", consumer.Config().(streamconfig.Consumer).Kafka.SSL.KeyPassword)
 }
 
 func TestIntegrationConsumer_Messages(t *testing.T) {
@@ -92,7 +92,7 @@ func TestIntegrationConsumer_Messages_Ordering(t *testing.T) {
 
 	messages := []interface{}{}
 	for i := 0; i < messageCount; i++ {
-		message := streammsg.TestMessage(t, strconv.Itoa(i), "hello world"+strconv.Itoa(i))
+		message := stream.TestMessage(t, strconv.Itoa(i), "hello world"+strconv.Itoa(i))
 		messages = append(messages, message)
 	}
 
@@ -164,7 +164,7 @@ func TestIntegrationConsumer_Errors_Manual(t *testing.T) {
 	consumer, closer := kafkaclient.TestConsumer(t, testutils.Random(t), options)
 	defer closer()
 
-	// Give the consumer some time to start.
+	// Give the consumer some time to properly start, before shutting it down.
 	//
 	// See: https://git.io/vpt2L
 	// See: https://git.io/vpqKr
@@ -264,7 +264,7 @@ func TestIntegrationConsumer_Nack(t *testing.T) {
 	consumer, closer := kafkaclient.TestConsumer(t, testutils.Random(t))
 	defer closer()
 
-	assert.Nil(t, consumer.Nack(streammsg.Message{}))
+	assert.Nil(t, consumer.Nack(stream.Message{}))
 }
 
 func BenchmarkIntegrationConsumer_Messages(b *testing.B) {
@@ -284,7 +284,7 @@ func BenchmarkIntegrationConsumer_Messages(b *testing.B) {
 	producer, err := kafka.NewProducer(config)
 	require.NoError(b, err)
 
-	msg := streammsg.TestMessage(b, "", "")
+	msg := stream.TestMessage(b, "", "")
 	h := []kafka.Header{}
 	for k, v := range msg.Tags {
 		h = append(h, kafka.Header{Key: k, Value: v})

@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -44,7 +44,7 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 	consumer, err := standardstreamclient.NewConsumer(options)
 	require.NoError(t, err)
 
-	assert.EqualValues(t, f, consumer.Config().Standardstream.Reader)
+	assert.EqualValues(t, f, consumer.Config().(streamconfig.Consumer).Standardstream.Reader)
 }
 
 func TestConsumer_Messages(t *testing.T) {
@@ -189,7 +189,7 @@ func TestConsumer_Ack(t *testing.T) {
 	consumer, closer := standardstreamclient.TestConsumer(t, b)
 	defer closer()
 
-	assert.Nil(t, consumer.Ack(streammsg.Message{}))
+	assert.Nil(t, consumer.Ack(stream.Message{}))
 }
 
 func TestConsumer_Nack(t *testing.T) {
@@ -199,7 +199,7 @@ func TestConsumer_Nack(t *testing.T) {
 	consumer, closer := standardstreamclient.TestConsumer(t, b)
 	defer closer()
 
-	assert.Nil(t, consumer.Nack(streammsg.Message{}))
+	assert.Nil(t, consumer.Nack(stream.Message{}))
 }
 
 func BenchmarkConsumer_Messages(b *testing.B) {

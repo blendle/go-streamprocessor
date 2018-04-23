@@ -7,7 +7,6 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamcore"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"go.uber.org/zap"
 )
 
@@ -18,7 +17,7 @@ type Consumer struct {
 	c streamconfig.Consumer
 
 	logger   *zap.Logger
-	messages chan streammsg.Message
+	messages chan stream.Message
 	signals  chan os.Signal
 	errors   chan error
 	quit     chan bool
@@ -73,7 +72,7 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 
 // Messages returns the read channel for the messages that are returned by the
 // stream.
-func (c *Consumer) Messages() <-chan streammsg.Message {
+func (c *Consumer) Messages() <-chan stream.Message {
 	return c.messages
 }
 
@@ -84,12 +83,12 @@ func (c *Consumer) Errors() <-chan error {
 }
 
 // Ack is a no-op implementation to satisfy the stream.Consumer interface.
-func (c *Consumer) Ack(_ streammsg.Message) error {
+func (c *Consumer) Ack(_ stream.Message) error {
 	return nil
 }
 
 // Nack is a no-op implementation to satisfy the stream.Consumer interface.
-func (c *Consumer) Nack(_ streammsg.Message) error {
+func (c *Consumer) Nack(_ stream.Message) error {
 	return nil
 }
 
@@ -122,8 +121,10 @@ func (c *Consumer) Close() error {
 	return nil
 }
 
-// Config returns a read-only representation of the consumer configuration.
-func (c *Consumer) Config() streamconfig.Consumer {
+// Config returns a read-only representation of the consumer configuration as an
+// interface. To access the underlying configuration struct, cast the interface
+// to `streamconfig.Consumer`.
+func (c *Consumer) Config() interface{} {
 	return c.c
 }
 
@@ -179,7 +180,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 	consumer := &Consumer{
 		c:        config,
 		logger:   &config.Logger,
-		messages: make(chan streammsg.Message),
+		messages: make(chan stream.Message),
 		errors:   make(chan error),
 		quit:     make(chan bool),
 		once:     &sync.Once{},

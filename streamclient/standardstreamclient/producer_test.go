@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -46,7 +46,7 @@ func TestNewProducer_WithOptions(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { require.NoError(t, producer.Close()) }()
 
-	assert.EqualValues(t, buffer, producer.Config().Standardstream.Writer)
+	assert.EqualValues(t, buffer, producer.Config().(streamconfig.Producer).Standardstream.Writer)
 }
 
 func TestProducer_Messages(t *testing.T) {
@@ -56,7 +56,7 @@ func TestProducer_Messages(t *testing.T) {
 	buffer := standardstreamclient.TestBuffer(t)
 	producer, closer := standardstreamclient.TestProducer(t, buffer)
 
-	producer.Messages() <- streammsg.Message{Value: []byte(expected)}
+	producer.Messages() <- stream.Message{Value: []byte(expected)}
 	closer()
 
 	b, err := ioutil.ReadAll(buffer)
@@ -70,7 +70,7 @@ func TestProducer_Messages_AppendNewline(t *testing.T) {
 	buffer := standardstreamclient.TestBuffer(t)
 	producer, closer := standardstreamclient.TestProducer(t, buffer)
 
-	producer.Messages() <- streammsg.Message{Value: []byte("hello world")}
+	producer.Messages() <- stream.Message{Value: []byte("hello world")}
 	closer()
 
 	b, err := ioutil.ReadAll(buffer)
@@ -86,7 +86,7 @@ func TestProducer_Messages_Ordering(t *testing.T) {
 	producer, closer := standardstreamclient.TestProducer(t, buffer)
 
 	for i := 0; i < messageCount; i++ {
-		producer.Messages() <- streammsg.Message{Value: []byte(strconv.Itoa(i))}
+		producer.Messages() <- stream.Message{Value: []byte(strconv.Itoa(i))}
 	}
 	closer()
 
@@ -147,6 +147,6 @@ func BenchmarkProducer_Messages(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		producer.Messages() <- streammsg.Message{Value: []byte(fmt.Sprintf(`{"number":%d}`, i))}
+		producer.Messages() <- stream.Message{Value: []byte(fmt.Sprintf(`{"number":%d}`, i))}
 	}
 }

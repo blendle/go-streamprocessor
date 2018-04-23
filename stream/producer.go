@@ -1,17 +1,12 @@
 package stream
 
-import (
-	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streammsg"
-)
-
 // Producer interface to be implemented by different stream clients.
 type Producer interface {
 	// Messages is a write-only channel on which you can deliver any messages that
 	// need to be produced on the message stream.
 	//
-	// The channel accepts `streammsg.Message` value objects.
-	Messages() chan<- streammsg.Message
+	// The channel accepts `stream.Message` value objects.
+	Messages() chan<- Message
 
 	// Errors is a read-only channel on which the producer delivers any errors
 	// that occurred while producing to the stream.
@@ -26,6 +21,8 @@ type Producer interface {
 	// message stream and the messages channel is closed.
 	Close() error
 
-	// Config returns the final configuration used by the producer.
-	Config() streamconfig.Producer
+	// Config returns the final configuration used by the producer as an
+	// interface. To access the configuration, cast the interface to a
+	// `streamconfig.Producer` struct.
+	Config() interface{}
 }

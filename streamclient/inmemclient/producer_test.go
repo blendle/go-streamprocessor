@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
 	"github.com/blendle/go-streamprocessor/streamutils/testutils"
 	"github.com/stretchr/testify/assert"
@@ -44,7 +44,7 @@ func TestNewProducer_WithOptions(t *testing.T) {
 	require.NoError(t, err)
 	defer require.NoError(t, producer.Close())
 
-	assert.EqualValues(t, store, producer.Config().Inmem.Store)
+	assert.EqualValues(t, store, producer.Config().(streamconfig.Producer).Inmem.Store)
 }
 
 func TestProducer_Messages(t *testing.T) {
@@ -55,7 +55,7 @@ func TestProducer_Messages(t *testing.T) {
 	producer, closer := inmemclient.TestProducer(t, store)
 	defer closer()
 
-	producer.Messages() <- streammsg.Message{Value: []byte(expected)}
+	producer.Messages() <- stream.Message{Value: []byte(expected)}
 
 	waitForMessageCount(t, 1, store.Messages)
 	messages := store.Messages()
@@ -73,7 +73,7 @@ func TestProducer_MessageOrdering(t *testing.T) {
 	defer closer()
 
 	for i := 0; i < messageCount; i++ {
-		producer.Messages() <- streammsg.Message{Value: []byte(strconv.Itoa(i))}
+		producer.Messages() <- stream.Message{Value: []byte(strconv.Itoa(i))}
 	}
 
 	waitForMessageCount(t, messageCount, store.Messages)
@@ -144,19 +144,19 @@ func BenchmarkProducer_Messages(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		producer.Messages() <- streammsg.Message{Value: []byte(fmt.Sprintf(`{"number":%d}`, i))}
+		producer.Messages() <- stream.Message{Value: []byte(fmt.Sprintf(`{"number":%d}`, i))}
 	}
 }
 
 // waitForMessageCount accepts a count, and a function that returns an array of
-// `streammsg.Message`s. It will try 100 times to call the provided function and
+// `stream.Message`s. It will try 100 times to call the provided function and
 // match the number of the returned messages against the provided count. If a
 // match is found anywhere between the first and last run, the function returns,
 // if no match is ever found, the test calling this function will fail.
-func waitForMessageCount(tb testing.TB, count int, f func() []streammsg.Message) {
+func waitForMessageCount(tb testing.TB, count int, f func() []stream.Message) {
 	tb.Helper()
 
-	var messages []streammsg.Message
+	var messages []stream.Message
 	for i := 0; i < 100; i++ {
 		messages = f()
 		if len(messages) >= count {

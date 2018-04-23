@@ -8,7 +8,6 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamcore"
-	"github.com/blendle/go-streamprocessor/streammsg"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -23,7 +22,7 @@ type Producer struct {
 	logger   *zap.Logger
 	wg       sync.WaitGroup
 	errors   chan error
-	messages chan<- streammsg.Message
+	messages chan<- stream.Message
 	signals  chan os.Signal
 	once     *sync.Once
 }
@@ -32,7 +31,7 @@ var _ stream.Producer = (*Producer)(nil)
 
 // NewProducer returns a new standard stream producer.
 func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, error) {
-	ch := make(chan streammsg.Message)
+	ch := make(chan stream.Message)
 
 	producer, err := newProducer(ch, options)
 	if err != nil {
@@ -76,7 +75,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 }
 
 // Messages returns the write channel for messages to be produced.
-func (p *Producer) Messages() chan<- streammsg.Message {
+func (p *Producer) Messages() chan<- stream.Message {
 	return p.messages
 }
 
@@ -112,12 +111,14 @@ func (p *Producer) Close() error {
 	return nil
 }
 
-// Config returns a read-only representation of the producer configuration.
-func (p *Producer) Config() streamconfig.Producer {
+// Config returns a read-only representation of the producer configuration as an
+// interface. To access the underlying configuration struct, cast the interface
+// to `streamconfig.Producer`.
+func (p *Producer) Config() interface{} {
 	return p.c
 }
 
-func (p *Producer) produce(ch <-chan streammsg.Message) {
+func (p *Producer) produce(ch <-chan stream.Message) {
 	defer p.wg.Done()
 
 	for msg := range ch {
@@ -136,7 +137,7 @@ func (p *Producer) produce(ch <-chan streammsg.Message) {
 	}
 }
 
-func newProducer(ch chan streammsg.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
+func newProducer(ch chan stream.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
 	config, err := streamconfig.NewProducer(options...)
 	if err != nil {
 		return nil, err
