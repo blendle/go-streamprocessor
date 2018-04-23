@@ -25,7 +25,7 @@ go test -cover "${@:-./...}" -coverprofile="$tmp" >/dev/null
 coverage="$(go tool cover -func="$tmp")"
 percent="$(echo "$coverage" | tail -n1 | awk '{print $3}' | sed -e 's/^\([0-9]*\).*$/\1/g')"
 
-if [ "$percent" -lt "$min" ]; then
+if [ "$percent" -le "$min" ]; then
   >&2 echo "$coverage"
   >&2 echo
   >&2 echo "FAILED: test coverage $percent is below configured minimum: $min"
@@ -36,3 +36,5 @@ if [ "$percent" -lt "$min" ]; then
 
   exit 1
 fi
+
+echo "ok      coverage \"$percent\" is higher than configured lower bound \"$min\""
