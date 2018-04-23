@@ -1,4 +1,4 @@
-package streamcore
+package streamutil
 
 import (
 	"errors"

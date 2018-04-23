@@ -1,4 +1,4 @@
-package streamcore_test
+package streamutil_test
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/streamcore"
+	"github.com/blendle/go-streamprocessor/streamutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -25,7 +25,7 @@ func TestHandleInterrupts(t *testing.T) {
 			return nil
 		}
 
-		go streamcore.HandleInterrupts(ch, fn, logger)
+		go streamutil.HandleInterrupts(ch, fn, logger)
 		ch <- os.Interrupt
 
 		time.Sleep(10 * time.Millisecond)

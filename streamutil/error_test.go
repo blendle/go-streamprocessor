@@ -1,4 +1,4 @@
-package streamcore_test
+package streamutil_test
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/streamcore"
+	"github.com/blendle/go-streamprocessor/streamutil"
 	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -76,7 +76,7 @@ func TestHandleErrors(t *testing.T) {
 				ch <- err
 			}
 
-			go streamcore.HandleErrors(ch, logger.Log)
+			go streamutil.HandleErrors(ch, logger.Log)
 			time.Sleep(testutil.MultipliedDuration(t, 20*time.Millisecond))
 
 			require.Len(t, logger.Logs(), len(tt.results))
@@ -107,7 +107,7 @@ func TestErrorsChan(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			ch := streamcore.ErrorsChan(make(chan error), tt.disabled)
+			ch := streamutil.ErrorsChan(make(chan error), tt.disabled)
 			assert.Len(t, ch, tt.errors)
 		})
 	}
