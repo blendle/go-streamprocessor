@@ -11,8 +11,8 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
-	"github.com/blendle/go-streamprocessor/streamutils/testutils"
+	"github.com/blendle/go-streamprocessor/streamutil/inmemstore"
+	"github.com/blendle/go-streamprocessor/streamutil/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/blendle/go-streamprocessor/stream"
-	"github.com/blendle/go-streamprocessor/streamutils/testutils"
+	"github.com/blendle/go-streamprocessor/streamutil/testutils"
 	"github.com/stretchr/testify/require"
 )
 

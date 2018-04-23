@@ -8,7 +8,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streamutils/testutils"
+	"github.com/blendle/go-streamprocessor/streamutil/testutils"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
