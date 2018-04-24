@@ -43,8 +43,6 @@ func TestNewProducer_WithOptions(t *testing.T) {
 	producer, err := inmemclient.NewProducer(options)
 	require.NoError(t, err)
 	defer require.NoError(t, producer.Close())
-
-	assert.EqualValues(t, store, producer.Config().(streamconfig.Producer).Inmem.Store)
 }
 
 func TestProducer_Messages(t *testing.T) {

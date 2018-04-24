@@ -44,8 +44,6 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 	consumer, err := inmemclient.NewConsumer(options)
 	require.NoError(t, err)
 	defer func() { require.NoError(t, consumer.Close()) }()
-
-	assert.Equal(t, store, consumer.Config().(streamconfig.Consumer).Inmem.Store)
 }
 
 func TestConsumer_Messages(t *testing.T) {
