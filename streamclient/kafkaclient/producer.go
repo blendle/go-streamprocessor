@@ -7,7 +7,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamcore"
+	"github.com/blendle/go-streamprocessor/streamutil"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -52,7 +52,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// configuration flag. If the auto-error functionality is disabled, the user
 	// needs to manually listen to the `Errors()` channel and act accordingly.
 	if producer.c.HandleErrors {
-		go streamcore.HandleErrors(producer.errors, producer.logger.Fatal)
+		go streamutil.HandleErrors(producer.errors, producer.logger.Fatal)
 	}
 
 	// We listen to the produce channel in a goroutine. Every message delivered to
@@ -80,7 +80,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// configuration flag.
 	if producer.c.HandleInterrupt {
 		producer.signals = make(chan os.Signal, 1)
-		go streamcore.HandleInterrupts(producer.signals, producer.Close, producer.logger)
+		go streamutil.HandleInterrupts(producer.signals, producer.Close, producer.logger)
 	}
 
 	return producer, nil
@@ -94,7 +94,7 @@ func (p *Producer) Messages() chan<- stream.Message {
 // Errors returns the read channel for the errors that are returned by the
 // stream.
 func (p *Producer) Errors() <-chan error {
-	return streamcore.ErrorsChan(p.errors, p.c.HandleErrors)
+	return streamutil.ErrorsChan(p.errors, p.c.HandleErrors)
 }
 
 // Close closes the producer connection. This function blocks until all messages

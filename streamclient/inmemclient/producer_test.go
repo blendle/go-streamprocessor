@@ -10,8 +10,8 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
-	"github.com/blendle/go-streamprocessor/streamutils/testutils"
+	"github.com/blendle/go-streamprocessor/streamutil/inmemstore"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -131,7 +131,7 @@ func TestProducer_Close(t *testing.T) {
 		select {
 		case err := <-ch:
 			assert.NoError(t, err)
-		case <-time.After(testutils.MultipliedDuration(t, 1*time.Second)):
+		case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
 			t.Fatal("timeout while waiting for close to finish")
 		}
 	}

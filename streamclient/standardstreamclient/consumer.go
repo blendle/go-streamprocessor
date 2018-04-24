@@ -7,7 +7,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamcore"
+	"github.com/blendle/go-streamprocessor/streamutil"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -54,7 +54,7 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// configuration flag. If the auto-error functionality is disabled, the user
 	// needs to manually listen to the `Errors()` channel and act accordingly.
 	if consumer.c.HandleErrors {
-		go streamcore.HandleErrors(consumer.errors, consumer.logger.Fatal)
+		go streamutil.HandleErrors(consumer.errors, consumer.logger.Fatal)
 	}
 
 	// We start a goroutine to consume any messages sent to us from the configured
@@ -72,7 +72,7 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// configuration flag.
 	if consumer.c.HandleInterrupt {
 		consumer.signals = make(chan os.Signal, 1)
-		go streamcore.HandleInterrupts(consumer.signals, consumer.Close, consumer.logger)
+		go streamutil.HandleInterrupts(consumer.signals, consumer.Close, consumer.logger)
 	}
 
 	return consumer, nil
@@ -87,7 +87,7 @@ func (c *Consumer) Messages() <-chan stream.Message {
 // Errors returns the read channel for the errors that are returned by the
 // stream.
 func (c *Consumer) Errors() <-chan error {
-	return streamcore.ErrorsChan(c.errors, c.c.HandleErrors)
+	return streamutil.ErrorsChan(c.errors, c.c.HandleErrors)
 }
 
 // Ack is a no-op implementation to satisfy the stream.Consumer interface.

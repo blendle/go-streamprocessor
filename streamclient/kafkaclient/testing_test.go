@@ -10,7 +10,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streamutils/testutils"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,9 +18,9 @@ import (
 
 func TestIntegrationTestConsumer(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 
 	consumer, closer := kafkaclient.TestConsumer(t, topicAndGroup)
 	defer closer()
@@ -31,9 +31,9 @@ func TestIntegrationTestConsumer(t *testing.T) {
 
 func TestIntegrationTestConsumer_WithOptions(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 	options := func(c *streamconfig.Consumer) {
 		c.Kafka.ID = "TestTestConsumer_WithOptions"
 	}
@@ -48,9 +48,9 @@ func TestIntegrationTestConsumer_WithOptions(t *testing.T) {
 
 func TestIntegrationTestProducer(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topic := testutils.Random(t)
+	topic := testutil.Random(t)
 
 	producer, closer := kafkaclient.TestProducer(t, topic)
 	defer closer()
@@ -60,9 +60,9 @@ func TestIntegrationTestProducer(t *testing.T) {
 
 func TestIntegrationTestProducer_WithOptions(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topic := testutils.Random(t)
+	topic := testutil.Random(t)
 	options := func(c *streamconfig.Producer) {
 		c.Kafka.ID = "TestTestProducer_WithOptions"
 	}
@@ -77,9 +77,9 @@ func TestIntegrationTestProducer_WithOptions(t *testing.T) {
 
 func TestIntegrationTestMessageFromTopic(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 
 	config := &kafka.ConfigMap{
 		"metadata.broker.list":  kafkaconfig.TestBrokerAddress,
@@ -117,9 +117,9 @@ func TestIntegrationTestMessageFromTopic(t *testing.T) {
 
 func TestIntegrationTestMessagesFromTopic(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 
 	config := &kafka.ConfigMap{
 		"metadata.broker.list":  kafkaconfig.TestBrokerAddress,
@@ -149,7 +149,7 @@ func TestIntegrationTestMessagesFromTopic(t *testing.T) {
 
 func TestIntegrationTestProduceMessages(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
 	var tests = map[string]struct {
 		ifaces []interface{}
@@ -183,7 +183,7 @@ func TestIntegrationTestProduceMessages(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			topicAndGroup := testutils.Random(t)
+			topicAndGroup := testutil.Random(t)
 
 			config := &kafka.ConfigMap{
 				"metadata.broker.list":     kafkaconfig.TestBrokerAddress,
@@ -223,9 +223,9 @@ func TestIntegrationTestProduceMessages(t *testing.T) {
 
 func TestIntegrationTestOffsets(t *testing.T) {
 	t.Parallel()
-	testutils.Integration(t)
+	testutil.Integration(t)
 
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 
 	config := &kafka.ConfigMap{
 		"metadata.broker.list":  kafkaconfig.TestBrokerAddress,
@@ -264,11 +264,11 @@ func TestIntegrationTestOffsets(t *testing.T) {
 func TestTestConsumerConfig(t *testing.T) {
 	t.Parallel()
 
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 	config := kafkaclient.TestConsumerConfig(t, topicAndGroup)
 
 	size := 1
-	if testutils.Verbose(t) {
+	if testutil.Verbose(t) {
 		size = 2
 	}
 
@@ -278,11 +278,11 @@ func TestTestConsumerConfig(t *testing.T) {
 func TestTestProducerConfig(t *testing.T) {
 	t.Parallel()
 
-	topicAndGroup := testutils.Random(t)
+	topicAndGroup := testutil.Random(t)
 	config := kafkaclient.TestProducerConfig(t, topicAndGroup)
 
 	size := 1
-	if testutils.Verbose(t) {
+	if testutil.Verbose(t) {
 		size = 2
 	}
 

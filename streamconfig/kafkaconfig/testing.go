@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/streamutils/testutils"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 )
 
 // TestBrokerAddress is the address used to connect to the testing broker.
@@ -26,7 +26,7 @@ func TestConsumer(tb testing.TB) Consumer {
 	config.SessionTimeout = 1 * time.Second
 	config.Topics = []string{"testTopic"}
 
-	if testutils.Verbose(tb) {
+	if testutil.Verbose(tb) {
 		config.Debug.CGRP = true
 		config.Debug.Topic = true
 	}

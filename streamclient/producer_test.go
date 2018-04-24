@@ -8,7 +8,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streamutils/testutils"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,7 +19,7 @@ func TestNewProducer(t *testing.T) {
 }
 
 func TestIntegrationNewProducer_Env(t *testing.T) {
-	testutils.Integration(t)
+	testutil.Integration(t)
 
 	var tests = []struct {
 		env    string

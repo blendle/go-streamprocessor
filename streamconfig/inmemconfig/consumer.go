@@ -1,7 +1,7 @@
 package inmemconfig
 
 import (
-	"github.com/blendle/go-streamprocessor/streamutils/inmemstore"
+	"github.com/blendle/go-streamprocessor/streamutil/inmemstore"
 )
 
 // Consumer is a value-object, containing all user-configurable configuration
