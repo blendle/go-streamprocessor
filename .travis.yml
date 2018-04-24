@@ -30,6 +30,8 @@ before_install:
 - chmod +x docker-compose
 - sudo mv docker-compose /usr/local/bin
 - script/cisetup
+- docker ps
 
 install: script/setup
 script: script/test
+after_failure: docker-compose logs
