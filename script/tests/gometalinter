@@ -18,12 +18,12 @@ if [ -n "$matches" ]; then
   exit 1
 fi
 
+# --warn-unmatched-nolint, disabled for now, see: https://git.io/vpGor
 gometalinter \
   --vendor \
   --tests \
   --aggregate \
   --sort=line \
-  --warn-unmatched-nolint \
   --deadline=300s \
   --vendored-linters \
   --enable-all \
