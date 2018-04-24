@@ -268,10 +268,10 @@ func TestConsumerEnvironmentVariables(t *testing.T) {
 
 			tt.config.Name = "consumer"
 			tt.config.AllowEnvironmentBasedConfiguration = true
-			options := func(c *streamconfig.Consumer) {
+			options := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
 				c.Name = "consumer"
 				c.AllowEnvironmentBasedConfiguration = true
-			}
+			})
 
 			assert.EqualValues(t, tt.config, streamconfig.TestNewConsumer(t, false, options))
 		})
@@ -588,10 +588,10 @@ func TestProducerEnvironmentVariables(t *testing.T) {
 
 			tt.config.Name = "producer"
 			tt.config.AllowEnvironmentBasedConfiguration = true
-			options := func(c *streamconfig.Producer) {
+			options := streamconfig.ProducerOptions(func(c *streamconfig.Producer) {
 				c.Name = "producer"
 				c.AllowEnvironmentBasedConfiguration = true
-			}
+			})
 
 			assert.EqualValues(t, tt.config, streamconfig.TestNewProducer(t, false, options))
 		})

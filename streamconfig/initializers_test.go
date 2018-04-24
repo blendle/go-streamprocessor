@@ -34,11 +34,7 @@ func TestNewConsumer(t *testing.T) {
 }
 
 func TestNewConsumer_WithOptions(t *testing.T) {
-	options := func(c *streamconfig.Consumer) {
-		c.Kafka.ID = "test"
-	}
-
-	config, err := streamconfig.NewConsumer(options)
+	config, err := streamconfig.NewConsumer(streamconfig.KafkaID("test"))
 	require.NoError(t, err)
 
 	assert.Equal(t, "test", config.Kafka.ID)
@@ -54,11 +50,7 @@ func TestNewConsumer_WithOptions_Nil(t *testing.T) {
 func TestNewConsumer_WithOptions_NilLogger(t *testing.T) {
 	t.Parallel()
 
-	options := func(c *streamconfig.Consumer) {
-		c.Logger = nil
-	}
-
-	config, err := streamconfig.NewConsumer(options)
+	config, err := streamconfig.NewConsumer(streamconfig.Logger(nil))
 	require.NoError(t, err)
 
 	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
@@ -78,12 +70,10 @@ func TestNewConsumer_WithOptionsAndEnvironmentVariables(t *testing.T) {
 	_ = os.Setenv("CONSUMER_KAFKA_BROKERS", "broker1")
 	defer os.Unsetenv("CONSUMER_KAFKA_BROKERS") // nolint: errcheck
 
-	options := func(c *streamconfig.Consumer) {
-		c.Kafka.Brokers = []string{"broker2"}
-		c.Kafka.ID = "test"
-	}
-
-	config, err := streamconfig.NewConsumer(options)
+	config, err := streamconfig.NewConsumer(
+		streamconfig.KafkaBroker("broker2"),
+		streamconfig.KafkaID("test"),
+	)
 	require.NoError(t, err)
 
 	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
@@ -94,12 +84,10 @@ func TestNewConsumer_WithOptionsWithoutEnvironmentVariables(t *testing.T) {
 	_ = os.Setenv("CONSUMER_KAFKA_BROKERS", "broker1")
 	defer os.Unsetenv("CONSUMER_KAFKA_BROKERS") // nolint: errcheck
 
-	options := func(c *streamconfig.Consumer) {
-		c.AllowEnvironmentBasedConfiguration = false
-		c.Kafka.Brokers = []string{"broker2"}
-	}
-
-	config, err := streamconfig.NewConsumer(options)
+	config, err := streamconfig.NewConsumer(
+		streamconfig.DisableEnvironmentConfig(),
+		streamconfig.KafkaBroker("broker2"),
+	)
 	require.NoError(t, err)
 
 	assert.EqualValues(t, []string{"broker2"}, config.Kafka.Brokers)
@@ -129,11 +117,7 @@ func TestNewProducer(t *testing.T) {
 }
 
 func TestNewProducer_WithOptions(t *testing.T) {
-	options := func(c *streamconfig.Producer) {
-		c.Kafka.ID = "test"
-	}
-
-	config, err := streamconfig.NewProducer(options)
+	config, err := streamconfig.NewProducer(streamconfig.KafkaID("test"))
 	require.NoError(t, err)
 
 	assert.Equal(t, "test", config.Kafka.ID)
@@ -149,11 +133,7 @@ func TestNewProducer_WithOptions_Nil(t *testing.T) {
 func TestNewProducer_WithOptions_NilLogger(t *testing.T) {
 	t.Parallel()
 
-	options := func(c *streamconfig.Producer) {
-		c.Logger = nil
-	}
-
-	config, err := streamconfig.NewProducer(options)
+	config, err := streamconfig.NewProducer(streamconfig.Logger(nil))
 	require.NoError(t, err)
 
 	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
@@ -173,12 +153,10 @@ func TestNewProducer_WithOptionsAndEnvironmentVariables(t *testing.T) {
 	_ = os.Setenv("PRODUCER_KAFKA_BROKERS", "broker1")
 	defer os.Unsetenv("PRODUCER_KAFKA_BROKERS") // nolint: errcheck
 
-	options := func(c *streamconfig.Producer) {
-		c.Kafka.Brokers = []string{"broker2"}
-		c.Kafka.ID = "test"
-	}
-
-	config, err := streamconfig.NewProducer(options)
+	config, err := streamconfig.NewProducer(
+		streamconfig.KafkaBroker("broker2"),
+		streamconfig.KafkaID("test"),
+	)
 	require.NoError(t, err)
 
 	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
@@ -189,12 +167,10 @@ func TestNewProducer_WithOptionsWithoutEnvironmentVariables(t *testing.T) {
 	_ = os.Setenv("CONSUMER_KAFKA_BROKERS", "broker1")
 	defer os.Unsetenv("CONSUMER_KAFKA_BROKERS") // nolint: errcheck
 
-	options := func(c *streamconfig.Producer) {
-		c.AllowEnvironmentBasedConfiguration = false
-		c.Kafka.Brokers = []string{"broker2"}
-	}
-
-	config, err := streamconfig.NewProducer(options)
+	config, err := streamconfig.NewProducer(
+		streamconfig.DisableEnvironmentConfig(),
+		streamconfig.KafkaBroker("broker2"),
+	)
 	require.NoError(t, err)
 
 	assert.EqualValues(t, []string{"broker2"}, config.Kafka.Brokers)

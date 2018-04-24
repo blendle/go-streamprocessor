@@ -31,15 +31,14 @@ func TestTestConsumer_WithOptions(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.New()
-	options := func(c *streamconfig.Consumer) {
-		c.Inmem.Store = store
-	}
 
 	// setting the second argument (the store) to nil will instantiate a new store
 	// in the initializer, but since we also pass in our own store as an optional
 	// argument, it will be the eventual store used by this consumer.
-	_, closer := inmemclient.TestConsumer(t, nil, options)
+	consumer, closer := inmemclient.TestConsumer(t, nil, streamconfig.InmemStore(store))
 	defer closer()
+
+	assert.EqualValues(t, store, consumer.Config().(streamconfig.Consumer).Inmem.Store)
 }
 
 func TestTestProducer(t *testing.T) {
@@ -65,14 +64,11 @@ func TestTestProducer_WithOptions(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.New()
-	options := func(c *streamconfig.Producer) {
-		c.Inmem.Store = store
-	}
 
 	// setting the second argument (the store) to nil will instantiate a new store
 	// in the initializer, but since we also pass in our own store as an optional
 	// argument, it will be the eventual store used by this producer.
-	producer, closer := inmemclient.TestProducer(t, nil, options)
+	producer, closer := inmemclient.TestProducer(t, nil, streamconfig.InmemStore(store))
 	defer closer()
 
 	assert.EqualValues(t, store, producer.Config().(streamconfig.Producer).Inmem.Store)

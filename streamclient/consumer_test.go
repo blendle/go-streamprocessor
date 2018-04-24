@@ -27,7 +27,7 @@ func TestIntegrationNewConsumer_Env(t *testing.T) {
 	var tests = []struct {
 		env    string
 		typeOf string
-		opts   func(*streamconfig.Consumer)
+		opts   streamconfig.Option
 	}{
 		{
 			"standardstream",
@@ -44,11 +44,11 @@ func TestIntegrationNewConsumer_Env(t *testing.T) {
 		{
 			"kafka",
 			"*kafkaclient.consumer",
-			func(c *streamconfig.Consumer) {
+			streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
 				c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 				c.Kafka.Topics = []string{"test"}
 				c.Kafka.GroupID = "test"
-			},
+			}),
 		},
 	}
 

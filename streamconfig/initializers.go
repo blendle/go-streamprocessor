@@ -25,6 +25,10 @@ func NewConsumer(options ...Option) (Consumer, error) {
 	// value with any custom configuration values passed into the `NewConsumer`
 	// function.
 	for _, option := range options {
+		if option == nil {
+			continue
+		}
+
 		option.apply(config, nil)
 	}
 
@@ -69,6 +73,10 @@ func NewProducer(options ...Option) (Producer, error) {
 	// value with any custom configuration values passed into the `NewProducer`
 	// function.
 	for _, option := range options {
+		if option == nil {
+			continue
+		}
+
 		option.apply(nil, config)
 	}
 

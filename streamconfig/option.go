@@ -1,6 +1,7 @@
 package streamconfig
 
 import (
+	"io"
 	"time"
 
 	"github.com/blendle/go-streamprocessor/stream"
@@ -21,7 +22,9 @@ type optionFunc func(*Consumer, *Producer)
 
 func (f optionFunc) apply(c *Consumer, p *Producer) {
 	if c == nil {
-		c = &ConsumerDefaults
+		defaults := ConsumerDefaults
+
+		c = &defaults
 		c.Inmem = inmemconfig.ConsumerDefaults
 		c.Kafka = kafkaconfig.ConsumerDefaults
 		c.Pubsub = pubsubconfig.ConsumerDefaults
@@ -29,7 +32,9 @@ func (f optionFunc) apply(c *Consumer, p *Producer) {
 	}
 
 	if p == nil {
-		p = &ProducerDefaults
+		defaults := ProducerDefaults
+
+		p = &defaults
 		p.Inmem = inmemconfig.ProducerDefaults
 		p.Kafka = kafkaconfig.ProducerDefaults
 		p.Pubsub = pubsubconfig.ProducerDefaults
@@ -41,31 +46,15 @@ func (f optionFunc) apply(c *Consumer, p *Producer) {
 
 // ConsumerOptions is a convenience accessor to manually set consumer options.
 func ConsumerOptions(fn func(c *Consumer)) Option {
-	c := &ConsumerDefaults
-	c.Inmem = inmemconfig.ConsumerDefaults
-	c.Kafka = kafkaconfig.ConsumerDefaults
-	c.Pubsub = pubsubconfig.ConsumerDefaults
-	c.Standardstream = standardstreamconfig.ConsumerDefaults
-
-	fn(c)
-
-	return optionFunc(func(c1 *Consumer, _ *Producer) {
-		*c1 = *c
+	return optionFunc(func(c *Consumer, _ *Producer) {
+		fn(c)
 	})
 }
 
 // ProducerOptions is a convenience accessor to manually set producer options.
 func ProducerOptions(fn func(p *Producer)) Option {
-	p := &ProducerDefaults
-	p.Inmem = inmemconfig.ProducerDefaults
-	p.Kafka = kafkaconfig.ProducerDefaults
-	p.Pubsub = pubsubconfig.ProducerDefaults
-	p.Standardstream = standardstreamconfig.ProducerDefaults
-
-	fn(p)
-
-	return optionFunc(func(_ *Consumer, p1 *Producer) {
-		*p1 = *p
+	return optionFunc(func(_ *Consumer, p *Producer) {
+		fn(p)
 	})
 }
 
@@ -113,6 +102,16 @@ func Name(s string) Option {
 	return optionFunc(func(c *Consumer, p *Producer) {
 		c.Name = s
 		p.Name = s
+	})
+}
+
+// InmemListen configures the inmem consumer to continuously listen for any new
+// messages in the configured store.
+//
+// This option has no effect when applied to a producer.
+func InmemListen() Option {
+	return optionFunc(func(c *Consumer, _ *Producer) {
+		c.Inmem.ConsumeOnce = false
 	})
 }
 
@@ -304,5 +303,25 @@ func KafkaTopic(s string) Option {
 	return optionFunc(func(c *Consumer, p *Producer) {
 		c.Kafka.Topics = append(c.Kafka.Topics, s)
 		p.Kafka.Topic = s
+	})
+}
+
+// StandardstreamWriter sets the writer to use as the message stream to write
+// to.
+//
+// This option has no effect when applied to a consumer.
+func StandardstreamWriter(w io.Writer) Option {
+	return optionFunc(func(_ *Consumer, p *Producer) {
+		p.Standardstream.Writer = w
+	})
+}
+
+// StandardstreamReader sets the reader to use as the message stream from which
+// to read.
+//
+// This option has no effect when applied to a producer.
+func StandardstreamReader(w io.ReadCloser) Option {
+	return optionFunc(func(c *Consumer, _ *Producer) {
+		c.Standardstream.Reader = w
 	})
 }

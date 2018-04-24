@@ -36,11 +36,13 @@ func TestIntegrationNewProducer_WithOptions(t *testing.T) {
 	testutil.Integration(t)
 
 	topic := testutil.Random(t)
-	options := kafkaclient.TestProducerConfig(t, topic, func(c *streamconfig.Producer) {
-		c.Kafka.Debug.Msg = true
-		c.Kafka.SSL.KeyPassword = "test"
+
+	opts := streamconfig.ProducerOptions(func(p *streamconfig.Producer) {
+		p.Kafka.Debug.Msg = true
+		p.Kafka.SSL.KeyPassword = "test"
 	})
 
+	options := kafkaclient.TestProducerConfig(t, topic, opts)
 	producer, err := kafkaclient.NewProducer(options...)
 	require.NoError(t, err)
 	defer func() { require.NoError(t, producer.Close()) }()
@@ -104,9 +106,9 @@ func TestIntegrationProducer_Errors(t *testing.T) {
 	t.Parallel()
 	testutil.Integration(t)
 
-	options := func(c *streamconfig.Producer) {
+	options := streamconfig.ProducerOptions(func(c *streamconfig.Producer) {
 		c.HandleErrors = true
-	}
+	})
 
 	producer, closer := kafkaclient.TestProducer(t, testutil.Random(t), options)
 	defer closer()
@@ -124,11 +126,8 @@ func TestIntegrationProducer_Errors_Manual(t *testing.T) {
 	t.Parallel()
 	testutil.Integration(t)
 
-	options := func(c *streamconfig.Producer) {
-		c.HandleErrors = false
-	}
-
-	producer, closer := kafkaclient.TestProducer(t, testutil.Random(t), options)
+	handler := streamconfig.ManualErrorHandling()
+	producer, closer := kafkaclient.TestProducer(t, testutil.Random(t), handler)
 	defer closer()
 
 	select {
@@ -147,12 +146,10 @@ func BenchmarkIntegrationProducer_Messages(b *testing.B) {
 
 	// We use the default (production-like) config in this benchmark, to simulate
 	// real-world usage as best as possible.
-	options := func(c *streamconfig.Producer) {
-		c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
-		c.Kafka.Topic = topic
-	}
-
-	producer, err := kafkaclient.NewProducer(options)
+	producer, err := kafkaclient.NewProducer(
+		streamconfig.KafkaBroker(kafkaconfig.TestBrokerAddress),
+		streamconfig.KafkaTopic(topic),
+	)
 	require.NoError(b, err)
 	defer func() { require.NoError(b, producer.Close()) }()
 

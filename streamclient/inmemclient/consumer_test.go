@@ -30,12 +30,7 @@ func TestNewConsumer(t *testing.T) {
 func TestNewConsumer_WithOptions(t *testing.T) {
 	t.Parallel()
 
-	store := inmemstore.New()
-	options := func(c *streamconfig.Consumer) {
-		c.Inmem.Store = store
-	}
-
-	consumer, err := inmemclient.NewConsumer(options)
+	consumer, err := inmemclient.NewConsumer(streamconfig.InmemStore(inmemstore.New()))
 	require.NoError(t, err)
 	defer func() { require.NoError(t, consumer.Close()) }()
 }
@@ -117,9 +112,9 @@ func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 func TestConsumer_Errors(t *testing.T) {
 	t.Parallel()
 
-	options := func(c *streamconfig.Consumer) {
+	options := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
 		c.HandleErrors = true
-	}
+	})
 
 	consumer, closer := inmemclient.TestConsumer(t, nil, options)
 	defer closer()
@@ -132,11 +127,7 @@ func TestConsumer_Errors(t *testing.T) {
 func TestConsumer_Errors_Manual(t *testing.T) {
 	t.Parallel()
 
-	options := func(c *streamconfig.Consumer) {
-		c.HandleErrors = false
-	}
-
-	consumer, closer := inmemclient.TestConsumer(t, nil, options)
+	consumer, closer := inmemclient.TestConsumer(t, nil, streamconfig.ManualErrorHandling())
 	defer closer()
 
 	select {
@@ -167,11 +158,7 @@ func TestConsumer_Nack(t *testing.T) {
 func TestConsumer_Close(t *testing.T) {
 	t.Parallel()
 
-	opts := func(c *streamconfig.Consumer) {
-		c.Inmem.ConsumeOnce = false
-	}
-
-	consumer, err := inmemclient.NewConsumer(opts)
+	consumer, err := inmemclient.NewConsumer(streamconfig.InmemListen())
 	require.NoError(t, err)
 
 	ch := make(chan error)

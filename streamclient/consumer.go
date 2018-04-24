@@ -13,7 +13,7 @@ import (
 
 // NewConsumer returns a new streamclient consumer, based on the context from
 // which this function is called.
-func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, error) {
+func NewConsumer(options ...streamconfig.Option) (stream.Consumer, error) {
 	switch os.Getenv("STREAMCLIENT_CONSUMER") {
 	case "standardstream":
 		return standardstreamclient.NewConsumer(options...)

@@ -4,9 +4,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
+	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
 	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -67,6 +69,16 @@ func TestOptions(t *testing.T) {
 			},
 			streamconfig.Producer{
 				Name: "test1",
+			},
+		},
+
+		"InmemListen": {
+			[]streamconfig.Option{streamconfig.InmemListen()},
+			streamconfig.Consumer{
+				Inmem: inmemconfig.Consumer{ConsumeOnce: false},
+			},
+			streamconfig.Producer{
+				Inmem: inmemconfig.Producer{},
 			},
 		},
 
@@ -315,7 +327,34 @@ func TestOptions(t *testing.T) {
 				Kafka: kafkaconfig.Producer{Topic: "test2"},
 			},
 		},
-	}
+
+		"StandardstreamWriter": {
+			[]streamconfig.Option{
+				streamconfig.StandardstreamWriter(standardstreamclient.TestBuffer(t, "")),
+			},
+			streamconfig.Consumer{
+				Standardstream: standardstreamconfig.Consumer{},
+			},
+			streamconfig.Producer{
+				Standardstream: standardstreamconfig.Producer{
+					Writer: standardstreamclient.TestBuffer(t, ""),
+				},
+			},
+		},
+
+		"StandardstreamReader": {
+			[]streamconfig.Option{
+				streamconfig.StandardstreamReader(standardstreamclient.TestBuffer(t, "")),
+			},
+			streamconfig.Consumer{
+				Standardstream: standardstreamconfig.Consumer{
+					Reader: standardstreamclient.TestBuffer(t, ""),
+				},
+			},
+			streamconfig.Producer{
+				Standardstream: standardstreamconfig.Producer{},
+			},
+		}}
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -334,7 +373,7 @@ func TestConsumerOptions(t *testing.T) {
 	})
 
 	c1 := streamconfig.Consumer{}
-	c2, _ := streamconfig.NewConsumer()
+	c2 := streamconfig.Consumer{}
 	c2.Name = "hello world"
 
 	p := streamconfig.Producer{}
@@ -343,17 +382,57 @@ func TestConsumerOptions(t *testing.T) {
 	assert.EqualValues(t, streamconfig.Producer{}, p.WithOptions(opts))
 }
 
+func TestConsumerOptions_Multiple(t *testing.T) {
+	opts1 := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
+		// Due to an earlier bug, the default values would override the configured
+		// values when the ConsumerOptions() function was called twice. This sets a
+		// value to the non-default value, and it expects this value to remain in
+		// the final struct.
+		c.Kafka.Debug.Msg = true
+	})
+
+	opts2 := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
+		c.Name = "test"
+	})
+
+	consumer := streamconfig.Consumer{}
+	consumer = consumer.WithOptions(opts1, opts2)
+
+	assert.True(t, consumer.Kafka.Debug.Msg)
+	assert.Equal(t, "test", consumer.Name)
+}
+
 func TestProducerOptions(t *testing.T) {
 	opts := streamconfig.ProducerOptions(func(p *streamconfig.Producer) {
 		p.Name = "hello world"
 	})
 
 	p1 := streamconfig.Producer{}
-	p2, _ := streamconfig.NewProducer()
+	p2 := streamconfig.Producer{}
 	p2.Name = "hello world"
 
 	c := streamconfig.Consumer{}
 
 	assert.EqualValues(t, p2, p1.WithOptions(opts))
 	assert.EqualValues(t, streamconfig.Consumer{}, c.WithOptions(opts))
+}
+
+func TestProducerOptions_Multiple(t *testing.T) {
+	opts1 := streamconfig.ProducerOptions(func(c *streamconfig.Producer) {
+		// Due to an earlier bug, the default values would override the configured
+		// values when the ProducerOptions() function was called twice. This sets a
+		// value to the non-default value, and it expects this value to remain in
+		// the final struct.
+		c.Kafka.Debug.Msg = true
+	})
+
+	opts2 := streamconfig.ProducerOptions(func(c *streamconfig.Producer) {
+		c.Name = "test"
+	})
+
+	producer := streamconfig.Producer{}
+	producer = producer.WithOptions(opts1, opts2)
+
+	assert.True(t, producer.Kafka.Debug.Msg)
+	assert.Equal(t, "test", producer.Name)
 }

@@ -31,11 +31,7 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 
 	f := standardstreamclient.TestBuffer(t)
 
-	options := func(c *streamconfig.Consumer) {
-		c.Standardstream.Reader = f
-	}
-
-	consumer, err := standardstreamclient.NewConsumer(options)
+	consumer, err := standardstreamclient.NewConsumer(streamconfig.StandardstreamReader(f))
 	require.NoError(t, err)
 
 	assert.EqualValues(t, f, consumer.Config().(streamconfig.Consumer).Standardstream.Reader)
@@ -145,9 +141,9 @@ func TestConsumer_Messages_ScannerError(t *testing.T) {
 func TestConsumer_Errors(t *testing.T) {
 	t.Parallel()
 
-	options := func(c *streamconfig.Consumer) {
+	options := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
 		c.HandleErrors = true
-	}
+	})
 
 	b := standardstreamclient.TestBuffer(t)
 	consumer, closer := standardstreamclient.TestConsumer(t, b, options)
@@ -161,12 +157,8 @@ func TestConsumer_Errors(t *testing.T) {
 func TestConsumer_Errors_Manual(t *testing.T) {
 	t.Parallel()
 
-	options := func(c *streamconfig.Consumer) {
-		c.HandleErrors = false
-	}
-
 	b := standardstreamclient.TestBuffer(t)
-	consumer, closer := standardstreamclient.TestConsumer(t, b, options)
+	consumer, closer := standardstreamclient.TestConsumer(t, b, streamconfig.ManualErrorHandling())
 	defer closer()
 
 	select {

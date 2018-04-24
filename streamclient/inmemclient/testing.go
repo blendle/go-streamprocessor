@@ -17,16 +17,14 @@ import (
 //
 // You can optionally provide extra options to be used when instantiating the
 // consumer.
-func TestConsumer(tb testing.TB, s stream.Store, options ...func(c *streamconfig.Consumer)) (stream.Consumer, func()) {
+func TestConsumer(tb testing.TB, s stream.Store, options ...streamconfig.Option) (stream.Consumer, func()) {
 	tb.Helper()
 
 	if s == nil {
 		s = inmemstore.New()
 	}
 
-	options = append(options, func(c *streamconfig.Consumer) {
-		c.Inmem.Store = s
-	})
+	options = append(options, streamconfig.InmemStore(s))
 
 	consumer, err := NewConsumer(options...)
 	require.NoError(tb, err)
@@ -39,16 +37,14 @@ func TestConsumer(tb testing.TB, s stream.Store, options ...func(c *streamconfig
 //
 // You can either pass a pre-configured inmemstore to this function as its
 // second argument, or pass in `nil`, to have one be instantiated for you.
-func TestProducer(tb testing.TB, s stream.Store, options ...func(c *streamconfig.Producer)) (stream.Producer, func()) {
+func TestProducer(tb testing.TB, s stream.Store, options ...streamconfig.Option) (stream.Producer, func()) {
 	tb.Helper()
 
 	if s == nil {
 		s = inmemstore.New()
 	}
 
-	options = append(options, func(c *streamconfig.Producer) {
-		c.Inmem.Store = s
-	})
+	options = append(options, streamconfig.InmemStore(s))
 
 	producer, err := NewProducer(options...)
 	require.NoError(tb, err)

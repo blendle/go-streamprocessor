@@ -31,12 +31,10 @@ func TestBuffer(tb testing.TB, v ...string) io.ReadWriteCloser {
 //
 // The return value is the consumer, and a function that should be deferred to
 // clean up resources.
-func TestConsumer(tb testing.TB, r io.ReadCloser, options ...func(c *streamconfig.Consumer)) (stream.Consumer, func()) {
+func TestConsumer(tb testing.TB, r io.ReadCloser, options ...streamconfig.Option) (stream.Consumer, func()) {
 	tb.Helper()
 
-	options = append(options, func(c *streamconfig.Consumer) {
-		c.Standardstream.Reader = r
-	})
+	options = append(options, streamconfig.StandardstreamReader(r))
 
 	consumer, err := NewConsumer(streamconfig.TestConsumerOptions(tb, options...)...)
 	require.NoError(tb, err)
@@ -49,12 +47,10 @@ func TestConsumer(tb testing.TB, r io.ReadCloser, options ...func(c *streamconfi
 //
 // The return value is the producer, and a function that should be deferred to
 // clean up resources.
-func TestProducer(tb testing.TB, w io.Writer, options ...func(c *streamconfig.Producer)) (stream.Producer, func()) {
+func TestProducer(tb testing.TB, w io.Writer, options ...streamconfig.Option) (stream.Producer, func()) {
 	tb.Helper()
 
-	options = append(options, func(c *streamconfig.Producer) {
-		c.Standardstream.Writer = w
-	})
+	options = append(options, streamconfig.StandardstreamWriter(w))
 
 	producer, err := NewProducer(options...)
 	require.NoError(tb, err)

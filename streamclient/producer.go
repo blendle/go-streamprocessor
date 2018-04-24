@@ -13,7 +13,7 @@ import (
 
 // NewProducer returns a new streamclient producer, based on the context from
 // which this function is called.
-func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, error) {
+func NewProducer(options ...streamconfig.Option) (stream.Producer, error) {
 	switch os.Getenv("STREAMCLIENT_PRODUCER") {
 	case "standardstream":
 		return standardstreamclient.NewProducer(options...)
