@@ -18,12 +18,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestConsumer(t *testing.T) {
-	t.Parallel()
-
-	_ = kafkaclient.Consumer{}
-}
-
 func TestIntegrationNewConsumer(t *testing.T) {
 	t.Parallel()
 	testutil.Integration(t)
@@ -35,7 +29,7 @@ func TestIntegrationNewConsumer(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { require.NoError(t, consumer.Close()) }()
 
-	assert.Equal(t, "*kafkaclient.Consumer", reflect.TypeOf(consumer).String())
+	assert.Equal(t, "*kafkaclient.consumer", reflect.TypeOf(consumer).String())
 }
 
 func TestIntegrationNewConsumer_WithOptions(t *testing.T) {

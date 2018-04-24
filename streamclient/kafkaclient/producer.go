@@ -13,8 +13,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// Producer implements the stream.Producer interface for the Kafka client.
-type Producer struct {
+// producer implements the stream.Producer interface for the Kafka client.
+type producer struct {
 	// c represents the configuration passed into the producer on
 	// initialization.
 	c streamconfig.Producer
@@ -29,20 +29,20 @@ type Producer struct {
 	once     *sync.Once
 }
 
-var _ stream.Producer = (*Producer)(nil)
+var _ stream.Producer = (*producer)(nil)
 
 // NewProducer returns a new Kafka producer.
 func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, error) {
 	ch := make(chan stream.Message)
 
-	producer, err := newProducer(ch, options)
+	p, err := newProducer(ch, options)
 	if err != nil {
 		return nil, err
 	}
 
 	// add one to the WaitGroup. We reduce this count once Close() is called, and
 	// the messages channel is closed.
-	producer.wg.Add(1)
+	p.wg.Add(1)
 
 	// We start a goroutine to listen for errors on the errors channel, and log a
 	// fatal error (terminating the application in the process) when an error is
@@ -51,8 +51,8 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag. If the auto-error functionality is disabled, the user
 	// needs to manually listen to the `Errors()` channel and act accordingly.
-	if producer.c.HandleErrors {
-		go streamutil.HandleErrors(producer.errors, producer.logger.Fatal)
+	if p.c.HandleErrors {
+		go streamutil.HandleErrors(p.errors, p.logger.Fatal)
 	}
 
 	// We listen to the produce channel in a goroutine. Every message delivered to
@@ -60,7 +60,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// of messages ready to be sent to Kafka. This queue is handled asynchronously
 	// for us. If the producer is closed, the close is blocked until the queue is
 	// emptied. If the queue can't be emptied, the close call returns an error.
-	go producer.produce(ch)
+	go p.produce(ch)
 
 	// Each delivered message to Kafka also triggers an event being returned to
 	// the producer, with the status of the delivered message. We listen for these
@@ -69,7 +69,7 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	// could improve this logic in the future, to provide the user with an events
 	// channel of our own, and leave it up to the user what to do in case of such
 	// an event.
-	go producer.checkReports()
+	go p.checkReports()
 
 	// Finally, we monitor for any interrupt signals. Ideally, the user handles
 	// these cases gracefully, but just in case, we try to close the producer if
@@ -78,22 +78,22 @@ func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, erro
 	//
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag.
-	if producer.c.HandleInterrupt {
-		producer.signals = make(chan os.Signal, 1)
-		go streamutil.HandleInterrupts(producer.signals, producer.Close, producer.logger)
+	if p.c.HandleInterrupt {
+		p.signals = make(chan os.Signal, 1)
+		go streamutil.HandleInterrupts(p.signals, p.Close, p.logger)
 	}
 
-	return producer, nil
+	return p, nil
 }
 
 // Messages returns the write channel for messages to be produced.
-func (p *Producer) Messages() chan<- stream.Message {
+func (p *producer) Messages() chan<- stream.Message {
 	return p.messages
 }
 
 // Errors returns the read channel for the errors that are returned by the
 // stream.
-func (p *Producer) Errors() <-chan error {
+func (p *producer) Errors() <-chan error {
 	return streamutil.ErrorsChan(p.errors, p.c.HandleErrors)
 }
 
@@ -101,7 +101,7 @@ func (p *Producer) Errors() <-chan error {
 // still in the channel have been processed, and the channel is properly closed.
 // Close is safe to call more than once, but it will only effectively close the
 // producer on the first call.
-func (p *Producer) Close() (err error) {
+func (p *producer) Close() (err error) {
 	p.once.Do(func() {
 		// Trigger the quit channel, which terminates our internal goroutine to
 		// process messages, and closes the messages channel. We do this first, to
@@ -148,11 +148,11 @@ func (p *Producer) Close() (err error) {
 // Config returns a read-only representation of the producer configuration as an
 // interface. To access the underlying configuration struct, cast the interface
 // to `streamconfig.Producer`.
-func (p *Producer) Config() interface{} {
+func (p *producer) Config() interface{} {
 	return p.c
 }
 
-func (p *Producer) produce(ch <-chan stream.Message) {
+func (p *producer) produce(ch <-chan stream.Message) {
 	defer func() {
 		close(p.messages)
 		p.wg.Done()
@@ -182,7 +182,7 @@ func (p *Producer) produce(ch <-chan stream.Message) {
 	}
 }
 
-func newProducer(ch chan stream.Message, options []func(*streamconfig.Producer)) (*Producer, error) {
+func newProducer(ch chan stream.Message, options []func(*streamconfig.Producer)) (*producer, error) {
 	// Construct a full configuration object, based on the provided configuration,
 	// the default configurations, and the static configurations.
 	config, err := streamconfig.NewProducer(options...)
@@ -208,7 +208,7 @@ func newProducer(ch chan stream.Message, options []func(*streamconfig.Producer))
 		return nil, err
 	}
 
-	producer := &Producer{
+	p := &producer{
 		c:        config,
 		logger:   config.Logger,
 		kafka:    kafkaproducer,
@@ -218,10 +218,10 @@ func newProducer(ch chan stream.Message, options []func(*streamconfig.Producer))
 		once:     &sync.Once{},
 	}
 
-	return producer, nil
+	return p, nil
 }
 
-func (p *Producer) newMessage(m stream.Message) *kafka.Message {
+func (p *producer) newMessage(m stream.Message) *kafka.Message {
 	headers := make([]kafka.Header, len(m.Tags))
 	for k, v := range m.Tags {
 		headers = append(headers, kafka.Header{Key: k, Value: v})
@@ -245,7 +245,7 @@ func (p *Producer) newMessage(m stream.Message) *kafka.Message {
 // The partition is set to `kafka.PartitionAny`, to allow the Kafka broker to
 // determine in which partition the message should end up, based on the key set
 // for the message.
-func (p *Producer) newToppar(m stream.Message) kafka.TopicPartition {
+func (p *producer) newToppar(m stream.Message) kafka.TopicPartition {
 	topic := &p.c.Kafka.Topic
 	if m.Topic != "" {
 		topic = &m.Topic
@@ -259,7 +259,7 @@ func (p *Producer) newToppar(m stream.Message) kafka.TopicPartition {
 
 // checkReports listens to Kafka events send to the producer, and delegates them
 // to the appropriate handlers.
-func (p *Producer) checkReports() {
+func (p *producer) checkReports() {
 	for event := range p.kafka.Events() {
 		switch e := event.(type) {
 		case *kafka.Message:

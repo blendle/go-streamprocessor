@@ -17,12 +17,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestConsumer(t *testing.T) {
-	t.Parallel()
-
-	_ = inmemclient.Consumer{}
-}
-
 func TestNewConsumer(t *testing.T) {
 	t.Parallel()
 
@@ -30,7 +24,7 @@ func TestNewConsumer(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { require.NoError(t, consumer.Close()) }()
 
-	assert.Equal(t, "*inmemclient.Consumer", reflect.TypeOf(consumer).String())
+	assert.Equal(t, "*inmemclient.consumer", reflect.TypeOf(consumer).String())
 }
 
 func TestNewConsumer_WithOptions(t *testing.T) {

@@ -31,19 +31,19 @@ func TestIntegrationNewConsumer_Env(t *testing.T) {
 	}{
 		{
 			"standardstream",
-			"*standardstreamclient.Consumer",
+			"*standardstreamclient.consumer",
 			nil,
 		},
 
 		{
 			"inmem",
-			"*inmemclient.Consumer",
+			"*inmemclient.consumer",
 			nil,
 		},
 
 		{
 			"kafka",
-			"*kafkaclient.Consumer",
+			"*kafkaclient.consumer",
 			func(c *streamconfig.Consumer) {
 				c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 				c.Kafka.Topics = []string{"test"}
@@ -78,7 +78,7 @@ func TestNewConsumer_PipedData(t *testing.T) {
 		consumer, err := streamclient.NewConsumer()
 		require.NoError(t, err)
 
-		require.Equal(t, "*standardstreamclient.Consumer", reflect.TypeOf(consumer).String())
+		require.Equal(t, "*standardstreamclient.consumer", reflect.TypeOf(consumer).String())
 		return
 	}
 

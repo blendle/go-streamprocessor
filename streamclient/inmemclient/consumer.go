@@ -11,8 +11,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// Consumer implements the stream.Consumer interface for the inmem client.
-type Consumer struct {
+// consumer implements the stream.Consumer interface for the inmem client.
+type consumer struct {
 	// c represents the configuration passed into the consumer on
 	// initialization.
 	c streamconfig.Consumer
@@ -26,18 +26,18 @@ type Consumer struct {
 	once     *sync.Once
 }
 
-var _ stream.Consumer = (*Consumer)(nil)
+var _ stream.Consumer = (*consumer)(nil)
 
 // NewConsumer returns a new inmem consumer.
 func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, error) {
-	consumer, err := newConsumer(options)
+	c, err := newConsumer(options)
 	if err != nil {
 		return nil, err
 	}
 
 	// add one to the WaitGroup. We remove this one only after all reads (below)
 	// are completed and the read channel is closed.
-	consumer.wg.Add(1)
+	c.wg.Add(1)
 
 	// We start a goroutine to listen for errors on the errors channel, and log a
 	// fatal error (terminating the application in the process) when an error is
@@ -46,15 +46,15 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag. If the auto-error functionality is disabled, the user
 	// needs to manually listen to the `Errors()` channel and act accordingly.
-	if consumer.c.HandleErrors {
-		go streamutil.HandleErrors(consumer.errors, consumer.logger.Fatal)
+	if c.c.HandleErrors {
+		go streamutil.HandleErrors(c.errors, c.logger.Fatal)
 	}
 
 	// We start a goroutine to consume any messages currently stored in the inmem
 	// storage. We deliver these messages on a blocking channel, so as long as no
 	// one is listening on the other end of the channel, there's no significant
 	// overhead to starting the goroutine this early.
-	go consumer.consume()
+	go c.consume()
 
 	// Finally, we monitor for any interrupt signals. Ideally, the user handles
 	// these cases gracefully, but just in case, we try to close the consumer if
@@ -63,38 +63,38 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	//
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag.
-	if consumer.c.HandleInterrupt {
-		consumer.signals = make(chan os.Signal, 1)
-		go streamutil.HandleInterrupts(consumer.signals, consumer.Close, consumer.logger)
+	if c.c.HandleInterrupt {
+		c.signals = make(chan os.Signal, 1)
+		go streamutil.HandleInterrupts(c.signals, c.Close, c.logger)
 	}
 
-	return consumer, nil
+	return c, nil
 }
 
 // Messages returns the read channel for the messages that are returned by the
 // stream.
-func (c *Consumer) Messages() <-chan stream.Message {
+func (c *consumer) Messages() <-chan stream.Message {
 	return c.messages
 }
 
 // Errors returns the read channel for the errors that are returned by the
 // stream.
-func (c *Consumer) Errors() <-chan error {
+func (c *consumer) Errors() <-chan error {
 	return streamutil.ErrorsChan(c.errors, c.c.HandleErrors)
 }
 
 // Ack is a no-op implementation to satisfy the stream.Consumer interface.
-func (c *Consumer) Ack(_ stream.Message) error {
+func (c *consumer) Ack(_ stream.Message) error {
 	return nil
 }
 
 // Nack is a no-op implementation to satisfy the stream.Consumer interface.
-func (c *Consumer) Nack(_ stream.Message) error {
+func (c *consumer) Nack(_ stream.Message) error {
 	return nil
 }
 
 // Close closes the consumer connection.
-func (c *Consumer) Close() error {
+func (c *consumer) Close() error {
 	c.once.Do(func() {
 		if !c.c.Inmem.ConsumeOnce {
 			// Trigger the quit channel, which terminates our internal goroutine to
@@ -125,11 +125,11 @@ func (c *Consumer) Close() error {
 // Config returns a read-only representation of the consumer configuration as an
 // interface. To access the underlying configuration struct, cast the interface
 // to `streamconfig.Consumer`.
-func (c *Consumer) Config() interface{} {
+func (c *consumer) Config() interface{} {
 	return c.c
 }
 
-func (c *Consumer) consume() {
+func (c *consumer) consume() {
 	defer func() {
 		close(c.messages)
 		c.wg.Done()
@@ -174,13 +174,13 @@ func (c *Consumer) consume() {
 	}
 }
 
-func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
+func newConsumer(options []func(*streamconfig.Consumer)) (*consumer, error) {
 	config, err := streamconfig.NewConsumer(options...)
 	if err != nil {
 		return nil, err
 	}
 
-	consumer := &Consumer{
+	c := &consumer{
 		c:        config,
 		logger:   config.Logger,
 		messages: make(chan stream.Message),
@@ -189,5 +189,5 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 		once:     &sync.Once{},
 	}
 
-	return consumer, nil
+	return c, nil
 }

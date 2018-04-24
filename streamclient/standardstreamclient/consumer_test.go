@@ -17,19 +17,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestConsumer(t *testing.T) {
-	t.Parallel()
-
-	_ = standardstreamclient.Consumer{}
-}
-
 func TestNewConsumer(t *testing.T) {
 	t.Parallel()
 
 	consumer, err := standardstreamclient.NewConsumer()
 	require.NoError(t, err)
 
-	assert.Equal(t, "*standardstreamclient.Consumer", reflect.TypeOf(consumer).String())
+	assert.Equal(t, "*standardstreamclient.consumer", reflect.TypeOf(consumer).String())
 }
 
 func TestNewConsumer_WithOptions(t *testing.T) {

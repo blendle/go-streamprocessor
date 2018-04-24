@@ -28,19 +28,19 @@ func TestIntegrationNewProducer_Env(t *testing.T) {
 	}{
 		{
 			"standardstream",
-			"*standardstreamclient.Producer",
+			"*standardstreamclient.producer",
 			nil,
 		},
 
 		{
 			"inmem",
-			"*inmemclient.Producer",
+			"*inmemclient.producer",
 			nil,
 		},
 
 		{
 			"kafka",
-			"*kafkaclient.Producer",
+			"*kafkaclient.producer",
 			func(c *streamconfig.Producer) {
 				c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 				c.Kafka.Topic = "test"
@@ -76,7 +76,7 @@ func TestNewProducer_Env_DryRun(t *testing.T) {
 	producer, err := streamclient.NewProducer()
 	require.NoError(t, err)
 
-	assert.Equal(t, "*standardstreamclient.Producer", reflect.TypeOf(producer).String())
+	assert.Equal(t, "*standardstreamclient.producer", reflect.TypeOf(producer).String())
 }
 
 func TestNewProducer_Env_DryRun_Overridden(t *testing.T) {
@@ -89,7 +89,7 @@ func TestNewProducer_Env_DryRun_Overridden(t *testing.T) {
 	producer, err := streamclient.NewProducer()
 	require.NoError(t, err)
 
-	assert.Equal(t, "*inmemclient.Producer", reflect.TypeOf(producer).String())
+	assert.Equal(t, "*inmemclient.producer", reflect.TypeOf(producer).String())
 }
 
 func TestNewProducer_Unknown(t *testing.T) {
