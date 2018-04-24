@@ -9,7 +9,6 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 )
 
 // TestNewConsumer returns a new consumer configuration struct, optionally with
@@ -23,7 +22,7 @@ func TestNewConsumer(tb testing.TB, defaults bool, options ...func(*Consumer)) C
 		c.Kafka = kafkaconfig.Consumer{}
 		c.Pubsub = pubsubconfig.Consumer{}
 		c.Standardstream = standardstreamconfig.Consumer{}
-		c.Logger = zap.Logger{}
+		c.Logger = nil
 		c.HandleInterrupt = false
 		c.HandleErrors = false
 		c.Name = ""
@@ -69,7 +68,7 @@ func TestNewProducer(tb testing.TB, defaults bool, options ...func(*Producer)) P
 		p.Kafka = kafkaconfig.Producer{}
 		p.Pubsub = pubsubconfig.Producer{}
 		p.Standardstream = standardstreamconfig.Producer{}
-		p.Logger = zap.Logger{}
+		p.Logger = nil
 		p.HandleInterrupt = false
 		p.HandleErrors = false
 		p.Name = ""

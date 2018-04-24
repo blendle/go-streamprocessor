@@ -182,7 +182,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 
 	consumer := &Consumer{
 		c:        config,
-		logger:   &config.Logger,
+		logger:   config.Logger,
 		messages: make(chan stream.Message),
 		errors:   make(chan error),
 		quit:     make(chan bool),

@@ -133,7 +133,7 @@ func newProducer(ch chan stream.Message, options []func(*streamconfig.Producer))
 
 	producer := &Producer{
 		c:        config,
-		logger:   &config.Logger,
+		logger:   config.Logger,
 		errors:   make(chan error),
 		messages: ch,
 		once:     &sync.Once{},

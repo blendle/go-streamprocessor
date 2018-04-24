@@ -24,7 +24,7 @@ func TestConsumer(t *testing.T) {
 		Kafka:           kafkaconfig.Consumer{},
 		Pubsub:          pubsubconfig.Consumer{},
 		Standardstream:  standardstreamconfig.Consumer{},
-		Logger:          *zap.NewNop(),
+		Logger:          zap.NewNop(),
 		HandleInterrupt: false,
 		Name:            "",
 		AllowEnvironmentBasedConfiguration: false,
@@ -36,7 +36,7 @@ func TestConsumerDefaults(t *testing.T) {
 
 	config := streamconfig.ConsumerDefaults
 
-	assert.Equal(t, "zap.Logger", reflect.TypeOf(config.Logger).String())
+	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
 	assert.True(t, config.HandleInterrupt)
 	assert.Equal(t, "consumer", config.Name)
 	assert.True(t, config.AllowEnvironmentBasedConfiguration)
@@ -286,7 +286,7 @@ func TestProducer(t *testing.T) {
 		Kafka:           kafkaconfig.Producer{},
 		Pubsub:          pubsubconfig.Producer{},
 		Standardstream:  standardstreamconfig.Producer{},
-		Logger:          *zap.NewNop(),
+		Logger:          zap.NewNop(),
 		HandleInterrupt: false,
 		Name:            "",
 		AllowEnvironmentBasedConfiguration: false,
@@ -298,7 +298,7 @@ func TestProducerDefaults(t *testing.T) {
 
 	config := streamconfig.ProducerDefaults
 
-	assert.Equal(t, "zap.Logger", reflect.TypeOf(config.Logger).String())
+	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
 	assert.True(t, config.HandleInterrupt)
 	assert.Equal(t, "producer", config.Name)
 	assert.True(t, config.AllowEnvironmentBasedConfiguration)

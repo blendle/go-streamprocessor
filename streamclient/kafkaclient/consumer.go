@@ -274,7 +274,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 
 	consumer := &Consumer{
 		c:        config,
-		logger:   &config.Logger,
+		logger:   config.Logger,
 		kafka:    kafkaconsumer,
 		errors:   make(chan error),
 		messages: make(chan stream.Message),

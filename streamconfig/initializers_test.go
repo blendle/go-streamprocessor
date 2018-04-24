@@ -25,7 +25,7 @@ func TestNewConsumer(t *testing.T) {
 		{"kafkaconfig.Consumer", config.Kafka},
 		{"pubsubconfig.Consumer", config.Pubsub},
 		{"standardstreamconfig.Consumer", config.Standardstream},
-		{"zap.Logger", config.Logger},
+		{"*zap.Logger", config.Logger},
 	}
 
 	for _, tt := range tests {
@@ -49,6 +49,19 @@ func TestNewConsumer_WithOptions_Nil(t *testing.T) {
 
 	_, err := streamconfig.NewConsumer(nil)
 	assert.NoError(t, err)
+}
+
+func TestNewConsumer_WithOptions_NilLogger(t *testing.T) {
+	t.Parallel()
+
+	options := func(c *streamconfig.Consumer) {
+		c.Logger = nil
+	}
+
+	config, err := streamconfig.NewConsumer(options)
+	require.NoError(t, err)
+
+	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
 }
 
 func TestNewConsumer_WithEnvironmentVariables(t *testing.T) {
@@ -107,7 +120,7 @@ func TestNewProducer(t *testing.T) {
 		{"kafkaconfig.Producer", config.Kafka},
 		{"pubsubconfig.Producer", config.Pubsub},
 		{"standardstreamconfig.Producer", config.Standardstream},
-		{"zap.Logger", config.Logger},
+		{"*zap.Logger", config.Logger},
 	}
 
 	for _, tt := range tests {
@@ -131,6 +144,19 @@ func TestNewProducer_WithOptions_Nil(t *testing.T) {
 
 	_, err := streamconfig.NewProducer(nil)
 	assert.NoError(t, err)
+}
+
+func TestNewProducer_WithOptions_NilLogger(t *testing.T) {
+	t.Parallel()
+
+	options := func(c *streamconfig.Producer) {
+		c.Logger = nil
+	}
+
+	config, err := streamconfig.NewProducer(options)
+	require.NoError(t, err)
+
+	assert.Equal(t, "*zap.Logger", reflect.TypeOf(config.Logger).String())
 }
 
 func TestNewProducer_WithEnvironmentVariables(t *testing.T) {

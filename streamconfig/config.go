@@ -17,7 +17,7 @@ import (
 // these options can be passed into the new consumer to determine its behavior.
 // If the consumer only has to support a single implementation of the interface,
 // then all other configuration values can be ignored.
-type Consumer struct { // nolint:malign
+type Consumer struct {
 	Inmem          inmemconfig.Consumer
 	Kafka          kafkaconfig.Consumer
 	Pubsub         pubsubconfig.Consumer
@@ -44,7 +44,7 @@ type Consumer struct { // nolint:malign
 
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
-	Logger zap.Logger `ignored:"true"`
+	Logger *zap.Logger `ignored:"true"`
 
 	// Name is the name of the current processor. It is currently only used to
 	// determine the prefix for environment-variable based configuration values.
@@ -60,7 +60,7 @@ type Consumer struct { // nolint:malign
 // these options can be passed into the new producer to determine its behavior.
 // If the producer only has to support a single implementation of the interface,
 // then all other configuration values can be ignored.
-type Producer struct { // nolint:malign
+type Producer struct {
 	Inmem          inmemconfig.Producer
 	Kafka          kafkaconfig.Producer
 	Pubsub         pubsubconfig.Producer
@@ -87,7 +87,7 @@ type Producer struct { // nolint:malign
 
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
-	Logger zap.Logger `ignored:"true"`
+	Logger *zap.Logger `ignored:"true"`
 
 	// Name is the name of the current processor. It is currently only used to
 	// determine the prefix for environment-variable based configuration values.
@@ -100,7 +100,7 @@ type Producer struct { // nolint:malign
 
 // ConsumerDefaults holds the default values for Consumer.
 var ConsumerDefaults = Consumer{
-	Logger:          *zap.NewNop(),
+	Logger:          zap.NewNop(),
 	HandleErrors:    true,
 	HandleInterrupt: true,
 	Name:            "consumer",
@@ -109,7 +109,7 @@ var ConsumerDefaults = Consumer{
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
-	Logger:          *zap.NewNop(),
+	Logger:          zap.NewNop(),
 	HandleErrors:    true,
 	HandleInterrupt: true,
 	Name:            "producer",
