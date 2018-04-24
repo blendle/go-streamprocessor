@@ -25,7 +25,7 @@ func TestIntegrationTestConsumer(t *testing.T) {
 	consumer, closer := kafkaclient.TestConsumer(t, topicAndGroup)
 	defer closer()
 
-	assert.Equal(t, "*kafkaclient.Consumer", reflect.TypeOf(consumer).String())
+	assert.Equal(t, "*kafkaclient.consumer", reflect.TypeOf(consumer).String())
 	assert.Equal(t, topicAndGroup, consumer.Config().(streamconfig.Consumer).Kafka.Topics[0])
 }
 
@@ -55,7 +55,7 @@ func TestIntegrationTestProducer(t *testing.T) {
 	producer, closer := kafkaclient.TestProducer(t, topic)
 	defer closer()
 
-	assert.Equal(t, "*kafkaclient.Producer", reflect.TypeOf(producer).String())
+	assert.Equal(t, "*kafkaclient.producer", reflect.TypeOf(producer).String())
 }
 
 func TestIntegrationTestProducer_WithOptions(t *testing.T) {

@@ -17,12 +17,6 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestProducer(t *testing.T) {
-	t.Parallel()
-
-	_ = kafkaclient.Producer{}
-}
-
 func TestIntegrationNewProducer(t *testing.T) {
 	t.Parallel()
 	testutil.Integration(t)
@@ -34,7 +28,7 @@ func TestIntegrationNewProducer(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { require.NoError(t, producer.Close()) }()
 
-	assert.Equal(t, "*kafkaclient.Producer", reflect.TypeOf(producer).String())
+	assert.Equal(t, "*kafkaclient.producer", reflect.TypeOf(producer).String())
 }
 
 func TestIntegrationNewProducer_WithOptions(t *testing.T) {

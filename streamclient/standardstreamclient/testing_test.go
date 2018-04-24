@@ -39,7 +39,7 @@ func TestTestConsumer(t *testing.T) {
 	consumer, closer := standardstreamclient.TestConsumer(t, buffer)
 	defer closer()
 
-	assert.Equal(t, "*standardstreamclient.Consumer", reflect.TypeOf(consumer).String())
+	assert.Equal(t, "*standardstreamclient.consumer", reflect.TypeOf(consumer).String())
 	assert.EqualValues(t, buffer, consumer.Config().(streamconfig.Consumer).Standardstream.Reader)
 }
 
@@ -50,6 +50,6 @@ func TestTestProducer(t *testing.T) {
 	producer, closer := standardstreamclient.TestProducer(t, w)
 	defer closer()
 
-	assert.Equal(t, "*standardstreamclient.Producer", reflect.TypeOf(producer).String())
+	assert.Equal(t, "*standardstreamclient.producer", reflect.TypeOf(producer).String())
 	assert.EqualValues(t, w, producer.Config().(streamconfig.Producer).Standardstream.Writer)
 }

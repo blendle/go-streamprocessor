@@ -16,12 +16,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestProducer(t *testing.T) {
-	t.Parallel()
-
-	_ = inmemclient.Producer{}
-}
-
 func TestNewProducer(t *testing.T) {
 	t.Parallel()
 
@@ -29,7 +23,7 @@ func TestNewProducer(t *testing.T) {
 	require.NoError(t, err)
 	defer require.NoError(t, producer.Close())
 
-	assert.Equal(t, "*inmemclient.Producer", reflect.TypeOf(producer).String())
+	assert.Equal(t, "*inmemclient.producer", reflect.TypeOf(producer).String())
 }
 
 func TestNewProducer_WithOptions(t *testing.T) {

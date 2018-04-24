@@ -12,8 +12,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// Consumer implements the `stream.Consumer` interface for the Kafka client.
-type Consumer struct {
+// consumer implements the `stream.Consumer` interface for the Kafka client.
+type consumer struct {
 	// c represents the configuration passed into the consumer on
 	// initialization.
 	c streamconfig.Consumer
@@ -32,18 +32,18 @@ type opaque struct {
 	toppar *kafka.TopicPartition
 }
 
-var _ stream.Consumer = (*Consumer)(nil)
+var _ stream.Consumer = (*consumer)(nil)
 
 // NewConsumer returns a new Kafka consumer.
 func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, error) {
-	consumer, err := newConsumer(options)
+	c, err := newConsumer(options)
 	if err != nil {
 		return nil, err
 	}
 
 	// add one to the WaitGroup. We reduce this count once Close() is called, and
 	// the messages channel is closed.
-	consumer.wg.Add(1)
+	c.wg.Add(1)
 
 	// We start a goroutine to listen for errors on the errors channel, and log a
 	// fatal error (terminating the application in the process) when an error is
@@ -52,15 +52,15 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag. If the auto-error functionality is disabled, the user
 	// needs to manually listen to the `Errors()` channel and act accordingly.
-	if consumer.c.HandleErrors {
-		go streamutil.HandleErrors(consumer.errors, consumer.logger.Fatal)
+	if c.c.HandleErrors {
+		go streamutil.HandleErrors(c.errors, c.logger.Fatal)
 	}
 
 	// We start a goroutine to consume any messages being delivered to us from
 	// Kafka. We deliver these messages on a blocking channel, so as long as no
 	// one is listening on the other end of the channel, there's no significant
 	// overhead to starting the goroutine this early.
-	go consumer.consume()
+	go c.consume()
 
 	// Finally, we monitor for any interrupt signals. Ideally, the user handles
 	// these cases gracefully, but just in case, we try to close the consumer if
@@ -69,30 +69,30 @@ func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, erro
 	//
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag.
-	if consumer.c.HandleInterrupt {
-		consumer.signals = make(chan os.Signal, 1)
-		go streamutil.HandleInterrupts(consumer.signals, consumer.Close, consumer.logger)
+	if c.c.HandleInterrupt {
+		c.signals = make(chan os.Signal, 1)
+		go streamutil.HandleInterrupts(c.signals, c.Close, c.logger)
 	}
 
-	return consumer, nil
+	return c, nil
 }
 
 // Messages returns the read channel for the messages that are returned by the
 // stream.
-func (c *Consumer) Messages() <-chan stream.Message {
+func (c *consumer) Messages() <-chan stream.Message {
 	return c.messages
 }
 
 // Errors returns the read channel for the errors that are returned by the
 // stream.
-func (c *Consumer) Errors() <-chan error {
+func (c *consumer) Errors() <-chan error {
 	return streamutil.ErrorsChan(c.errors, c.c.HandleErrors)
 }
 
 // Ack acknowledges that a message was processed. See `Consumer.storeOffset` for
 // more details on how message acknowledgment works for the Kafka consumer. If
 // the consumer is unable to acknowledge a message, an error is returned.
-func (c *Consumer) Ack(m stream.Message) error {
+func (c *consumer) Ack(m stream.Message) error {
 	o, ok := stream.MessageOpqaue(&m).(opaque)
 	if !ok {
 		return errors.New("unsuccessful type assertion")
@@ -104,13 +104,13 @@ func (c *Consumer) Ack(m stream.Message) error {
 // Nack is a no-op implementation to satisfy the `stream.Consumer` interface. We
 // don't need an actual implementation, since not acknowledging a message will
 // eventually result in the message being redelivered.
-func (c *Consumer) Nack(m stream.Message) error {
+func (c *consumer) Nack(m stream.Message) error {
 	return nil
 }
 
 // Close closes the consumer connection. Close is safe to call more than once,
 // but it will only effectively close the consumer on the first call.
-func (c *Consumer) Close() (err error) {
+func (c *consumer) Close() (err error) {
 	c.once.Do(func() {
 		// This synchronous call closes the Kafka consumer and also sends any
 		// still-to-be-committed offsets to the Broker before returning. This is
@@ -160,11 +160,11 @@ func (c *Consumer) Close() (err error) {
 // Config returns a read-only representation of the consumer configuration as an
 // interface. To access the underlying configuration struct, cast the interface
 // to `streamconfig.Consumer`.
-func (c *Consumer) Config() interface{} {
+func (c *consumer) Config() interface{} {
 	return c.c
 }
 
-func (c *Consumer) consume() {
+func (c *consumer) consume() {
 	defer func() {
 		close(c.messages)
 		c.wg.Done()
@@ -241,7 +241,7 @@ func (c *Consumer) consume() {
 	}
 }
 
-func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
+func newConsumer(options []func(*streamconfig.Consumer)) (*consumer, error) {
 	// Construct a full configuration object, based on the provided configuration,
 	// the default configurations, and the static configurations.
 	config, err := streamconfig.NewConsumer(options...)
@@ -272,7 +272,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 		return nil, err
 	}
 
-	consumer := &Consumer{
+	c := &consumer{
 		c:        config,
 		logger:   config.Logger,
 		kafka:    kafkaconsumer,
@@ -282,7 +282,7 @@ func newConsumer(options []func(*streamconfig.Consumer)) (*Consumer, error) {
 		once:     &sync.Once{},
 	}
 
-	return consumer, nil
+	return c, nil
 }
 
 // newMessageFromKafka takes a *kafka.Message (provided by librdkafka), and
@@ -324,7 +324,7 @@ func newMessageFromKafka(m *kafka.Message) *stream.Message {
 // "acknowledgment" implementation, while still having a very high guarantee of
 // offset correctness (the only situation where this can go wrong is in an
 // abrupt termination of the process, without any proper notice of termination).
-func (c *Consumer) storeOffset(tp kafka.TopicPartition) error {
+func (c *consumer) storeOffset(tp kafka.TopicPartition) error {
 	// if c.quit equals nil, this means this consumer is no longer in an operable
 	// state, and the underlying kafka Consumer has already been closed. In such a
 	// situation, we can no longer commit any offsets, and will thus have to
@@ -349,7 +349,7 @@ func (c *Consumer) storeOffset(tp kafka.TopicPartition) error {
 // the Kafka broker sends a partition rebalance request. When this happens, we
 // first commit any still-to-be-committed offsets, before we unassign ourselves
 // from the partition.
-func (c *Consumer) commit() ([]kafka.TopicPartition, error) {
+func (c *consumer) commit() ([]kafka.TopicPartition, error) {
 	p, err := c.kafka.Commit()
 	if err == nil {
 		c.logger.Debug(

@@ -16,7 +16,7 @@ func TestTestConsumer(t *testing.T) {
 	consumer, closer := inmemclient.TestConsumer(t, nil)
 	defer closer()
 
-	assert.Equal(t, "*inmemclient.Consumer", reflect.TypeOf(consumer).String())
+	assert.Equal(t, "*inmemclient.consumer", reflect.TypeOf(consumer).String())
 }
 
 func TestTestConsumer_WithStore(t *testing.T) {
@@ -48,7 +48,7 @@ func TestTestProducer(t *testing.T) {
 	producer, closer := inmemclient.TestProducer(t, nil)
 	defer closer()
 
-	assert.Equal(t, "*inmemclient.Producer", reflect.TypeOf(producer).String())
+	assert.Equal(t, "*inmemclient.producer", reflect.TypeOf(producer).String())
 }
 
 func TestTestProducer_WithStore(t *testing.T) {

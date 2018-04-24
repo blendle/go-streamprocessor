@@ -7,7 +7,7 @@ import (
 )
 
 // handleAssignedPartitions assigns the consumer to a provided partition.
-func (c *Consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
+func (c *consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
 	c.logger.Info(
 		"Received event from Kafka.",
 		zap.String("eventType", "AssignedPartitions"),
@@ -29,7 +29,7 @@ func (c *Consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
 }
 
 // handleRevokedPartitions unassigns the consumer from a provided partition.
-func (c *Consumer) handleRevokedPartitions(e kafka.RevokedPartitions) {
+func (c *consumer) handleRevokedPartitions(e kafka.RevokedPartitions) {
 	log := c.logger.With(
 		zap.String("eventType", "RevokedPartitions"),
 		zap.String("eventDetails", e.String()),
@@ -63,7 +63,7 @@ func (c *Consumer) handleRevokedPartitions(e kafka.RevokedPartitions) {
 // returned message actually contains an error, we log that error, but don't
 // crash, as there's nothing we can do at this point, since the offset is
 // already delivered to Kafka.
-func (c *Consumer) handleOffsetCommitted(e kafka.OffsetsCommitted) {
+func (c *consumer) handleOffsetCommitted(e kafka.OffsetsCommitted) {
 	if e.Error == nil {
 		return
 	}
@@ -88,7 +88,7 @@ func (c *Consumer) handleOffsetCommitted(e kafka.OffsetsCommitted) {
 // We'll monitor this and see if we need to change this in the future. If you
 // want to handle this situation manually, use the `Events()` method to receive
 // the raised errors.
-func (c *Consumer) handleError(e kafka.Error) {
+func (c *consumer) handleError(e kafka.Error) {
 	c.errors <- errors.Wrap(e, "received error from event stream")
 }
 
@@ -104,7 +104,7 @@ func (c *Consumer) handleError(e kafka.Error) {
 // We'll monitor this and see if we need to change this in the future. If you
 // want to handle this situation manually, use the `Events()` method to receive
 // the raised errors.
-func (p *Producer) handleError(e kafka.Error) {
+func (p *producer) handleError(e kafka.Error) {
 	p.errors <- errors.Wrap(e, "received error from event stream")
 }
 
@@ -113,7 +113,7 @@ func (p *Producer) handleError(e kafka.Error) {
 // channel. The return value indicates whether or not the quit signal was
 // received while waiting to deliver the message. This value is used by the
 // consumer to close up shop.
-func (c *Consumer) handleMessage(e *kafka.Message) bool {
+func (c *consumer) handleMessage(e *kafka.Message) bool {
 	msg := newMessageFromKafka(e)
 
 	// Once the message has been prepared, we offer it to the consumer of
@@ -136,7 +136,7 @@ func (c *Consumer) handleMessage(e *kafka.Message) bool {
 // only relevant to validate that a published message was actually delivered as
 // expected. We check the error state of the message, and if there's an error,
 // we terminate the program, as there is no way to recover from this situation.
-func (p *Producer) handleMessage(e *kafka.Message) {
+func (p *producer) handleMessage(e *kafka.Message) {
 	if e.TopicPartition.Error == nil {
 		return
 	}
