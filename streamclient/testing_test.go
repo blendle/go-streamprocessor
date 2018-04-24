@@ -23,11 +23,7 @@ func TestTestMessageFromConsumer(t *testing.T) {
 
 	producer.Messages() <- stream.TestMessage(t, "hello", "world")
 
-	opts := func(c *streamconfig.Consumer) {
-		c.Inmem.ConsumeOnce = false
-	}
-
-	consumer, closer := inmemclient.TestConsumer(t, store, opts)
+	consumer, closer := inmemclient.TestConsumer(t, store, streamconfig.InmemListen())
 	defer closer()
 
 	message := streamclient.TestMessageFromConsumer(t, consumer)
@@ -40,11 +36,7 @@ func TestTestMessageFromConsumer_Timeout(t *testing.T) {
 	t.Parallel()
 
 	if os.Getenv("BE_TESTING_FATAL") == "1" {
-		opts := func(c *streamconfig.Consumer) {
-			c.Inmem.ConsumeOnce = false
-		}
-
-		consumer, closer := inmemclient.TestConsumer(t, nil, opts)
+		consumer, closer := inmemclient.TestConsumer(t, nil, streamconfig.InmemListen())
 		defer closer()
 
 		_ = streamclient.TestMessageFromConsumer(t, consumer)

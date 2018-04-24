@@ -18,7 +18,7 @@ import (
 // returns a function that should be deferred to clean up resources.
 //
 // You pass the topic and group name of the consumer as a single argument.
-func TestConsumer(tb testing.TB, topicAndGroup string, options ...func(c *streamconfig.Consumer)) (stream.Consumer, func()) {
+func TestConsumer(tb testing.TB, topicAndGroup string, options ...streamconfig.Option) (stream.Consumer, func()) {
 	tb.Helper()
 
 	consumer, err := NewConsumer(TestConsumerConfig(tb, topicAndGroup, options...)...)
@@ -31,7 +31,7 @@ func TestConsumer(tb testing.TB, topicAndGroup string, options ...func(c *stream
 // returns a function that should be deferred to clean up resources.
 //
 // You pass the topic and group name of the consumer as a single argument.
-func TestProducer(tb testing.TB, topic string, options ...func(c *streamconfig.Producer)) (stream.Producer, func()) {
+func TestProducer(tb testing.TB, topic string, options ...streamconfig.Option) (stream.Producer, func()) {
 	tb.Helper()
 
 	producer, err := NewProducer(TestProducerConfig(tb, topic, options...)...)
@@ -146,24 +146,24 @@ func TestOffsets(tb testing.TB, message stream.Message) []kafka.TopicPartition {
 
 // TestConsumerConfig returns sane default options to use during testing of the
 // kafkaclient consumer implementation.
-func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *streamconfig.Consumer)) []func(c *streamconfig.Consumer) {
-	var allOptions []func(c *streamconfig.Consumer)
+func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...streamconfig.Option) []streamconfig.Option {
+	var allOptions []streamconfig.Option
 
-	opts := func(c *streamconfig.Consumer) {
+	opts := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
 		c.Kafka = kafkaconfig.TestConsumer(tb)
 		c.Kafka.GroupID = topicAndGroup
 		c.Kafka.Topics = []string{topicAndGroup}
-	}
+	})
 
 	if testutil.Verbose(tb) {
 		logger, err := zap.NewDevelopment()
 		require.NoError(tb, err)
 
-		verbose := func(c *streamconfig.Consumer) {
+		verbose := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
 			c.Logger = logger.Named("TestConsumer")
 			c.Kafka.Debug.CGRP = true
 			c.Kafka.Debug.Topic = true
-		}
+		})
 
 		allOptions = append(allOptions, verbose)
 	}
@@ -173,29 +173,29 @@ func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...func(c *
 
 // TestProducerConfig returns sane default options to use during testing of the
 // kafkaclient producer implementation.
-func TestProducerConfig(tb testing.TB, topic string, options ...func(c *streamconfig.Producer)) []func(c *streamconfig.Producer) {
-	var allOptions []func(c *streamconfig.Producer)
+func TestProducerConfig(tb testing.TB, topic string, options ...streamconfig.Option) []streamconfig.Option {
+	var allOptions []streamconfig.Option
 
 	if testutil.Verbose(tb) {
 		logger, err := zap.NewDevelopment()
 		require.NoError(tb, err)
 
-		verbose := func(c *streamconfig.Producer) {
-			c.Logger = logger.Named("TestProducer")
-			c.Kafka.Debug.CGRP = true
-			c.Kafka.Debug.Topic = true
-		}
+		verbose := streamconfig.ProducerOptions(func(p *streamconfig.Producer) {
+			p.Logger = logger.Named("TestProducer")
+			p.Kafka.Debug.CGRP = true
+			p.Kafka.Debug.Topic = true
+		})
 
 		allOptions = append(allOptions, verbose)
 	}
 
-	opts := func(p *streamconfig.Producer) {
+	opts := streamconfig.ProducerOptions(func(p *streamconfig.Producer) {
 		p.Kafka.ID = "testProducer"
 		p.Kafka.SessionTimeout = 1 * time.Second
 		p.Kafka.HeartbeatInterval = 150 * time.Millisecond
 		p.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
 		p.Kafka.Topic = topic
-	}
+	})
 
 	return append(append(allOptions, opts), options...)
 }

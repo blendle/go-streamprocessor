@@ -29,12 +29,7 @@ func TestNewProducer(t *testing.T) {
 func TestNewProducer_WithOptions(t *testing.T) {
 	t.Parallel()
 
-	store := inmemstore.New()
-	options := func(c *streamconfig.Producer) {
-		c.Inmem.Store = store
-	}
-
-	producer, err := inmemclient.NewProducer(options)
+	producer, err := inmemclient.NewProducer(streamconfig.InmemStore(inmemstore.New()))
 	require.NoError(t, err)
 	defer require.NoError(t, producer.Close())
 }
@@ -78,9 +73,9 @@ func TestProducer_MessageOrdering(t *testing.T) {
 func TestProducer_Errors(t *testing.T) {
 	t.Parallel()
 
-	options := func(c *streamconfig.Producer) {
+	options := streamconfig.ProducerOptions(func(c *streamconfig.Producer) {
 		c.HandleErrors = true
-	}
+	})
 
 	producer, closer := inmemclient.TestProducer(t, nil, options)
 	defer closer()
@@ -93,11 +88,7 @@ func TestProducer_Errors(t *testing.T) {
 func TestProducer_Errors_Manual(t *testing.T) {
 	t.Parallel()
 
-	options := func(c *streamconfig.Producer) {
-		c.HandleErrors = false
-	}
-
-	producer, closer := inmemclient.TestProducer(t, nil, options)
+	producer, closer := inmemclient.TestProducer(t, nil, streamconfig.ManualErrorHandling())
 	defer closer()
 
 	select {

@@ -35,7 +35,7 @@ type opaque struct {
 var _ stream.Consumer = (*consumer)(nil)
 
 // NewConsumer returns a new Kafka consumer.
-func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, error) {
+func NewConsumer(options ...streamconfig.Option) (stream.Consumer, error) {
 	c, err := newConsumer(options)
 	if err != nil {
 		return nil, err
@@ -241,7 +241,7 @@ func (c *consumer) consume() {
 	}
 }
 
-func newConsumer(options []func(*streamconfig.Consumer)) (*consumer, error) {
+func newConsumer(options []streamconfig.Option) (*consumer, error) {
 	// Construct a full configuration object, based on the provided configuration,
 	// the default configurations, and the static configurations.
 	config, err := streamconfig.NewConsumer(options...)

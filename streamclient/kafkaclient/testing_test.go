@@ -34,11 +34,9 @@ func TestIntegrationTestConsumer_WithOptions(t *testing.T) {
 	testutil.Integration(t)
 
 	topicAndGroup := testutil.Random(t)
-	options := func(c *streamconfig.Consumer) {
-		c.Kafka.ID = "TestTestConsumer_WithOptions"
-	}
 
-	consumer, closer := kafkaclient.TestConsumer(t, topicAndGroup, options)
+	id := streamconfig.KafkaID("TestTestConsumer_WithOptions")
+	consumer, closer := kafkaclient.TestConsumer(t, topicAndGroup, id)
 	defer closer()
 
 	cfg := consumer.Config().(streamconfig.Consumer)
@@ -63,11 +61,9 @@ func TestIntegrationTestProducer_WithOptions(t *testing.T) {
 	testutil.Integration(t)
 
 	topic := testutil.Random(t)
-	options := func(c *streamconfig.Producer) {
-		c.Kafka.ID = "TestTestProducer_WithOptions"
-	}
 
-	producer, closer := kafkaclient.TestProducer(t, topic, options)
+	id := streamconfig.KafkaID("TestTestProducer_WithOptions")
+	producer, closer := kafkaclient.TestProducer(t, topic, id)
 	defer closer()
 
 	cfg := producer.Config().(streamconfig.Producer)
@@ -97,13 +93,11 @@ func TestIntegrationTestMessageFromTopic(t *testing.T) {
 	require.Zero(t, producer.Flush(1000))
 	producer.Close()
 
-	options := func(c *streamconfig.Consumer) {
-		c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
-		c.Kafka.Topics = []string{topicAndGroup}
-		c.Kafka.GroupID = topicAndGroup
-	}
-
-	consumer, err := kafkaclient.NewConsumer(options)
+	consumer, err := kafkaclient.NewConsumer(
+		streamconfig.KafkaBroker(kafkaconfig.TestBrokerAddress),
+		streamconfig.KafkaTopic(topicAndGroup),
+		streamconfig.KafkaGroupID(topicAndGroup),
+	)
 	require.NoError(t, err)
 	defer func() {
 		time.Sleep(100 * time.Millisecond)
@@ -241,13 +235,11 @@ func TestIntegrationTestOffsets(t *testing.T) {
 	<-producer.Events()
 	producer.Close()
 
-	options := func(c *streamconfig.Consumer) {
-		c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
-		c.Kafka.Topics = []string{topicAndGroup}
-		c.Kafka.GroupID = topicAndGroup
-	}
-
-	consumer, err := kafkaclient.NewConsumer(options)
+	consumer, err := kafkaclient.NewConsumer(
+		streamconfig.KafkaBroker(kafkaconfig.TestBrokerAddress),
+		streamconfig.KafkaTopic(topicAndGroup),
+		streamconfig.KafkaGroupID(topicAndGroup),
+	)
 	require.NoError(t, err)
 	defer func() { assert.NoError(t, consumer.Close()) }()
 

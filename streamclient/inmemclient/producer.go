@@ -28,7 +28,7 @@ type producer struct {
 var _ stream.Producer = (*producer)(nil)
 
 // NewProducer returns a new inmem producer.
-func NewProducer(options ...func(*streamconfig.Producer)) (stream.Producer, error) {
+func NewProducer(options ...streamconfig.Option) (stream.Producer, error) {
 	ch := make(chan stream.Message)
 
 	p, err := newProducer(ch, options)
@@ -125,7 +125,7 @@ func (p *producer) produce(ch <-chan stream.Message) {
 	}
 }
 
-func newProducer(ch chan stream.Message, options []func(*streamconfig.Producer)) (*producer, error) {
+func newProducer(ch chan stream.Message, options []streamconfig.Option) (*producer, error) {
 	config, err := streamconfig.NewProducer(options...)
 	if err != nil {
 		return nil, err

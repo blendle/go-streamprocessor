@@ -37,10 +37,13 @@ func TestIntegrationNewConsumer_WithOptions(t *testing.T) {
 	testutil.Integration(t)
 
 	topicAndGroup := testutil.Random(t)
-	options := kafkaclient.TestConsumerConfig(t, topicAndGroup, func(c *streamconfig.Consumer) {
+
+	opts := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
 		c.Kafka.Debug.Msg = true
 		c.Kafka.SSL.KeyPassword = "test"
 	})
+
+	options := kafkaclient.TestConsumerConfig(t, topicAndGroup, opts)
 
 	consumer, err := kafkaclient.NewConsumer(options...)
 	require.NoError(t, err)
@@ -125,9 +128,9 @@ func TestIntegrationConsumer_Errors(t *testing.T) {
 	t.Parallel()
 	testutil.Integration(t)
 
-	options := func(c *streamconfig.Consumer) {
+	options := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
 		c.HandleErrors = true
-	}
+	})
 
 	consumer, closer := kafkaclient.TestConsumer(t, testutil.Random(t), options)
 	defer closer()
@@ -151,11 +154,8 @@ func TestIntegrationConsumer_Errors_Manual(t *testing.T) {
 	t.Parallel()
 	testutil.Integration(t)
 
-	options := func(c *streamconfig.Consumer) {
-		c.HandleErrors = false
-	}
-
-	consumer, closer := kafkaclient.TestConsumer(t, testutil.Random(t), options)
+	handler := streamconfig.ManualErrorHandling()
+	consumer, closer := kafkaclient.TestConsumer(t, testutil.Random(t), handler)
 	defer closer()
 
 	// Give the consumer some time to properly start, before shutting it down.
@@ -306,13 +306,11 @@ func BenchmarkIntegrationConsumer_Messages(b *testing.B) {
 
 	// We use the default (production-like) config in this benchmark, to simulate
 	// real-world usage as best as possible.
-	options := func(c *streamconfig.Consumer) {
-		c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
-		c.Kafka.GroupID = topicAndGroup
-		c.Kafka.Topics = []string{topicAndGroup}
-	}
-
-	consumer, err := kafkaclient.NewConsumer(options)
+	consumer, err := kafkaclient.NewConsumer(
+		streamconfig.KafkaBroker(kafkaconfig.TestBrokerAddress),
+		streamconfig.KafkaGroupID(topicAndGroup),
+		streamconfig.KafkaTopic(topicAndGroup),
+	)
 	require.NoError(b, err)
 	defer func() { require.NoError(b, consumer.Close()) }()
 

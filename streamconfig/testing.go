@@ -13,7 +13,7 @@ import (
 
 // TestNewConsumer returns a new consumer configuration struct, optionally with
 // the default values removed.
-func TestNewConsumer(tb testing.TB, defaults bool, options ...func(*Consumer)) Consumer {
+func TestNewConsumer(tb testing.TB, defaults bool, options ...Option) Consumer {
 	c, err := NewConsumer()
 	require.NoError(tb, err)
 
@@ -30,11 +30,7 @@ func TestNewConsumer(tb testing.TB, defaults bool, options ...func(*Consumer)) C
 	}
 
 	for _, option := range options {
-		if option == nil {
-			continue
-		}
-
-		option(&c)
+		option.apply(&c, nil)
 	}
 
 	err = envconfig.Process(c.Name, &c)
@@ -45,21 +41,23 @@ func TestNewConsumer(tb testing.TB, defaults bool, options ...func(*Consumer)) C
 
 // TestConsumerOptions returns an array of consumer options ready to be used
 // during testing.
-func TestConsumerOptions(tb testing.TB, options ...func(*Consumer)) []func(c *Consumer) {
+func TestConsumerOptions(tb testing.TB, options ...Option) []Option {
 	tb.Helper()
 
-	var defaults []func(c *Consumer)
+	var defaults []Option
 
-	defaults = append(defaults, func(c *Consumer) {
+	config := ConsumerOptions(func(c *Consumer) {
 		c.Kafka = kafkaconfig.TestConsumer(tb)
 	})
+
+	defaults = append(defaults, config)
 
 	return append(defaults, options...)
 }
 
 // TestNewProducer returns a new producer configuration struct, optionally with
 // the default values removed.
-func TestNewProducer(tb testing.TB, defaults bool, options ...func(*Producer)) Producer {
+func TestNewProducer(tb testing.TB, defaults bool, options ...Option) Producer {
 	p, err := NewProducer()
 	require.NoError(tb, err)
 
@@ -76,11 +74,7 @@ func TestNewProducer(tb testing.TB, defaults bool, options ...func(*Producer)) P
 	}
 
 	for _, option := range options {
-		if option == nil {
-			continue
-		}
-
-		option(&p)
+		option.apply(nil, &p)
 	}
 
 	err = envconfig.Process(p.Name, &p)

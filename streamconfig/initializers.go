@@ -12,7 +12,7 @@ import (
 // NewConsumer returns a new Consumer configuration struct, containing the
 // values passed into the function. If any error occurs during configuration
 // validation, an error is returned as the second argument.
-func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
+func NewConsumer(options ...Option) (Consumer, error) {
 	defaults := ConsumerDefaults
 
 	config := &defaults
@@ -29,7 +29,7 @@ func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
 			continue
 		}
 
-		option(config)
+		option.apply(config, nil)
 	}
 
 	// Finally, we set/overwrite any value with any custom configuration values
@@ -60,7 +60,7 @@ func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
 // NewProducer returns a new Producer configuration struct, containing the
 // values passed into the function. If any error occurs during configuration
 // validation, an error is returned as the second argument.
-func NewProducer(options ...func(*Producer)) (Producer, error) {
+func NewProducer(options ...Option) (Producer, error) {
 	defaults := ProducerDefaults
 
 	config := &defaults
@@ -77,7 +77,7 @@ func NewProducer(options ...func(*Producer)) (Producer, error) {
 			continue
 		}
 
-		option(config)
+		option.apply(nil, config)
 	}
 
 	// Finally, we set/overwrite any value with any custom configuration values

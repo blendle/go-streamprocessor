@@ -32,11 +32,7 @@ func TestNewProducer_WithOptions(t *testing.T) {
 
 	buffer := standardstreamclient.TestBuffer(t)
 
-	options := func(c *streamconfig.Producer) {
-		c.Standardstream.Writer = buffer
-	}
-
-	producer, err := standardstreamclient.NewProducer(options)
+	producer, err := standardstreamclient.NewProducer(streamconfig.StandardstreamWriter(buffer))
 	require.NoError(t, err)
 	defer func() { require.NoError(t, producer.Close()) }()
 
@@ -102,9 +98,9 @@ func TestProducer_Messages_Ordering(t *testing.T) {
 func TestProducer_Errors(t *testing.T) {
 	t.Parallel()
 
-	options := func(c *streamconfig.Producer) {
+	options := streamconfig.ProducerOptions(func(c *streamconfig.Producer) {
 		c.HandleErrors = true
-	}
+	})
 
 	b := standardstreamclient.TestBuffer(t)
 	producer, closer := standardstreamclient.TestProducer(t, b, options)
@@ -118,12 +114,8 @@ func TestProducer_Errors(t *testing.T) {
 func TestProducer_Errors_Manual(t *testing.T) {
 	t.Parallel()
 
-	options := func(c *streamconfig.Producer) {
-		c.HandleErrors = false
-	}
-
 	b := standardstreamclient.TestBuffer(t)
-	producer, closer := standardstreamclient.TestProducer(t, b, options)
+	producer, closer := standardstreamclient.TestProducer(t, b, streamconfig.ManualErrorHandling())
 	defer closer()
 
 	select {

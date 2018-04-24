@@ -29,12 +29,8 @@ func TestTestNewConsumer_WithOptions(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	options := func(c *streamconfig.Consumer) {
-		c.Logger = logger
-	}
-
 	c1 := streamconfig.Consumer{Logger: logger}
-	c2 := streamconfig.TestNewConsumer(t, false, options)
+	c2 := streamconfig.TestNewConsumer(t, false, streamconfig.Logger(logger))
 
 	assert.EqualValues(t, c1, c2)
 }
@@ -53,13 +49,13 @@ func TestTestNewConsumer_WithOptionsAndEnvironmentVariables(t *testing.T) {
 	_ = os.Setenv("KAFKA_BROKERS", "broker1")
 	defer os.Unsetenv("KAFKA_BROKERS") // nolint: errcheck
 
-	options := func(c *streamconfig.Consumer) {
-		c.Kafka.Brokers = []string{"broker2"}
-		c.Kafka.ID = "test"
+	options := []streamconfig.Option{
+		streamconfig.KafkaBroker("broker2"),
+		streamconfig.KafkaID("test"),
 	}
 
 	c1 := streamconfig.Consumer{Kafka: kafkaconfig.Consumer{Brokers: []string{"broker1"}, ID: "test"}}
-	c2 := streamconfig.TestNewConsumer(t, false, options)
+	c2 := streamconfig.TestNewConsumer(t, false, options...)
 
 	assert.EqualValues(t, c1, c2)
 }
@@ -82,12 +78,8 @@ func TestTestNewProducer_WithOptions(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	options := func(c *streamconfig.Producer) {
-		c.Logger = logger
-	}
-
 	p1 := streamconfig.Producer{Logger: logger}
-	p2 := streamconfig.TestNewProducer(t, false, options)
+	p2 := streamconfig.TestNewProducer(t, false, streamconfig.Logger(logger))
 
 	assert.EqualValues(t, p1, p2)
 }
@@ -106,30 +98,18 @@ func TestTestNewProducer_WithOptionsAndEnvironmentVariables(t *testing.T) {
 	_ = os.Setenv("KAFKA_BROKERS", "broker1")
 	defer os.Unsetenv("KAFKA_BROKERS") // nolint: errcheck
 
-	options := func(c *streamconfig.Producer) {
-		c.Kafka.Brokers = []string{"broker2"}
-		c.Kafka.ID = "test"
+	options := []streamconfig.Option{
+		streamconfig.KafkaBroker("broker2"),
+		streamconfig.KafkaID("test"),
 	}
 
 	c1 := streamconfig.Producer{Kafka: kafkaconfig.Producer{Brokers: []string{"broker1"}, ID: "test"}}
-	c2 := streamconfig.TestNewProducer(t, false, options)
+	c2 := streamconfig.TestNewProducer(t, false, options...)
 
 	assert.EqualValues(t, c1, c2)
 }
 
 func TestTestConsumerOptions(t *testing.T) {
-	options := func(c *streamconfig.Consumer) {
-		c.Kafka.GroupID = "overrideGroup"
-	}
-
-	opts := streamconfig.TestConsumerOptions(t, options)
+	opts := streamconfig.TestConsumerOptions(t, streamconfig.KafkaGroupID("overrideGroup"))
 	require.Len(t, opts, 2)
-
-	c := &streamconfig.Consumer{}
-
-	opts[0](c)
-	assert.Equal(t, c.Kafka.GroupID, "testGroup")
-
-	opts[1](c)
-	assert.Equal(t, c.Kafka.GroupID, "overrideGroup")
 }

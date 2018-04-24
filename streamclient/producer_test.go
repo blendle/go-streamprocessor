@@ -24,7 +24,7 @@ func TestIntegrationNewProducer_Env(t *testing.T) {
 	var tests = []struct {
 		env    string
 		typeOf string
-		opts   func(*streamconfig.Producer)
+		opts   streamconfig.Option
 	}{
 		{
 			"standardstream",
@@ -41,10 +41,10 @@ func TestIntegrationNewProducer_Env(t *testing.T) {
 		{
 			"kafka",
 			"*kafkaclient.producer",
-			func(c *streamconfig.Producer) {
-				c.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
-				c.Kafka.Topic = "test"
-			},
+			streamconfig.ProducerOptions(func(p *streamconfig.Producer) {
+				p.Kafka.Brokers = []string{kafkaconfig.TestBrokerAddress}
+				p.Kafka.Topic = "test"
+			}),
 		},
 	}
 
