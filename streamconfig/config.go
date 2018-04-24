@@ -116,12 +116,37 @@ var ProducerDefaults = Producer{
 	AllowEnvironmentBasedConfiguration: true,
 }
 
-// Usage calls the usage() function and returns a byte array.
+// WithOptions takes the current Consumer, applies the supplied Options, and
+// returns the resulting Consumer.
+func (c Consumer) WithOptions(opts ...Option) Consumer {
+	cc := &c
+
+	for _, opt := range opts {
+		opt.apply(cc, nil)
+	}
+
+	return *cc
+}
+
+// TODO: implement `--help` by default, and add `EnableHelpFlag`.
+
 // Usage returns a byte array with a table-based explanation on how to set the
 // configuration values using environment variables. This can be used to explain
 // usage details to the user of the application.
 func (c Consumer) Usage() []byte {
 	return usage(c.Name, c)
+}
+
+// WithOptions takes the current Producer, applies the supplied Options, and
+// returns the resulting Producer.
+func (p Producer) WithOptions(opts ...Option) Producer {
+	pp := &p
+
+	for _, opt := range opts {
+		opt.apply(nil, pp)
+	}
+
+	return *pp
 }
 
 // Usage returns a byte array with a table-based explanation on how to set the

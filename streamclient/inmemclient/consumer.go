@@ -29,7 +29,7 @@ type consumer struct {
 var _ stream.Consumer = (*consumer)(nil)
 
 // NewConsumer returns a new inmem consumer.
-func NewConsumer(options ...func(*streamconfig.Consumer)) (stream.Consumer, error) {
+func NewConsumer(options ...streamconfig.Option) (stream.Consumer, error) {
 	c, err := newConsumer(options)
 	if err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func (c *consumer) consume() {
 	}
 }
 
-func newConsumer(options []func(*streamconfig.Consumer)) (*consumer, error) {
+func newConsumer(options []streamconfig.Option) (*consumer, error) {
 	config, err := streamconfig.NewConsumer(options...)
 	if err != nil {
 		return nil, err
