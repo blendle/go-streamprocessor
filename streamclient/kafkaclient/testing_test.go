@@ -230,6 +230,7 @@ func TestIntegrationTestOffsets(t *testing.T) {
 	config := &kafka.ConfigMap{
 		"metadata.broker.list":  kafkaconfig.TestBrokerAddress,
 		"produce.offset.report": false,
+		"message.timeout.ms":    60000,
 	}
 	producer, err := kafka.NewProducer(config)
 	require.NoError(t, err)
