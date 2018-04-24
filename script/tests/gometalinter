@@ -22,6 +22,8 @@ gometalinter \
   --vendor \
   --tests \
   --aggregate \
+  --sort=line \
+  --warn-unmatched-nolint \
   --deadline=300s \
   --vendored-linters \
   --enable-all \

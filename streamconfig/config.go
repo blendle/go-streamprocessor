@@ -17,7 +17,7 @@ import (
 // these options can be passed into the new consumer to determine its behavior.
 // If the consumer only has to support a single implementation of the interface,
 // then all other configuration values can be ignored.
-type Consumer struct { // nolint:malign
+type Consumer struct {
 	Inmem          inmemconfig.Consumer
 	Kafka          kafkaconfig.Consumer
 	Pubsub         pubsubconfig.Consumer
@@ -60,7 +60,7 @@ type Consumer struct { // nolint:malign
 // these options can be passed into the new producer to determine its behavior.
 // If the producer only has to support a single implementation of the interface,
 // then all other configuration values can be ignored.
-type Producer struct { // nolint:malign
+type Producer struct {
 	Inmem          inmemconfig.Producer
 	Kafka          kafkaconfig.Producer
 	Pubsub         pubsubconfig.Producer
