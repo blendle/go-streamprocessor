@@ -21,7 +21,7 @@ func TestNew(t *testing.T) {
 func TestAdd(t *testing.T) {
 	t.Parallel()
 
-	store := New()
+	store := &Store{messages: make([]stream.Message, 0)}
 	m := stream.Message{
 		Value:     []byte("testValue"),
 		Key:       []byte("testKey"),
@@ -30,30 +30,17 @@ func TestAdd(t *testing.T) {
 		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
-	store.Add(m)
+	err := store.Add(m)
+	require.NoError(t, err)
 
-	msg := store.store[0]
-
-	var tests = []struct {
-		expected interface{}
-		actual   interface{}
-	}{
-		{m.Value, msg.Value},
-		{m.Key, msg.Key},
-		{m.Timestamp, msg.Timestamp},
-		{m.Topic, msg.Topic},
-		{m.Tags, msg.Tags},
-	}
-
-	for _, tt := range tests {
-		assert.EqualValues(t, tt.expected, tt.actual)
-	}
+	msg := store.messages[0]
+	assert.EqualValues(t, m, msg)
 }
 
-func TestDelete(t *testing.T) {
+func TestDel(t *testing.T) {
 	t.Parallel()
 
-	store := New()
+	store := &Store{messages: make([]stream.Message, 0)}
 	m1 := stream.Message{
 		Value:     []byte("testValue1"),
 		Key:       []byte("testKey1"),
@@ -78,25 +65,28 @@ func TestDelete(t *testing.T) {
 		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
-	store.store = append(store.store, m1, m2)
-	require.Len(t, store.store, 2)
+	store.messages = append(store.messages, m1, m2)
+	require.Len(t, store.messages, 2)
 
-	store.Delete(m1)
-	assert.Len(t, store.store, 1)
-	assert.Equal(t, m2, store.store[0])
+	err := store.Del(m1)
+	require.NoError(t, err)
+	assert.Len(t, store.messages, 1)
+	assert.Equal(t, m2, store.messages[0])
 
-	store.Delete(m3)
-	assert.Len(t, store.store, 1)
-	assert.Equal(t, m2, store.store[0])
+	err = store.Del(m3)
+	require.NoError(t, err)
+	assert.Len(t, store.messages, 1)
+	assert.Equal(t, m2, store.messages[0])
 
-	store.Delete(m2)
-	assert.Len(t, store.store, 0)
+	err = store.Del(m2)
+	require.NoError(t, err)
+	assert.Len(t, store.messages, 0)
 }
 
-func TestMessages(t *testing.T) {
+func TestFlush(t *testing.T) {
 	t.Parallel()
 
-	store := New()
+	store := &Store{messages: make([]stream.Message, 0)}
 	m := stream.Message{
 		Value:     []byte("testValue"),
 		Key:       []byte("testKey"),
@@ -105,7 +95,30 @@ func TestMessages(t *testing.T) {
 		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
-	store.store = append(store.store, m)
+	err := store.Add(m)
+	require.NoError(t, err)
+
+	err = store.Add(m)
+	require.NoError(t, err)
+
+	require.Len(t, store.messages, 2)
+	require.NoError(t, store.Flush())
+	assert.Len(t, store.messages, 0)
+}
+
+func TestMessages(t *testing.T) {
+	t.Parallel()
+
+	store := &Store{messages: make([]stream.Message, 0)}
+	m := stream.Message{
+		Value:     []byte("testValue"),
+		Key:       []byte("testKey"),
+		Timestamp: time.Unix(0, 0),
+		Topic:     "testTopic",
+		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
+	}
+
+	store.messages = append(store.messages, m)
 
 	assert.EqualValues(t, m.Value, store.Messages()[0].Value)
 }

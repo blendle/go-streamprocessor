@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
-	"github.com/blendle/go-streamprocessor/streamutil/inmemstore"
+	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
 	"github.com/stretchr/testify/assert"
 )
 

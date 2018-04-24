@@ -10,7 +10,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamutil/inmemstore"
+	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
 	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -43,8 +43,6 @@ func TestNewProducer_WithOptions(t *testing.T) {
 	producer, err := inmemclient.NewProducer(options)
 	require.NoError(t, err)
 	defer require.NoError(t, producer.Close())
-
-	assert.EqualValues(t, store, producer.Config().(streamconfig.Producer).Inmem.Store)
 }
 
 func TestProducer_Messages(t *testing.T) {

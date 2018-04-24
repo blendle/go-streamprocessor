@@ -1,7 +1,8 @@
 package inmemconfig
 
 import (
-	"github.com/blendle/go-streamprocessor/streamutil/inmemstore"
+	"github.com/blendle/go-streamprocessor/stream"
+	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
 )
 
 // Consumer is a value-object, containing all user-configurable configuration
@@ -9,7 +10,7 @@ import (
 type Consumer struct {
 	// Store is the inmem store from which to consume messages. If left undefined,
 	// an internal store will be used.
-	Store *inmemstore.Store `ignored:"true"`
+	Store stream.Store `ignored:"true"`
 
 	// ConsumeOnce dictates whether the inmem consumer should request all messages
 	// in the configured `inmemstore` once, or if it should keep listening for any

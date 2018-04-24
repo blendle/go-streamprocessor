@@ -11,7 +11,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamutil/inmemstore"
+	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
 	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -44,16 +44,14 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 	consumer, err := inmemclient.NewConsumer(options)
 	require.NoError(t, err)
 	defer func() { require.NoError(t, consumer.Close()) }()
-
-	assert.Equal(t, store, consumer.Config().(streamconfig.Consumer).Inmem.Store)
 }
 
 func TestConsumer_Messages(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.New()
-	store.Add(stream.TestMessage(t, "key1", "hello world"))
-	store.Add(stream.TestMessage(t, "key2", "hello universe!"))
+	_ = store.Add(stream.TestMessage(t, "key1", "hello world"))
+	_ = store.Add(stream.TestMessage(t, "key2", "hello universe!"))
 
 	consumer, closer := inmemclient.TestConsumer(t, store)
 	defer closer()
@@ -75,7 +73,7 @@ func TestConsumer_Messages_Ordering(t *testing.T) {
 	store := inmemstore.New()
 
 	for i := 0; i < messageCount; i++ {
-		store.Add(stream.TestMessage(t, strconv.Itoa(i), "hello world"+strconv.Itoa(i)))
+		_ = store.Add(stream.TestMessage(t, strconv.Itoa(i), "hello world"+strconv.Itoa(i)))
 	}
 
 	consumer, closer := inmemclient.TestConsumer(t, store)
@@ -100,7 +98,7 @@ func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 	line := `{"number":%d}` + "\n"
 
 	for i := 0; i < messageCount; i++ {
-		store.Add(stream.TestMessage(t, strconv.Itoa(i), fmt.Sprintf(line, i)))
+		_ = store.Add(stream.TestMessage(t, strconv.Itoa(i), fmt.Sprintf(line, i)))
 	}
 
 	consumer, closer := inmemclient.TestConsumer(t, store)
@@ -203,7 +201,7 @@ func BenchmarkConsumer_Messages(b *testing.B) {
 	line := `{"number":%d}` + "\n"
 
 	for i := 1; i <= b.N; i++ {
-		store.Add(stream.TestMessage(b, strconv.Itoa(i), fmt.Sprintf(line, i)))
+		_ = store.Add(stream.TestMessage(b, strconv.Itoa(i), fmt.Sprintf(line, i)))
 	}
 
 	b.ResetTimer()

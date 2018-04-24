@@ -6,7 +6,7 @@ import (
 
 	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamutil/inmemstore"
+	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,10 +23,8 @@ func TestTestConsumer_WithStore(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.New()
-	consumer, closer := inmemclient.TestConsumer(t, store)
+	_, closer := inmemclient.TestConsumer(t, store)
 	defer closer()
-
-	assert.EqualValues(t, store, consumer.Config().(streamconfig.Consumer).Inmem.Store)
 }
 
 func TestTestConsumer_WithOptions(t *testing.T) {
@@ -40,10 +38,8 @@ func TestTestConsumer_WithOptions(t *testing.T) {
 	// setting the second argument (the store) to nil will instantiate a new store
 	// in the initializer, but since we also pass in our own store as an optional
 	// argument, it will be the eventual store used by this consumer.
-	consumer, closer := inmemclient.TestConsumer(t, nil, options)
+	_, closer := inmemclient.TestConsumer(t, nil, options)
 	defer closer()
-
-	assert.EqualValues(t, store, consumer.Config().(streamconfig.Consumer).Inmem.Store)
 }
 
 func TestTestProducer(t *testing.T) {
