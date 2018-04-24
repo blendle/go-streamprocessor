@@ -30,10 +30,10 @@ func TestTestNewConsumer_WithOptions(t *testing.T) {
 	require.NoError(t, err)
 
 	options := func(c *streamconfig.Consumer) {
-		c.Logger = *logger
+		c.Logger = logger
 	}
 
-	c1 := streamconfig.Consumer{Logger: *logger}
+	c1 := streamconfig.Consumer{Logger: logger}
 	c2 := streamconfig.TestNewConsumer(t, false, options)
 
 	assert.EqualValues(t, c1, c2)
@@ -83,10 +83,10 @@ func TestTestNewProducer_WithOptions(t *testing.T) {
 	require.NoError(t, err)
 
 	options := func(c *streamconfig.Producer) {
-		c.Logger = *logger
+		c.Logger = logger
 	}
 
-	p1 := streamconfig.Producer{Logger: *logger}
+	p1 := streamconfig.Producer{Logger: logger}
 	p2 := streamconfig.TestNewProducer(t, false, options)
 
 	assert.EqualValues(t, p1, p2)

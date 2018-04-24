@@ -42,6 +42,11 @@ func NewConsumer(options ...func(*Consumer)) (Consumer, error) {
 		}
 	}
 
+	// Make sure we set a logger if it was explicitly set to nil.
+	if config.Logger == nil {
+		config.Logger = zap.NewNop()
+	}
+
 	config.Logger.Info(
 		"Finished preparing consumer configuration.",
 		zap.Any("config", config),
@@ -83,6 +88,11 @@ func NewProducer(options ...func(*Producer)) (Producer, error) {
 		if err != nil {
 			return *config, err
 		}
+	}
+
+	// Make sure we set a logger if it was explicitly set to nil.
+	if config.Logger == nil {
+		config.Logger = zap.NewNop()
 	}
 
 	config.Logger.Info(

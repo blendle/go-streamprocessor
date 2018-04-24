@@ -44,7 +44,7 @@ type Consumer struct { // nolint:malign
 
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
-	Logger zap.Logger `ignored:"true"`
+	Logger *zap.Logger `ignored:"true"`
 
 	// Name is the name of the current processor. It is currently only used to
 	// determine the prefix for environment-variable based configuration values.
@@ -87,7 +87,7 @@ type Producer struct { // nolint:malign
 
 	// Logger is the configurable logger instance to log messages. If left
 	// undefined, a no-op logger will be used.
-	Logger zap.Logger `ignored:"true"`
+	Logger *zap.Logger `ignored:"true"`
 
 	// Name is the name of the current processor. It is currently only used to
 	// determine the prefix for environment-variable based configuration values.
@@ -100,7 +100,7 @@ type Producer struct { // nolint:malign
 
 // ConsumerDefaults holds the default values for Consumer.
 var ConsumerDefaults = Consumer{
-	Logger:          *zap.NewNop(),
+	Logger:          zap.NewNop(),
 	HandleErrors:    true,
 	HandleInterrupt: true,
 	Name:            "consumer",
@@ -109,7 +109,7 @@ var ConsumerDefaults = Consumer{
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
-	Logger:          *zap.NewNop(),
+	Logger:          zap.NewNop(),
 	HandleErrors:    true,
 	HandleInterrupt: true,
 	Name:            "producer",
