@@ -138,7 +138,7 @@ type staticConsumer struct {
 var ConsumerDefaults = Consumer{
 	CommitInterval:    5 * time.Second,
 	Debug:             Debug{},
-	HeartbeatInterval: 10 * time.Second,
+	HeartbeatInterval: 1 * time.Second,
 	InitialOffset:     OffsetBeginning,
 	SecurityProtocol:  ProtocolPlaintext,
 	SessionTimeout:    30 * time.Second,

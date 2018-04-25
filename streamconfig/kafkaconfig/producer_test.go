@@ -11,7 +11,7 @@ import (
 )
 
 var producerDefaults = map[string]interface{}{
-	"queue.buffering.backpressure.threshold": 100,
+	"queue.buffering.backpressure.threshold": 10,
 }
 
 var producerOmitempties = []string{
@@ -46,14 +46,14 @@ func TestProducerDefaults(t *testing.T) {
 
 	config := kafkaconfig.ProducerDefaults
 
-	assert.Equal(t, 100000, config.BatchMessageSize)
+	assert.Equal(t, 10000, config.BatchMessageSize)
 	assert.Equal(t, kafkaconfig.Debug{}, config.Debug)
 	assert.Equal(t, kafkaconfig.CompressionSnappy, config.CompressionCodec)
-	assert.Equal(t, 10*time.Second, config.HeartbeatInterval)
+	assert.Equal(t, 1*time.Second, config.HeartbeatInterval)
 	assert.Equal(t, 0, config.MaxDeliveryRetries)
 	assert.Equal(t, 0*time.Second, config.MaxQueueBufferDuration)
 	assert.Equal(t, 2097151, config.MaxQueueSizeKBytes)
-	assert.Equal(t, 10000000, config.MaxQueueSizeMessages)
+	assert.Equal(t, 1000000, config.MaxQueueSizeMessages)
 	assert.EqualValues(t, kafkaconfig.AckLeader, config.RequiredAcks)
 	assert.Equal(t, 30*time.Second, config.SessionTimeout)
 	assert.Equal(t, kafkaconfig.SSL{}, config.SSL)

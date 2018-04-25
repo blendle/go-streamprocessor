@@ -111,27 +111,27 @@ type staticProducer struct {
 	// QueueBackpressureThreshold sets the threshold of outstanding not yet
 	// transmitted requests needed to back-pressure the producer's message
 	// accumulator. A lower number yields larger and more effective batches.
-	// Set to 100, and non-configurable for now.
+	// Set to 10, and non-configurable for now.
 	QueueBackpressureThreshold int `kafka:"queue.buffering.backpressure.threshold"`
 }
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
-	BatchMessageSize:       100000,
+	BatchMessageSize:       10000,
 	CompressionCodec:       CompressionSnappy,
 	Debug:                  Debug{},
-	HeartbeatInterval:      10 * time.Second,
+	HeartbeatInterval:      1 * time.Second,
 	MaxDeliveryRetries:     0,
 	MaxQueueBufferDuration: time.Duration(0),
 	MaxQueueSizeKBytes:     2097151,
-	MaxQueueSizeMessages:   10000000,
+	MaxQueueSizeMessages:   1000000,
 	RequiredAcks:           AckLeader,
 	SessionTimeout:         30 * time.Second,
 	SSL:                    SSL{},
 }
 
 var staticProducerDefaults = &staticProducer{
-	QueueBackpressureThreshold: 100,
+	QueueBackpressureThreshold: 10,
 }
 
 // ConfigMap converts the current configuration into a format known to the
