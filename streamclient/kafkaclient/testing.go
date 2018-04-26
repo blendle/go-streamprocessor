@@ -134,7 +134,7 @@ func TestProduceMessages(tb testing.TB, topic string, values ...interface{}) {
 func TestOffsets(tb testing.TB, message stream.Message) []kafka.TopicPartition {
 	tb.Helper()
 
-	consumer, closer := testKafkaConsumer(tb, message.Topic, false)
+	consumer, closer := testKafkaConsumer(tb, message.ConsumerTopic, false)
 	defer closer()
 
 	tp := []kafka.TopicPartition{*stream.MessageOpqaue(&message).(opaque).toppar}

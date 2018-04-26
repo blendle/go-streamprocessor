@@ -247,8 +247,8 @@ func (p *producer) newMessage(m stream.Message) *kafka.Message {
 // for the message.
 func (p *producer) newToppar(m stream.Message) kafka.TopicPartition {
 	topic := &p.c.Kafka.Topic
-	if m.Topic != "" {
-		topic = &m.Topic
+	if m.ProducerTopic != "" {
+		topic = &m.ProducerTopic
 	}
 
 	return kafka.TopicPartition{

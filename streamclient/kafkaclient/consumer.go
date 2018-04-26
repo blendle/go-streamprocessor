@@ -300,11 +300,11 @@ func newMessageFromKafka(m *kafka.Message) *stream.Message {
 	}
 
 	msg := &stream.Message{
-		Key:       m.Key,
-		Value:     m.Value,
-		Timestamp: m.Timestamp,
-		Topic:     *m.TopicPartition.Topic,
-		Offset:    offset,
+		Key:           m.Key,
+		Value:         m.Value,
+		Timestamp:     m.Timestamp,
+		ConsumerTopic: *m.TopicPartition.Topic,
+		Offset:        offset,
 	}
 
 	// We set the message's opaque field (which is still nil at this point), and

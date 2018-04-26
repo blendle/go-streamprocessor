@@ -157,7 +157,7 @@ func BenchmarkIntegrationProducer_Messages(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		msg := stream.TestMessage(b, strconv.Itoa(i), fmt.Sprintf(`{"number":%d}`, i))
-		msg.Topic = topic
+		msg.ProducerTopic = topic
 
 		producer.Messages() <- msg
 	}
