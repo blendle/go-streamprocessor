@@ -1,6 +1,7 @@
 package kafkaconfig_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -329,36 +330,36 @@ func TestProducer_ConfigMap_Validation(t *testing.T) {
 	t.Parallel()
 
 	var tests = map[string]struct {
-		valid bool
-		cfg   *kafkaconfig.Producer
+		err error
+		cfg *kafkaconfig.Producer
 	}{
 		"empty": {
-			false,
+			errors.New("required config Kafka.Brokers empty"),
 			&kafkaconfig.Producer{},
 		},
 
 		"valid": {
-			true,
+			nil,
 			&kafkaconfig.Producer{Brokers: []string{"1"}, Topic: "1"},
 		},
 
 		"brokers (missing)": {
-			false,
+			errors.New("required config Kafka.Brokers empty"),
 			&kafkaconfig.Producer{Topic: "1"},
 		},
 
 		"brokers (empty)": {
-			false,
+			errors.New("required config Kafka.Brokers empty"),
 			&kafkaconfig.Producer{Brokers: []string{}, Topic: "1"},
 		},
 
 		"topic (missing)": {
-			false,
+			errors.New("required config Kafka.Topic missing"),
 			&kafkaconfig.Producer{Brokers: []string{"1"}},
 		},
 
 		"topic (empty)": {
-			false,
+			errors.New("required config Kafka.Topic missing"),
 			&kafkaconfig.Producer{Brokers: []string{"1"}, Topic: ""},
 		},
 	}
@@ -366,10 +367,10 @@ func TestProducer_ConfigMap_Validation(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			_, err := tt.cfg.ConfigMap()
-			if tt.valid {
+			if tt.err == nil {
 				assert.NoError(t, err)
 			} else {
-				assert.Error(t, err)
+				assert.Equal(t, tt.err, err)
 			}
 		})
 	}

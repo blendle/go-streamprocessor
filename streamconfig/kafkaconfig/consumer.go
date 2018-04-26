@@ -168,6 +168,12 @@ func (c *Consumer) validate() error {
 		return errors.New("required config Kafka.Topics empty")
 	}
 
+	for i := range c.Topics {
+		if len(c.Topics[i]) == 0 {
+			return errors.New("empty value detected in config Kafka.Topics")
+		}
+	}
+
 	if len(c.GroupID) == 0 {
 		return errors.New("required config Kafka.GroupID missing")
 	}

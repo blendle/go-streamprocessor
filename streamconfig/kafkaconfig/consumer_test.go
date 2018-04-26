@@ -1,6 +1,7 @@
 package kafkaconfig_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -260,52 +261,62 @@ func TestConsumer_ConfigMap_Validation(t *testing.T) {
 	t.Parallel()
 
 	var tests = map[string]struct {
-		valid bool
-		cfg   *kafkaconfig.Consumer
+		err error
+		cfg *kafkaconfig.Consumer
 	}{
 		"empty": {
-			false,
+			errors.New("required config Kafka.Brokers empty"),
 			&kafkaconfig.Consumer{},
 		},
 
 		"valid": {
-			true,
+			nil,
 			&kafkaconfig.Consumer{Brokers: []string{"1"}, Topics: []string{"1"}, GroupID: "1"},
 		},
 
 		"brokers (missing)": {
-			false,
+			errors.New("required config Kafka.Brokers empty"),
 			&kafkaconfig.Consumer{Topics: []string{"1"}, GroupID: "1"},
 		},
 
 		"brokers (empty)": {
-			false,
+			errors.New("required config Kafka.Brokers empty"),
 			&kafkaconfig.Consumer{Brokers: []string{}, Topics: []string{"1"}, GroupID: "1"},
 		},
 
 		"topics (missing)": {
-			false,
+			errors.New("required config Kafka.Topics empty"),
 			&kafkaconfig.Consumer{Brokers: []string{"1"}, GroupID: "1"},
 		},
 
 		"topics (empty)": {
-			false,
+			errors.New("required config Kafka.Topics empty"),
 			&kafkaconfig.Consumer{Brokers: []string{"1"}, Topics: []string{}, GroupID: "1"},
 		},
 
-		"groupID": {
-			false,
+		"topics (empty value)": {
+			errors.New("empty value detected in config Kafka.Topics"),
+			&kafkaconfig.Consumer{Brokers: []string{"1"}, Topics: []string{""}, GroupID: "1"},
+		},
+
+		"groupID (missing)": {
+			errors.New("required config Kafka.GroupID missing"),
 			&kafkaconfig.Consumer{Brokers: []string{"1"}, Topics: []string{"1"}},
+		},
+
+		"groupID (empty)": {
+			errors.New("required config Kafka.GroupID missing"),
+			&kafkaconfig.Consumer{Brokers: []string{"1"}, GroupID: "", Topics: []string{"1"}},
 		},
 	}
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			_, err := tt.cfg.ConfigMap()
-			if tt.valid {
+			if tt.err == nil {
 				assert.NoError(t, err)
 			} else {
-				assert.Error(t, err)
+				assert.Equal(t, tt.err, err)
 			}
 		})
 	}
