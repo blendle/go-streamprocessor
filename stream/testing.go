@@ -17,11 +17,12 @@ func TestMessage(_ testing.TB, k, v string) Message {
 
 	offset := int64(12)
 	m := Message{
-		Value:     []byte(v),
-		Key:       []byte(k),
-		Timestamp: time.Unix(0, 0),
-		Topic:     "testTopic",
-		Offset:    &offset,
+		Value:         []byte(v),
+		Key:           []byte(k),
+		Timestamp:     time.Unix(0, 0),
+		ConsumerTopic: "testConsumerTopic",
+		ProducerTopic: "testProducerTopic",
+		Offset:        &offset,
 		Tags: map[string][]byte{
 			"testTagKey1": []byte("testTagValue1"),
 			"testTagKey2": []byte("testTagValue2"),

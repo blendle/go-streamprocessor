@@ -13,11 +13,12 @@ func TestMessageStruct(t *testing.T) {
 
 	offset := int64(12)
 	_ = Message{
-		Key:       []byte("testKey"),
-		Value:     []byte("testValue"),
-		Timestamp: time.Unix(0, 0),
-		Topic:     "testTopic",
-		Offset:    &offset,
+		Key:           []byte("testKey"),
+		Value:         []byte("testValue"),
+		Timestamp:     time.Unix(0, 0),
+		ConsumerTopic: "testConsumerTopic",
+		ProducerTopic: "testProducerTopic",
+		Offset:        &offset,
 		Tags: map[string][]byte{
 			"testTagKey1": []byte("testTagValue1"),
 			"testTagKey2": []byte("testTagValue2"),

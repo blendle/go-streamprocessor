@@ -23,11 +23,12 @@ func TestAdd(t *testing.T) {
 
 	store := &Store{messages: make([]stream.Message, 0)}
 	m := stream.Message{
-		Value:     []byte("testValue"),
-		Key:       []byte("testKey"),
-		Timestamp: time.Unix(0, 0),
-		Topic:     "testTopic",
-		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
+		Value:         []byte("testValue"),
+		Key:           []byte("testKey"),
+		Timestamp:     time.Unix(0, 0),
+		ConsumerTopic: "testConsumerTopic",
+		ProducerTopic: "testProducerTopic",
+		Tags:          map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	err := store.Add(m)
@@ -42,27 +43,30 @@ func TestDel(t *testing.T) {
 
 	store := &Store{messages: make([]stream.Message, 0)}
 	m1 := stream.Message{
-		Value:     []byte("testValue1"),
-		Key:       []byte("testKey1"),
-		Timestamp: time.Unix(0, 0),
-		Topic:     "testTopic",
-		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
+		Value:         []byte("testValue1"),
+		Key:           []byte("testKey1"),
+		Timestamp:     time.Unix(0, 0),
+		ConsumerTopic: "testConsumerTopic",
+		ProducerTopic: "testProducerTopic",
+		Tags:          map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	m2 := stream.Message{
-		Value:     []byte("testValue2"),
-		Key:       []byte("testKey2"),
-		Timestamp: time.Unix(0, 0),
-		Topic:     "testTopic",
-		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
+		Value:         []byte("testValue2"),
+		Key:           []byte("testKey2"),
+		Timestamp:     time.Unix(0, 0),
+		ConsumerTopic: "testConsumerTopic",
+		ProducerTopic: "testProducerTopic",
+		Tags:          map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	m3 := stream.Message{
-		Value:     []byte("testValue3"),
-		Key:       []byte("testKey3"),
-		Timestamp: time.Unix(0, 0),
-		Topic:     "testTopic",
-		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
+		Value:         []byte("testValue3"),
+		Key:           []byte("testKey3"),
+		Timestamp:     time.Unix(0, 0),
+		ConsumerTopic: "testConsumerTopic",
+		ProducerTopic: "testProducerTopic",
+		Tags:          map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	store.messages = append(store.messages, m1, m2)
@@ -88,11 +92,12 @@ func TestFlush(t *testing.T) {
 
 	store := &Store{messages: make([]stream.Message, 0)}
 	m := stream.Message{
-		Value:     []byte("testValue"),
-		Key:       []byte("testKey"),
-		Timestamp: time.Unix(0, 0),
-		Topic:     "testTopic",
-		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
+		Value:         []byte("testValue"),
+		Key:           []byte("testKey"),
+		Timestamp:     time.Unix(0, 0),
+		ConsumerTopic: "testConsumerTopic",
+		ProducerTopic: "testProducerTopic",
+		Tags:          map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	err := store.Add(m)
@@ -111,11 +116,12 @@ func TestMessages(t *testing.T) {
 
 	store := &Store{messages: make([]stream.Message, 0)}
 	m := stream.Message{
-		Value:     []byte("testValue"),
-		Key:       []byte("testKey"),
-		Timestamp: time.Unix(0, 0),
-		Topic:     "testTopic",
-		Tags:      map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
+		Value:         []byte("testValue"),
+		Key:           []byte("testKey"),
+		Timestamp:     time.Unix(0, 0),
+		ConsumerTopic: "testConsumerTopic",
+		ProducerTopic: "testProducerTopic",
+		Tags:          map[string][]byte{"test": []byte("value"), "test2": []byte("value2")},
 	}
 
 	store.messages = append(store.messages, m)

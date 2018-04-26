@@ -29,11 +29,17 @@ type Message struct {
 	// differently based on the value of this field.
 	Tags map[string][]byte
 
-	// Topic can be used by stream client consumers to expose from where the
-	// message originated, or by the producers to dictate where the message will
-	// be produced. Not all stream client implementations use this field, and
-	// those that do might behave differently based on the value of this field.
-	Topic string
+	// ConsumerTopic can be used by stream client consumers to expose from where
+	// the message originated. Not all stream client implementations use this
+	// field, and those that do might behave differently based on the value of
+	// this field.
+	ConsumerTopic string
+
+	// ProducerTopic can be used by the producers to dictate on which topic the
+	// message should be produced. Not all stream client implementations use this
+	// field, and those that do might behave differently based on the value of
+	// this field.
+	ProducerTopic string
 
 	// Offset can be used by stream client implementations to relay the position
 	// in a list of messages this message has. This is a read-only value, setting
