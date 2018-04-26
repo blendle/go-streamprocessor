@@ -293,9 +293,19 @@ func TestConsumer_ConfigMap_Validation(t *testing.T) {
 			&kafkaconfig.Consumer{Brokers: []string{"1"}, Topics: []string{}, GroupID: "1"},
 		},
 
-		"groupID": {
+		"topics (empty value)": {
+			false,
+			&kafkaconfig.Consumer{Brokers: []string{"1"}, Topics: []string{""}, GroupID: "1"},
+		},
+
+		"groupID (missing)": {
 			false,
 			&kafkaconfig.Consumer{Brokers: []string{"1"}, Topics: []string{"1"}},
+		},
+
+		"groupID (empty)": {
+			false,
+			&kafkaconfig.Consumer{Brokers: []string{"1"}, GroupID: "", Topics: []string{"1"}},
 		},
 	}
 
