@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/blendle/go-streamprocessor/stream"
+	"github.com/blendle/go-streamprocessor/streamclient"
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
@@ -135,6 +136,46 @@ func TestIntegrationProducer_Errors_Manual(t *testing.T) {
 		t.Fatalf("expected no error, got %s", err.Error())
 	case <-time.After(10 * time.Millisecond):
 	}
+}
+
+func TestIntegrationProducer_NoConsumerTopic(t *testing.T) {
+	t.Parallel()
+	testutil.Integration(t)
+
+	consumerTopicAndGroup := testutil.Random(t)
+	kafkaclient.TestProduceMessages(t, consumerTopicAndGroup, "hello world")
+
+	consumer, ccloser := kafkaclient.TestConsumer(t, consumerTopicAndGroup)
+
+	producerTopic := testutil.Random(t)
+	producer, pcloser := kafkaclient.TestProducer(t, producerTopic)
+
+	msg := streamclient.TestMessageFromConsumer(t, consumer)
+	msg.Value = []byte("hello universe")
+	ccloser()
+
+	select {
+	case producer.Messages() <- msg:
+	case <-time.After(1 * time.Second):
+		require.Fail(t, "Timeout while waiting for message to be delivered.")
+	}
+
+	// We explicitly close the producer here to force flushing of any messages
+	// still in the queue.
+	pcloser()
+
+	// At this point, there should be one message on the "consumer topic", and one
+	// on the "producer topic". Before PR#69, the produced message would end up on
+	// the original topic (see PR description for more details).
+	//
+	// see: https://git.io/vpRbQ
+	msgs := kafkaclient.TestMessagesFromTopic(t, consumerTopicAndGroup)
+	require.Len(t, msgs, 1)
+	assert.Equal(t, []byte("hello world"), msgs[0].Value)
+
+	msgs = kafkaclient.TestMessagesFromTopic(t, producerTopic)
+	require.Len(t, msgs, 1)
+	assert.Equal(t, []byte("hello universe"), msgs[0].Value)
 }
 
 func BenchmarkIntegrationProducer_Messages(b *testing.B) {
