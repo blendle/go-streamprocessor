@@ -64,7 +64,7 @@ func NewConsumer(options ...streamconfig.Option) (stream.Consumer, error) {
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag.
 	if c.c.HandleInterrupt {
-		c.signals = make(chan os.Signal, 1)
+		c.signals = make(chan os.Signal, 3)
 		go streamutil.HandleInterrupts(c.signals, c.Close, c.logger)
 	}
 
