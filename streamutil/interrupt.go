@@ -26,7 +26,7 @@ func Interrupt() <-chan os.Signal {
 // terminate the application when the closer takes too long to close, or returns
 // an error during closing.
 func HandleInterrupts(signals chan os.Signal, closer func() error, logger *zap.Logger) {
-	signal.Notify(signals, os.Interrupt)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 
 	s, ok := <-signals
 	if !ok {
@@ -34,7 +34,7 @@ func HandleInterrupts(signals chan os.Signal, closer func() error, logger *zap.L
 	}
 
 	logger.Info(
-		"Got interrupt signal, cleaning up. Use ^C again to exit immediately.",
+		"Got interrupt signal, cleaning up. Use ^C to exit immediately.",
 		zap.String("signal", s.String()),
 	)
 

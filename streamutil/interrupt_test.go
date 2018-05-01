@@ -3,6 +3,7 @@ package streamutil_test
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"syscall"
@@ -23,26 +24,34 @@ func TestInterrupt(t *testing.T) {
 		case s := <-streamutil.Interrupt():
 			println("interrupt received:", s.String())
 			return
-		case <-time.After(1 * time.Second):
+		case <-time.After(5 * time.Second):
 			os.Exit(1)
 		}
 
 		return
 	}
 
-	for _, sig := range []os.Signal{os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT} {
-		cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
-		cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
+	var tests = []os.Signal{
+		os.Interrupt,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	}
 
-		var b bytes.Buffer
-		cmd.Stderr = bufio.NewWriter(&b)
-		require.NoError(t, cmd.Start())
-		time.Sleep(100 * time.Millisecond)
+	for _, tt := range tests {
+		t.Run(tt.String(), func(t *testing.T) {
+			cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
+			cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
 
-		require.NoError(t, cmd.Process.Signal(sig))
-		require.NoError(t, cmd.Wait())
+			var b bytes.Buffer
+			cmd.Stderr = bufio.NewWriter(&b)
+			require.NoError(t, cmd.Start())
+			time.Sleep(150 * time.Millisecond)
 
-		assert.Contains(t, b.String(), "interrupt received: "+sig.String())
+			require.NoError(t, cmd.Process.Signal(tt))
+			require.NoError(t, cmd.Wait())
+
+			assert.Contains(t, b.String(), "interrupt received: "+tt.String())
+		})
 	}
 }
 
@@ -60,19 +69,31 @@ func TestHandleInterrupts(t *testing.T) {
 		}
 
 		go streamutil.HandleInterrupts(ch, fn, logger)
-		ch <- os.Interrupt
 
-		time.Sleep(10 * time.Millisecond)
-
-		return
+		time.Sleep(5 * time.Second)
+		os.Exit(1)
 	}
 
-	cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
-	cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
+	var tests = []os.Signal{
+		os.Interrupt,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	}
 
-	out, err := cmd.CombinedOutput()
-	require.Nil(t, err, "output received: %s", string(out))
+	for _, tt := range tests {
+		t.Run(tt.String(), func(t *testing.T) {
+			cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
+			cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
 
-	assert.Contains(t, string(out), "Got interrupt signal")
-	assert.Contains(t, string(out), "closed!")
+			var b bytes.Buffer
+			cmd.Stderr = bufio.NewWriter(&b)
+			require.NoError(t, cmd.Start())
+			time.Sleep(150 * time.Millisecond)
+
+			require.NoError(t, cmd.Process.Signal(tt))
+			require.NoError(t, cmd.Wait())
+
+			assert.Contains(t, b.String(), fmt.Sprintf(`{"signal": "%s"}`, tt.String()))
+		})
+	}
 }

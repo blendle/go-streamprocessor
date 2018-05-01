@@ -67,7 +67,7 @@ func NewProducer(options ...streamconfig.Option) (stream.Producer, error) {
 	// This functionality is enabled by default, but can be disabled through a
 	// configuration flag.
 	if p.c.HandleInterrupt {
-		p.signals = make(chan os.Signal, 1)
+		p.signals = make(chan os.Signal, 3)
 		go streamutil.HandleInterrupts(p.signals, p.Close, p.logger)
 	}
 
