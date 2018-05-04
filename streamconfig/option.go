@@ -211,6 +211,15 @@ func KafkaMaxDeliveryRetries(i int) Option {
 	})
 }
 
+// KafkaMaxInFlightRequests sets the maximum allowed in-flight requests for both
+// consumers and producers.
+func KafkaMaxInFlightRequests(i int) Option {
+	return optionFunc(func(c *Consumer, p *Producer) {
+		c.Kafka.MaxInFlightRequests = i
+		p.Kafka.MaxInFlightRequests = i
+	})
+}
+
 // KafkaMaxQueueBufferDuration sets the MaxQueueBufferDuration.
 //
 // This option has no effect when applied to a consumer.

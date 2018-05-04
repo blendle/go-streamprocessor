@@ -31,6 +31,7 @@ func TestProducer(t *testing.T) {
 		HeartbeatInterval:      time.Duration(0),
 		ID:                     "",
 		MaxDeliveryRetries:     0,
+		MaxInFlightRequests:    0,
 		MaxQueueBufferDuration: time.Duration(0),
 		MaxQueueSizeKBytes:     0,
 		MaxQueueSizeMessages:   0,
@@ -52,6 +53,7 @@ func TestProducerDefaults(t *testing.T) {
 	assert.Equal(t, kafkaconfig.CompressionSnappy, config.CompressionCodec)
 	assert.Equal(t, 1*time.Second, config.HeartbeatInterval)
 	assert.Equal(t, 0, config.MaxDeliveryRetries)
+	assert.Equal(t, 1000000, config.MaxInFlightRequests)
 	assert.Equal(t, 0*time.Second, config.MaxQueueBufferDuration)
 	assert.Equal(t, 2097151, config.MaxQueueSizeKBytes)
 	assert.Equal(t, 1000000, config.MaxQueueSizeMessages)
@@ -150,6 +152,11 @@ func TestProducer_ConfigMap(t *testing.T) {
 		"maxDeliveryRetries": {
 			&kafkaconfig.Producer{MaxDeliveryRetries: 10},
 			&kafka.ConfigMap{"message.send.max.retries": 10},
+		},
+
+		"maxInFlightRequests": {
+			&kafkaconfig.Producer{MaxInFlightRequests: 10},
+			&kafka.ConfigMap{"max.in.flight.requests.per.connection": 10},
 		},
 
 		"maxDeliveryRetries (no omitempty)": {

@@ -53,6 +53,13 @@ type Producer struct {
 	// prevent accidental message reordering.
 	MaxDeliveryRetries int `kafka:"message.send.max.retries" split_words:"true"`
 
+	// MaxInFlightRequests dictates the maximum number of in-flight requests per
+	// broker connection. This is a generic property applied to all broker
+	// communication, however it is primarily relevant to produce requests. In
+	// particular, note that other mechanisms limit the number of outstanding
+	// consumer fetch request per broker to one.
+	MaxInFlightRequests int `kafka:"max.in.flight.requests.per.connection,omitempty" split_words:"true"` // nolint: lll
+
 	// MaxQueueBufferDuration is the delay to wait for messages in the producer
 	// queue to accumulate before constructing message batches (MessageSets) to
 	// transmit to brokers. A higher value allows larger and more effective (less
@@ -122,6 +129,7 @@ var ProducerDefaults = Producer{
 	Debug:                  Debug{},
 	HeartbeatInterval:      1 * time.Second,
 	MaxDeliveryRetries:     0,
+	MaxInFlightRequests:    1000000,
 	MaxQueueBufferDuration: time.Duration(0),
 	MaxQueueSizeKBytes:     2097151,
 	MaxQueueSizeMessages:   1000000,
