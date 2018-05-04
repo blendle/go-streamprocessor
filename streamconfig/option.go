@@ -221,7 +221,7 @@ func KafkaMaxQueueSizeMessages(i int) Option {
 // KafkaOffsetHead sets the OffsetDefault.
 //
 // This option has no effect when applied to a producer.
-func KafkaOffsetHead(i uint64) Option {
+func KafkaOffsetHead(i uint32) Option {
 	return optionFunc(func(c *Consumer, _ *Producer) {
 		c.Kafka.OffsetDefault = int64(i)
 	})
@@ -239,7 +239,7 @@ func KafkaOffsetInitial(s kafkaconfig.Offset) Option {
 // KafkaOffsetTail sets the OffsetDefault.
 //
 // This option has no effect when applied to a producer.
-func KafkaOffsetTail(i uint64) Option {
+func KafkaOffsetTail(i uint32) Option {
 	return optionFunc(func(c *Consumer, _ *Producer) {
 		c.Kafka.OffsetDefault = -int64(i)
 	})

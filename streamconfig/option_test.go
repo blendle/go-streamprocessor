@@ -1,6 +1,7 @@
 package streamconfig_test
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -225,6 +226,16 @@ func TestOptions(t *testing.T) {
 			},
 		},
 
+		"KafkaOffsetHead (MaxUint32)": {
+			[]streamconfig.Option{streamconfig.KafkaOffsetHead(math.MaxUint32)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{OffsetDefault: int64(math.MaxUint32)},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{},
+			},
+		},
+
 		"KafkaOffsetInitial": {
 			[]streamconfig.Option{streamconfig.KafkaOffsetInitial(kafkaconfig.OffsetEnd)},
 			streamconfig.Consumer{
@@ -239,6 +250,16 @@ func TestOptions(t *testing.T) {
 			[]streamconfig.Option{streamconfig.KafkaOffsetTail(10)},
 			streamconfig.Consumer{
 				Kafka: kafkaconfig.Consumer{OffsetDefault: -10},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{},
+			},
+		},
+
+		"KafkaOffsetTail (MaxUint32)": {
+			[]streamconfig.Option{streamconfig.KafkaOffsetTail(math.MaxUint32)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{OffsetDefault: -int64(math.MaxUint32)},
 			},
 			streamconfig.Producer{
 				Kafka: kafkaconfig.Producer{},
