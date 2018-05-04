@@ -296,6 +296,16 @@ func TestOptions(t *testing.T) {
 			},
 		},
 
+		"KafkaOrderedDelivery": {
+			[]streamconfig.Option{streamconfig.KafkaOrderedDelivery()},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{MaxInFlightRequests: 1},
+			},
+		},
+
 		"KafkaRequireNoAck": {
 			[]streamconfig.Option{streamconfig.KafkaRequireNoAck()},
 			streamconfig.Consumer{

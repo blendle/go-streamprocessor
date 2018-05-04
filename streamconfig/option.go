@@ -274,6 +274,19 @@ func KafkaOffsetTail(i uint32) Option {
 	})
 }
 
+// KafkaOrderedDelivery sets `MaxInFlightRequests` to `1` for the producer, to
+// guarantee ordered delivery of messages.
+//
+// see: https://git.io/vpgiV
+// see: https://git.io/vpgDg
+//
+// This option has no effect when applied to a consumer.
+func KafkaOrderedDelivery() Option {
+	return optionFunc(func(_ *Consumer, p *Producer) {
+		p.Kafka.MaxInFlightRequests = 1
+	})
+}
+
 // KafkaRequireNoAck configures the producer not to wait for any broker acks.
 //
 // This option has no effect when applied to a consumer.
