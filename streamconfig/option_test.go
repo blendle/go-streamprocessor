@@ -175,16 +175,6 @@ func TestOptions(t *testing.T) {
 			},
 		},
 
-		"KafkaInitialOffset": {
-			[]streamconfig.Option{streamconfig.KafkaInitialOffset(kafkaconfig.OffsetEnd)},
-			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{InitialOffset: kafkaconfig.OffsetEnd},
-			},
-			streamconfig.Producer{
-				Kafka: kafkaconfig.Producer{},
-			},
-		},
-
 		"KafkaMaxDeliveryRetries": {
 			[]streamconfig.Option{streamconfig.KafkaMaxDeliveryRetries(10)},
 			streamconfig.Consumer{
@@ -222,6 +212,36 @@ func TestOptions(t *testing.T) {
 			},
 			streamconfig.Producer{
 				Kafka: kafkaconfig.Producer{MaxQueueSizeMessages: 5000},
+			},
+		},
+
+		"KafkaOffsetHead": {
+			[]streamconfig.Option{streamconfig.KafkaOffsetHead(10)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{OffsetDefault: 10},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{},
+			},
+		},
+
+		"KafkaOffsetInitial": {
+			[]streamconfig.Option{streamconfig.KafkaOffsetInitial(kafkaconfig.OffsetEnd)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{OffsetInitial: kafkaconfig.OffsetEnd},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{},
+			},
+		},
+
+		"KafkaOffsetTail": {
+			[]streamconfig.Option{streamconfig.KafkaOffsetTail(10)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{OffsetDefault: -10},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{},
 			},
 		},
 

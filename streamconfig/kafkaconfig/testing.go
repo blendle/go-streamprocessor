@@ -21,7 +21,7 @@ func TestConsumer(tb testing.TB) Consumer {
 	config.GroupID = "testGroup"
 	config.HeartbeatInterval = 150 * time.Millisecond
 	config.ID = "testConsumer"
-	config.InitialOffset = OffsetBeginning
+	config.OffsetInitial = OffsetBeginning
 	config.SecurityProtocol = ProtocolPlaintext
 	config.SessionTimeout = 1 * time.Second
 	config.Topics = []string{"testTopic"}

@@ -261,6 +261,73 @@ func TestIntegrationConsumer_Nack(t *testing.T) {
 	assert.Nil(t, consumer.Nack(stream.Message{}))
 }
 
+func TestIntegrationConsumer_OffsetTail(t *testing.T) {
+	t.Parallel()
+	testutil.Integration(t)
+
+	topicOrGroup := testutil.Random(t)
+
+	kafkaclient.TestProduceMessages(t, topicOrGroup, "hello", "hi", "good", "bye")
+
+	consumer, closer := kafkaclient.TestConsumer(t, topicOrGroup, streamconfig.KafkaOffsetTail(3))
+	message := streamclient.TestMessageFromConsumer(t, consumer)
+
+	err := consumer.Ack(message)
+	require.NoError(t, err)
+	closer()
+
+	// The consumer is configured to get the third message from the end.
+	assert.Equal(t, "hi", string(message.Value))
+
+	// After ack'ing the message, the offset for the consumer group is increased
+	// by one.
+	offsets := kafkaclient.TestOffsets(t, message)
+	assert.Equal(t, int64(2), int64(offsets[0].Offset))
+
+	// At this point, we've committed the offset for our consumer group, so even
+	// though we've configured to get the third message from the end, the consumer
+	// will instead continue consuming from the last known partition offset.
+	consumer, closer = kafkaclient.TestConsumer(t, topicOrGroup, streamconfig.KafkaOffsetTail(3))
+	message = streamclient.TestMessageFromConsumer(t, consumer)
+	closer()
+
+	assert.Equal(t, "good", string(message.Value))
+}
+
+func TestIntegrationConsumer_OffsetHead(t *testing.T) {
+	t.Parallel()
+	testutil.Integration(t)
+
+	topicOrGroup := testutil.Random(t)
+
+	kafkaclient.TestProduceMessages(t, topicOrGroup, "hello", "hi", "good", "bye")
+
+	consumer, closer := kafkaclient.TestConsumer(t, topicOrGroup, streamconfig.KafkaOffsetHead(1))
+	message := streamclient.TestMessageFromConsumer(t, consumer)
+
+	err := consumer.Ack(message)
+	require.NoError(t, err)
+	closer()
+
+	// The consumer is configured to get the 2nd message from the start (0-based index).
+	assert.Equal(t, "hi", string(message.Value))
+
+	// After ack'ing the message, the offset for the consumer group is increased
+	// by one.
+	offsets := kafkaclient.TestOffsets(t, message)
+	assert.Equal(t, int64(2), int64(offsets[0].Offset))
+
+	// At this point, we've committed the offset for our consumer group, so even
+	// though we've configured a hard starting offset for the 2nd message, the
+	// consumer will instead continue consuming from the last known partition
+	// offset.
+	consumer, closer = kafkaclient.TestConsumer(t, topicOrGroup, streamconfig.KafkaOffsetHead(1))
+	message = streamclient.TestMessageFromConsumer(t, consumer)
+	closer()
+
+	assert.Equal(t, "good", string(message.Value))
+}
+
 func BenchmarkIntegrationConsumer_Messages(b *testing.B) {
 	testutil.Integration(b)
 

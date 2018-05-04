@@ -14,7 +14,53 @@ func (c *consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
 		zap.String("eventDetails", e.String()),
 	)
 
-	err := c.kafka.Assign(e.Partitions)
+	tps := make([]kafka.TopicPartition, len(e.Partitions))
+	for i := range e.Partitions {
+		tps[i] = e.Partitions[i]
+	}
+
+	// If OffsetDefault is set to anything other than zero, this consumer is
+	// configured to receive data from a either a positive (starting from the
+	// beginning), or negative offset (starting from the end). In this case, we
+	// manually override the starting offset of the partition when we receive an
+	// assigned partition request, but only if no offset is stored yet at the
+	// Kafka brokers.
+	if c.c.Kafka.OffsetDefault != 0 {
+		// Set offsets, to support custom initial offsets. We start by setting the
+		// offset as usual, then we convert the offset to a "tail" type if we're
+		// actually dealing with a negative integer.
+		//
+		// see: https://git.io/vpa3B
+		offset := kafka.Offset(c.c.Kafka.OffsetDefault)
+		if c.c.Kafka.OffsetDefault < 0 {
+			offset = kafka.OffsetTail(-offset)
+		}
+
+		// Fetch already known partition offsets from Kafka, to check if we've
+		// already consumed messages with this consumer group.
+		ctps, err := c.kafka.Committed(tps, 5000)
+		if err != nil {
+			c.errors <- errors.Wrap(err, "unable to retrieve committed offsets")
+			return
+		}
+
+		for i := range tps {
+			// If the offset stored at Kafka is _not_ of type "Invalid", it means this
+			// consumer group has consumed messages before, and so we ignore the
+			// `OffsetDefault` configuration, and instead continue reading from where
+			// we left off...
+			if ctps[i].Offset != kafka.OffsetInvalid {
+				continue
+			}
+
+			// ...otherwise we set the partition offset to the default configured for
+			// this consumer, to start receiving messages starting from the configured
+			// offset.
+			tps[i].Offset = offset
+		}
+	}
+
+	err := c.kafka.Assign(tps)
 	if err != nil {
 		// Ignore the `Local: Broker handle destroyed` error.
 		//

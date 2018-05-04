@@ -123,24 +123,38 @@ func TestConsumerEnvironmentVariables(t *testing.T) {
 			streamconfig.Consumer{Kafka: kafkaconfig.Consumer{ID: "hi!"}},
 		},
 
-		"Kafka.InitialOffset (beginning)": {
-			map[string]string{"CONSUMER_KAFKA_INITIAL_OFFSET": "beginning"},
+		"Kafka.OffsetDefault (positive)": {
+			map[string]string{"CONSUMER_KAFKA_OFFSET_DEFAULT": "10"},
 			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{InitialOffset: kafkaconfig.OffsetBeginning},
+				Kafka: kafkaconfig.Consumer{OffsetDefault: 10},
 			},
 		},
 
-		"Kafka.InitialOffset (end)": {
-			map[string]string{"CONSUMER_KAFKA_INITIAL_OFFSET": "end"},
+		"Kafka.OffsetDefault (negative)": {
+			map[string]string{"CONSUMER_KAFKA_OFFSET_DEFAULT": "-10"},
 			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{InitialOffset: kafkaconfig.OffsetEnd},
+				Kafka: kafkaconfig.Consumer{OffsetDefault: -10},
 			},
 		},
 
-		"Kafka.InitialOffset (capitalized)": {
-			map[string]string{"CONSUMER_KAFKA_INITIAL_OFFSET": "End"},
+		"Kafka.OffsetInitial (beginning)": {
+			map[string]string{"CONSUMER_KAFKA_OFFSET_INITIAL": "beginning"},
 			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{InitialOffset: kafkaconfig.OffsetEnd},
+				Kafka: kafkaconfig.Consumer{OffsetInitial: kafkaconfig.OffsetBeginning},
+			},
+		},
+
+		"Kafka.OffsetInitial (end)": {
+			map[string]string{"CONSUMER_KAFKA_OFFSET_INITIAL": "end"},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{OffsetInitial: kafkaconfig.OffsetEnd},
+			},
+		},
+
+		"Kafka.OffsetInitial (capitalized)": {
+			map[string]string{"CONSUMER_KAFKA_OFFSET_INITIAL": "End"},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{OffsetInitial: kafkaconfig.OffsetEnd},
 			},
 		},
 
