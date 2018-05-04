@@ -52,7 +52,7 @@ func TestProducerDefaults(t *testing.T) {
 	assert.Equal(t, kafkaconfig.Debug{}, config.Debug)
 	assert.Equal(t, kafkaconfig.CompressionSnappy, config.CompressionCodec)
 	assert.Equal(t, 1*time.Second, config.HeartbeatInterval)
-	assert.Equal(t, 0, config.MaxDeliveryRetries)
+	assert.Equal(t, 2, config.MaxDeliveryRetries)
 	assert.Equal(t, 1000000, config.MaxInFlightRequests)
 	assert.Equal(t, 0*time.Second, config.MaxQueueBufferDuration)
 	assert.Equal(t, 2097151, config.MaxQueueSizeKBytes)
