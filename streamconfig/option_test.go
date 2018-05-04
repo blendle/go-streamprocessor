@@ -156,6 +156,26 @@ func TestOptions(t *testing.T) {
 			},
 		},
 
+		"KafkaGroupIDRandom (seed 0)": {
+			[]streamconfig.Option{streamconfig.KafkaGroupIDRandom(0)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{GroupID: "processor-8717895732742165505"},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{},
+			},
+		},
+
+		"KafkaGroupIDRandom (seed 1)": {
+			[]streamconfig.Option{streamconfig.KafkaGroupIDRandom(1)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{GroupID: "processor-5577006791947779410"},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{},
+			},
+		},
+
 		"KafkaHeartbeatInterval": {
 			[]streamconfig.Option{streamconfig.KafkaHeartbeatInterval(1 * time.Second)},
 			streamconfig.Consumer{
