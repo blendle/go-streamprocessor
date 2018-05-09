@@ -120,6 +120,28 @@ func TestProducer_Close(t *testing.T) {
 	}
 }
 
+func TestProducer_Close_WithoutInterrupt(t *testing.T) {
+	t.Parallel()
+
+	producer, err := inmemclient.NewProducer(streamconfig.ManualInterruptHandling())
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- producer.Close() // Close is working as expected, and the producer is terminated.
+		ch <- producer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
+}
+
 func BenchmarkProducer_Messages(b *testing.B) {
 	producer, closer := inmemclient.TestProducer(b, nil)
 	defer closer()

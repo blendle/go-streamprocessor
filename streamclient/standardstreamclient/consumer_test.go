@@ -13,6 +13,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,6 +36,57 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.EqualValues(t, f, consumer.Config().(streamconfig.Consumer).Standardstream.Reader)
+}
+
+func TestConsumer_Close(t *testing.T) {
+	t.Parallel()
+
+	f := standardstreamclient.TestBuffer(t)
+
+	consumer, err := standardstreamclient.NewConsumer(streamconfig.StandardstreamReader(f))
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- consumer.Close() // Close is working as expected, and the consumer is terminated.
+		ch <- consumer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
+}
+
+func TestConsumer_Close_WithoutInterrupt(t *testing.T) {
+	t.Parallel()
+
+	f := standardstreamclient.TestBuffer(t)
+
+	consumer, err := standardstreamclient.NewConsumer(
+		streamconfig.StandardstreamReader(f),
+		streamconfig.ManualInterruptHandling(),
+	)
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- consumer.Close() // Close is working as expected, and the consumer is terminated.
+		ch <- consumer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
 }
 
 func TestConsumer_Messages(t *testing.T) {

@@ -24,7 +24,7 @@ func TestInterrupt(t *testing.T) {
 		case s := <-streamutil.Interrupt():
 			println("interrupt received:", s.String())
 			return
-		case <-time.After(5 * time.Second):
+		case <-time.After(6 * time.Second):
 			os.Exit(1)
 		}
 
@@ -45,7 +45,7 @@ func TestInterrupt(t *testing.T) {
 			var b bytes.Buffer
 			cmd.Stderr = bufio.NewWriter(&b)
 			require.NoError(t, cmd.Start())
-			time.Sleep(150 * time.Millisecond)
+			time.Sleep(4 * time.Second)
 
 			require.NoError(t, cmd.Process.Signal(tt))
 			require.NoError(t, cmd.Wait())
@@ -53,6 +53,33 @@ func TestInterrupt(t *testing.T) {
 			assert.Contains(t, b.String(), "interrupt received: "+tt.String())
 		})
 	}
+}
+
+func TestInterrupt_NoSignal(t *testing.T) {
+	t.Parallel()
+
+	if os.Getenv("BE_TESTING_FATAL") == "1" {
+		select {
+		case <-streamutil.Interrupt():
+			os.Exit(1)
+		case <-time.After(3 * time.Second):
+			println("no signal!")
+			return
+		}
+
+		return
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
+	cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
+
+	var b bytes.Buffer
+	cmd.Stderr = bufio.NewWriter(&b)
+	require.NoError(t, cmd.Start())
+	time.Sleep(150 * time.Millisecond)
+	require.NoError(t, cmd.Wait())
+
+	assert.Contains(t, b.String(), "no signal!")
 }
 
 func TestHandleInterrupts(t *testing.T) {
