@@ -10,6 +10,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 var validIntegrationTestName = regexp.MustCompile(`^(Test|Benchmark)(Integration)?.+$`)
@@ -37,6 +40,18 @@ func Integration(tb testing.TB) {
 	if testing.Short() {
 		tb.Skip("integration test skipped due to -short")
 	}
+}
+
+// Logger returns a Zap logger instance to use during testing. It returns logs
+// in a user-friendly format, reporting anything above warn level.
+func Logger(tb testing.TB) *zap.Logger {
+	cfg := zap.NewDevelopmentConfig()
+	cfg.Level.SetLevel(zap.ErrorLevel)
+
+	log, err := cfg.Build()
+	require.NoError(tb, err)
+
+	return log
 }
 
 // Verbose returns true if the `testing.Verbose` flag returns true, or if the

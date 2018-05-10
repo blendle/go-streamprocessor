@@ -2,6 +2,7 @@ package testutil_test
 
 import (
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -12,6 +13,10 @@ import (
 
 func TestIntegration_Test(t *testing.T) {
 	testutil.Integration(t)
+}
+
+func TestLogger(t *testing.T) {
+	assert.Equal(t, "*zap.Logger", reflect.TypeOf(testutil.Logger(t)).String())
 }
 
 func TestVerbose(t *testing.T) {

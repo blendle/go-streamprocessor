@@ -100,7 +100,6 @@ type Producer struct {
 
 // ConsumerDefaults holds the default values for Consumer.
 var ConsumerDefaults = Consumer{
-	Logger:          zap.NewNop(),
 	HandleErrors:    true,
 	HandleInterrupt: true,
 	Name:            "consumer",
@@ -109,7 +108,6 @@ var ConsumerDefaults = Consumer{
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
-	Logger:          zap.NewNop(),
 	HandleErrors:    true,
 	HandleInterrupt: true,
 	Name:            "producer",

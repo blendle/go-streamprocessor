@@ -44,7 +44,15 @@ func NewConsumer(options ...Option) (Consumer, error) {
 
 	// Make sure we set a logger if it was explicitly set to nil.
 	if config.Logger == nil {
-		config.Logger = zap.NewNop()
+		cfg := zap.NewProductionConfig()
+		cfg.Level.SetLevel(zap.ErrorLevel)
+
+		log, err := cfg.Build()
+		if err != nil {
+			return *config, err
+		}
+
+		config.Logger = log
 	}
 
 	config.Logger.Info(
@@ -92,7 +100,15 @@ func NewProducer(options ...Option) (Producer, error) {
 
 	// Make sure we set a logger if it was explicitly set to nil.
 	if config.Logger == nil {
-		config.Logger = zap.NewNop()
+		cfg := zap.NewProductionConfig()
+		cfg.Level.SetLevel(zap.ErrorLevel)
+
+		log, err := cfg.Build()
+		if err != nil {
+			return *config, err
+		}
+
+		config.Logger = log
 	}
 
 	config.Logger.Info(
