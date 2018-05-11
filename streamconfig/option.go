@@ -3,8 +3,6 @@ package streamconfig
 import (
 	"fmt"
 	"io"
-	"math"
-	"math/rand"
 	"time"
 
 	"github.com/blendle/go-streamprocessor/stream"
@@ -12,6 +10,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
 )
 
@@ -175,14 +174,9 @@ func KafkaGroupID(s string) Option {
 // number generator. For true randomness, pass in `time.Now().Unix()`.
 //
 // This option has no effect when applied to a producer.
-func KafkaGroupIDRandom(i int64) Option {
+func KafkaGroupIDRandom() Option {
 	return optionFunc(func(c *Consumer, _ *Producer) {
-		// Note: we should probably not do this globally.
-		//
-		// see: https://nishanths.svbtle.com/do-not-seed-the-global-random
-		rand.Seed(i)
-
-		c.Kafka.GroupID = fmt.Sprintf("processor-%d", rand.Intn(math.MaxInt64))
+		c.Kafka.GroupID = fmt.Sprintf("processor-%s", uuid.Must(uuid.NewV4()))
 	})
 }
 
