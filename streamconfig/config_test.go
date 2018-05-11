@@ -133,14 +133,14 @@ func TestConsumerEnvironmentVariables(t *testing.T) {
 		"Kafka.OffsetDefault (positive)": {
 			map[string]string{"CONSUMER_KAFKA_OFFSET_DEFAULT": "10"},
 			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{OffsetDefault: 10},
+				Kafka: kafkaconfig.Consumer{OffsetDefault: &[]int64{10}[0]},
 			},
 		},
 
 		"Kafka.OffsetDefault (negative)": {
 			map[string]string{"CONSUMER_KAFKA_OFFSET_DEFAULT": "-10"},
 			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{OffsetDefault: -10},
+				Kafka: kafkaconfig.Consumer{OffsetDefault: &[]int64{-10}[0]},
 			},
 		},
 

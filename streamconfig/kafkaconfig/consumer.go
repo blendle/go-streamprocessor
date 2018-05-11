@@ -72,7 +72,7 @@ type Consumer struct {
 	// If you want to make sure that the provided offset is _always_ used as a
 	// starting point, you can use this value in conjunction with
 	// `streamconfig.GroupIDRandom()`.
-	OffsetDefault int64 `kafka:"-" split_words:"true"`
+	OffsetDefault *int64 `kafka:"-" split_words:"true"`
 
 	// OffsetInitial dictates what to do when there is no initial offset in Kafka
 	// or if the current offset does not exist any more on the server (e.g.
