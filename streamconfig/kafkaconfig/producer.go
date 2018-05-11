@@ -49,9 +49,16 @@ type Producer struct {
 	ID string `kafka:"client.id,omitempty" envconfig:"client_id"`
 
 	// MaxDeliveryRetries dictates how many times to retry sending a failing
-	// MessageSet. Note: retrying may cause reordering. Defaults to 0 retries to
-	// prevent accidental message reordering.
+	// MessageSet. Note: retrying may cause reordering. Defaults to 2 retries. Use
+	// `streamconfig.KafkaOrderedDelivery()` to guarantee order delivery.
 	MaxDeliveryRetries int `kafka:"message.send.max.retries" split_words:"true"`
+
+	// MaxInFlightRequests dictates the maximum number of in-flight requests per
+	// broker connection. This is a generic property applied to all broker
+	// communication, however it is primarily relevant to produce requests. In
+	// particular, note that other mechanisms limit the number of outstanding
+	// consumer fetch request per broker to one.
+	MaxInFlightRequests int `kafka:"max.in.flight.requests.per.connection,omitempty" split_words:"true"` // nolint: lll
 
 	// MaxQueueBufferDuration is the delay to wait for messages in the producer
 	// queue to accumulate before constructing message batches (MessageSets) to
@@ -121,7 +128,8 @@ var ProducerDefaults = Producer{
 	CompressionCodec:       CompressionSnappy,
 	Debug:                  Debug{},
 	HeartbeatInterval:      1 * time.Second,
-	MaxDeliveryRetries:     0,
+	MaxDeliveryRetries:     2,
+	MaxInFlightRequests:    1000000,
 	MaxQueueBufferDuration: time.Duration(0),
 	MaxQueueSizeKBytes:     2097151,
 	MaxQueueSizeMessages:   1000000,

@@ -123,6 +123,13 @@ func TestConsumerEnvironmentVariables(t *testing.T) {
 			streamconfig.Consumer{Kafka: kafkaconfig.Consumer{ID: "hi!"}},
 		},
 
+		"Kafka.MaxInFlightRequests": {
+			map[string]string{"CONSUMER_KAFKA_MAX_IN_FLIGHT_REQUESTS": "10"},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{MaxInFlightRequests: 10},
+			},
+		},
+
 		"Kafka.OffsetDefault (positive)": {
 			map[string]string{"CONSUMER_KAFKA_OFFSET_DEFAULT": "10"},
 			streamconfig.Consumer{

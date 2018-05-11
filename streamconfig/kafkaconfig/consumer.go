@@ -48,6 +48,13 @@ type Consumer struct {
 	// request logging.
 	ID string `kafka:"client.id,omitempty" envconfig:"client_id"`
 
+	// MaxInFlightRequests dictates the maximum number of in-flight requests per
+	// broker connection. This is a generic property applied to all broker
+	// communication, however it is primarily relevant to produce requests. In
+	// particular, note that other mechanisms limit the number of outstanding
+	// consumer fetch request per broker to one.
+	MaxInFlightRequests int `kafka:"max.in.flight.requests.per.connection,omitempty" split_words:"true"` // nolint: lll
+
 	// OffsetDefault sets an offset starting point from which to consume messages.
 	// If this value is set to zero (0), the value is ignored, and the
 	// `OffsetInitial` is used instead (see its description for more details). If
@@ -155,13 +162,14 @@ type staticConsumer struct {
 
 // ConsumerDefaults holds the default values for Consumer.
 var ConsumerDefaults = Consumer{
-	CommitInterval:    5 * time.Second,
-	Debug:             Debug{},
-	HeartbeatInterval: 1 * time.Second,
-	OffsetInitial:     OffsetBeginning,
-	SecurityProtocol:  ProtocolPlaintext,
-	SessionTimeout:    30 * time.Second,
-	SSL:               SSL{},
+	CommitInterval:      5 * time.Second,
+	Debug:               Debug{},
+	HeartbeatInterval:   1 * time.Second,
+	MaxInFlightRequests: 1000000,
+	OffsetInitial:       OffsetBeginning,
+	SecurityProtocol:    ProtocolPlaintext,
+	SessionTimeout:      30 * time.Second,
+	SSL:                 SSL{},
 }
 
 var staticConsumerDefaults = &staticConsumer{

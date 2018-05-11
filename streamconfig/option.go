@@ -211,6 +211,15 @@ func KafkaMaxDeliveryRetries(i int) Option {
 	})
 }
 
+// KafkaMaxInFlightRequests sets the maximum allowed in-flight requests for both
+// consumers and producers.
+func KafkaMaxInFlightRequests(i int) Option {
+	return optionFunc(func(c *Consumer, p *Producer) {
+		c.Kafka.MaxInFlightRequests = i
+		p.Kafka.MaxInFlightRequests = i
+	})
+}
+
 // KafkaMaxQueueBufferDuration sets the MaxQueueBufferDuration.
 //
 // This option has no effect when applied to a consumer.
@@ -262,6 +271,19 @@ func KafkaOffsetInitial(s kafkaconfig.Offset) Option {
 func KafkaOffsetTail(i uint32) Option {
 	return optionFunc(func(c *Consumer, _ *Producer) {
 		c.Kafka.OffsetDefault = -int64(i)
+	})
+}
+
+// KafkaOrderedDelivery sets `MaxInFlightRequests` to `1` for the producer, to
+// guarantee ordered delivery of messages.
+//
+// see: https://git.io/vpgiV
+// see: https://git.io/vpgDg
+//
+// This option has no effect when applied to a consumer.
+func KafkaOrderedDelivery() Option {
+	return optionFunc(func(_ *Consumer, p *Producer) {
+		p.Kafka.MaxInFlightRequests = 1
 	})
 }
 

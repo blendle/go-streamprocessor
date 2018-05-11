@@ -23,18 +23,19 @@ func TestConsumer(t *testing.T) {
 	t.Parallel()
 
 	_ = kafkaconfig.Consumer{
-		Brokers:           []string{},
-		CommitInterval:    time.Duration(0),
-		Debug:             kafkaconfig.Debug{All: true},
-		GroupID:           "",
-		HeartbeatInterval: time.Duration(0),
-		ID:                "",
-		OffsetInitial:     kafkaconfig.OffsetBeginning,
-		OffsetDefault:     5,
-		SecurityProtocol:  kafkaconfig.ProtocolPlaintext,
-		SessionTimeout:    time.Duration(0),
-		SSL:               kafkaconfig.SSL{KeyPath: ""},
-		Topics:            []string{},
+		Brokers:             []string{},
+		CommitInterval:      time.Duration(0),
+		Debug:               kafkaconfig.Debug{All: true},
+		GroupID:             "",
+		HeartbeatInterval:   time.Duration(0),
+		ID:                  "",
+		MaxInFlightRequests: 0,
+		OffsetInitial:       kafkaconfig.OffsetBeginning,
+		OffsetDefault:       5,
+		SecurityProtocol:    kafkaconfig.ProtocolPlaintext,
+		SessionTimeout:      time.Duration(0),
+		SSL:                 kafkaconfig.SSL{KeyPath: ""},
+		Topics:              []string{},
 	}
 }
 
@@ -46,6 +47,7 @@ func TestConsumerDefaults(t *testing.T) {
 	assert.Equal(t, 5*time.Second, config.CommitInterval)
 	assert.Equal(t, kafkaconfig.Debug{}, config.Debug)
 	assert.Equal(t, 1*time.Second, config.HeartbeatInterval)
+	assert.Equal(t, 1000000, config.MaxInFlightRequests)
 	assert.Equal(t, kafkaconfig.OffsetBeginning, config.OffsetInitial)
 	assert.Equal(t, 30*time.Second, config.SessionTimeout)
 	assert.Equal(t, kafkaconfig.SSL{}, config.SSL)
@@ -136,6 +138,11 @@ func TestConsumer_ConfigMap(t *testing.T) {
 		"ID (empty)": {
 			&kafkaconfig.Consumer{ID: ""},
 			&kafka.ConfigMap{},
+		},
+
+		"maxInFlightRequests": {
+			&kafkaconfig.Consumer{MaxInFlightRequests: 10},
+			&kafka.ConfigMap{"max.in.flight.requests.per.connection": 10},
 		},
 
 		"offsetDefault": {

@@ -206,6 +206,16 @@ func TestOptions(t *testing.T) {
 			},
 		},
 
+		"KafkaMaxInFlightRequests": {
+			[]streamconfig.Option{streamconfig.KafkaMaxInFlightRequests(10)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{MaxInFlightRequests: 10},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{MaxInFlightRequests: 10},
+			},
+		},
+
 		"KafkaMaxQueueBufferDuration": {
 			[]streamconfig.Option{streamconfig.KafkaMaxQueueBufferDuration(1 * time.Second)},
 			streamconfig.Consumer{
@@ -283,6 +293,16 @@ func TestOptions(t *testing.T) {
 			},
 			streamconfig.Producer{
 				Kafka: kafkaconfig.Producer{},
+			},
+		},
+
+		"KafkaOrderedDelivery": {
+			[]streamconfig.Option{streamconfig.KafkaOrderedDelivery()},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{MaxInFlightRequests: 1},
 			},
 		},
 
