@@ -2,6 +2,7 @@ package streamconfig_test
 
 import (
 	"math"
+	"strings"
 	"testing"
 	"time"
 
@@ -11,7 +12,9 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
 	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
@@ -150,26 +153,6 @@ func TestOptions(t *testing.T) {
 			[]streamconfig.Option{streamconfig.KafkaGroupID("test1")},
 			streamconfig.Consumer{
 				Kafka: kafkaconfig.Consumer{GroupID: "test1"},
-			},
-			streamconfig.Producer{
-				Kafka: kafkaconfig.Producer{},
-			},
-		},
-
-		"KafkaGroupIDRandom (seed 0)": {
-			[]streamconfig.Option{streamconfig.KafkaGroupIDRandom(0)},
-			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{GroupID: "processor-8717895732742165505"},
-			},
-			streamconfig.Producer{
-				Kafka: kafkaconfig.Producer{},
-			},
-		},
-
-		"KafkaGroupIDRandom (seed 1)": {
-			[]streamconfig.Option{streamconfig.KafkaGroupIDRandom(1)},
-			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{GroupID: "processor-5577006791947779410"},
 			},
 			streamconfig.Producer{
 				Kafka: kafkaconfig.Producer{},
@@ -446,6 +429,21 @@ func TestOptions(t *testing.T) {
 			assert.EqualValues(t, tt.producer, p.WithOptions(tt.ins...))
 		})
 	}
+}
+
+func TestOptions_KafkaGroupIDRandom(t *testing.T) {
+	c := streamconfig.Consumer{}
+	p := streamconfig.Producer{}
+
+	c = c.WithOptions(streamconfig.KafkaGroupIDRandom())
+	p = p.WithOptions(streamconfig.KafkaGroupIDRandom())
+
+	id := strings.Replace(c.Kafka.GroupID, "processor-", "", -1)
+	uid, err := uuid.FromString(id)
+	require.NoError(t, err)
+
+	assert.Equal(t, uint8(4), uid.Version())
+	assert.EqualValues(t, streamconfig.Producer{}, p)
 }
 
 func TestConsumerOptions(t *testing.T) {
