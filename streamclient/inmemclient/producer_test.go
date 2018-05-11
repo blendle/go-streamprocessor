@@ -51,10 +51,10 @@ func TestProducer_Messages(t *testing.T) {
 	assert.Equal(t, expected, string(messages[0].Value))
 }
 
-func TestProducer_MessageOrdering(t *testing.T) {
+func TestProducer_Messages_Ordering(t *testing.T) {
 	t.Parallel()
 
-	messageCount := 100000
+	messageCount := 10000
 	store := inmemstore.New()
 	producer, closer := inmemclient.TestProducer(t, store)
 	defer closer()
@@ -114,7 +114,7 @@ func TestProducer_Close(t *testing.T) {
 		select {
 		case err := <-ch:
 			assert.NoError(t, err)
-		case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
 			t.Fatal("timeout while waiting for close to finish")
 		}
 	}
@@ -136,7 +136,7 @@ func TestProducer_Close_WithoutInterrupt(t *testing.T) {
 		select {
 		case err := <-ch:
 			assert.NoError(t, err)
-		case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
 			t.Fatal("timeout while waiting for close to finish")
 		}
 	}

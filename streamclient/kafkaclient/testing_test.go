@@ -3,10 +3,8 @@ package kafkaclient_test
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/blendle/go-streamprocessor/stream"
-	"github.com/blendle/go-streamprocessor/streamclient"
 	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
@@ -93,18 +91,7 @@ func TestIntegrationTestMessageFromTopic(t *testing.T) {
 	require.Zero(t, producer.Flush(1000))
 	producer.Close()
 
-	consumer, err := kafkaclient.NewConsumer(
-		streamconfig.KafkaBroker(kafkaconfig.TestBrokerAddress),
-		streamconfig.KafkaTopic(topicAndGroup),
-		streamconfig.KafkaGroupID(topicAndGroup),
-	)
-	require.NoError(t, err)
-	defer func() {
-		time.Sleep(100 * time.Millisecond)
-		assert.NoError(t, consumer.Close())
-	}()
-
-	message := streamclient.TestMessageFromConsumer(t, consumer)
+	message := kafkaclient.TestMessageFromTopic(t, topicAndGroup)
 
 	assert.Equal(t, "hello world", string(message.Value))
 }

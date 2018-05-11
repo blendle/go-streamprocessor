@@ -58,7 +58,7 @@ func TestConsumer_Messages(t *testing.T) {
 func TestConsumer_Messages_Ordering(t *testing.T) {
 	t.Parallel()
 
-	messageCount := 100000
+	messageCount := 10000
 	store := inmemstore.New()
 
 	for i := 0; i < messageCount; i++ {
@@ -82,7 +82,7 @@ func TestConsumer_Messages_Ordering(t *testing.T) {
 func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 	t.Parallel()
 
-	messageCount := 100000
+	messageCount := 10000
 	store := inmemstore.New()
 	line := `{"number":%d}` + "\n"
 
@@ -171,7 +171,7 @@ func TestConsumer_Close(t *testing.T) {
 		select {
 		case err := <-ch:
 			assert.NoError(t, err)
-		case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
 			t.Fatal("timeout while waiting for close to finish")
 		}
 	}
@@ -196,7 +196,7 @@ func TestConsumer_Close_WithoutInterrupt(t *testing.T) {
 		select {
 		case err := <-ch:
 			assert.NoError(t, err)
-		case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
 			t.Fatal("timeout while waiting for close to finish")
 		}
 	}

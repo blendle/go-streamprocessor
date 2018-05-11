@@ -56,7 +56,7 @@ func TestProducer_Close(t *testing.T) {
 		select {
 		case err := <-ch:
 			assert.NoError(t, err)
-		case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
 			t.Fatal("timeout while waiting for close to finish")
 		}
 	}
@@ -78,7 +78,7 @@ func TestProducer_Close_WithoutInterrupt(t *testing.T) {
 		select {
 		case err := <-ch:
 			assert.NoError(t, err)
-		case <-time.After(testutil.MultipliedDuration(t, 1*time.Second)):
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
 			t.Fatal("timeout while waiting for close to finish")
 		}
 	}
