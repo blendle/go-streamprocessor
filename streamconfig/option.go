@@ -182,15 +182,6 @@ func KafkaID(s string) Option {
 	})
 }
 
-// KafkaInitialOffset sets the InitialOffset.
-//
-// This option has no effect when applied to a producer.
-func KafkaInitialOffset(s kafkaconfig.Offset) Option {
-	return optionFunc(func(c *Consumer, p *Producer) {
-		c.Kafka.InitialOffset = s
-	})
-}
-
 // KafkaMaxDeliveryRetries sets the MaxDeliveryRetries.
 //
 // This option has no effect when applied to a consumer.
@@ -224,6 +215,33 @@ func KafkaMaxQueueSizeKBytes(i int) Option {
 func KafkaMaxQueueSizeMessages(i int) Option {
 	return optionFunc(func(_ *Consumer, p *Producer) {
 		p.Kafka.MaxQueueSizeMessages = i
+	})
+}
+
+// KafkaOffsetHead sets the OffsetDefault.
+//
+// This option has no effect when applied to a producer.
+func KafkaOffsetHead(i uint32) Option {
+	return optionFunc(func(c *Consumer, _ *Producer) {
+		c.Kafka.OffsetDefault = int64(i)
+	})
+}
+
+// KafkaOffsetInitial sets the OffsetInitial.
+//
+// This option has no effect when applied to a producer.
+func KafkaOffsetInitial(s kafkaconfig.Offset) Option {
+	return optionFunc(func(c *Consumer, _ *Producer) {
+		c.Kafka.OffsetInitial = s
+	})
+}
+
+// KafkaOffsetTail sets the OffsetDefault.
+//
+// This option has no effect when applied to a producer.
+func KafkaOffsetTail(i uint32) Option {
+	return optionFunc(func(c *Consumer, _ *Producer) {
+		c.Kafka.OffsetDefault = -int64(i)
 	})
 }
 

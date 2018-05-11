@@ -48,7 +48,26 @@ type Consumer struct {
 	// request logging.
 	ID string `kafka:"client.id,omitempty" envconfig:"client_id"`
 
-	// InitialOffset dictates what to do when there is no initial offset in Kafka
+	// OffsetDefault sets an offset starting point from which to consume messages.
+	// If this value is set to zero (0), the value is ignored, and the
+	// `OffsetInitial` is used instead (see its description for more details). If
+	// the value is a positive integer, the offset will be set as expected,
+	// meaning that a value of `5` will set the starting offset to 5. If we
+	// provide a negative integer, we parse the value as a "tail" offset, meaning
+	// that an integer of `-2` will be considered as "get the second message from
+	// the last known offset of the topic".
+	//
+	// NOTE that this value ONLY works when used in a consumer group that has no
+	// offsets committed to Kafka yet. As soon as the first offset is committed
+	// (per partition), this value is ignored for that consumer group, and the
+	// consumer will instead continue reading from the last known offset.
+	//
+	// If you want to make sure that the provided offset is _always_ used as a
+	// starting point, you can use this value in conjunction with
+	// `streamconfig.GroupIDRandom()`.
+	OffsetDefault int64 `kafka:"-" split_words:"true"`
+
+	// OffsetInitial dictates what to do when there is no initial offset in Kafka
 	// or if the current offset does not exist any more on the server (e.g.
 	// because that data has been deleted):
 	//
@@ -56,7 +75,7 @@ type Consumer struct {
 	// * OffsetEnd: automatically reset the offset to the latest offset
 	// * none: throw exception to the consumer if no previous offset is found for
 	//   the consumer's group
-	InitialOffset Offset `kafka:"{topic}.auto.offset.reset,omitempty" split_words:"true"`
+	OffsetInitial Offset `kafka:"{topic}.auto.offset.reset,omitempty" split_words:"true"`
 
 	// SecurityProtocol is the protocol used to communicate with brokers.
 	SecurityProtocol Protocol `kafka:"security.protocol,omitempty" split_words:"true"`
@@ -139,7 +158,7 @@ var ConsumerDefaults = Consumer{
 	CommitInterval:    5 * time.Second,
 	Debug:             Debug{},
 	HeartbeatInterval: 1 * time.Second,
-	InitialOffset:     OffsetBeginning,
+	OffsetInitial:     OffsetBeginning,
 	SecurityProtocol:  ProtocolPlaintext,
 	SessionTimeout:    30 * time.Second,
 	SSL:               SSL{},

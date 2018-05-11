@@ -29,7 +29,8 @@ func TestConsumer(t *testing.T) {
 		GroupID:           "",
 		HeartbeatInterval: time.Duration(0),
 		ID:                "",
-		InitialOffset:     kafkaconfig.OffsetBeginning,
+		OffsetInitial:     kafkaconfig.OffsetBeginning,
+		OffsetDefault:     5,
 		SecurityProtocol:  kafkaconfig.ProtocolPlaintext,
 		SessionTimeout:    time.Duration(0),
 		SSL:               kafkaconfig.SSL{KeyPath: ""},
@@ -45,7 +46,7 @@ func TestConsumerDefaults(t *testing.T) {
 	assert.Equal(t, 5*time.Second, config.CommitInterval)
 	assert.Equal(t, kafkaconfig.Debug{}, config.Debug)
 	assert.Equal(t, 1*time.Second, config.HeartbeatInterval)
-	assert.Equal(t, kafkaconfig.OffsetBeginning, config.InitialOffset)
+	assert.Equal(t, kafkaconfig.OffsetBeginning, config.OffsetInitial)
 	assert.Equal(t, 30*time.Second, config.SessionTimeout)
 	assert.Equal(t, kafkaconfig.SSL{}, config.SSL)
 }
@@ -137,13 +138,18 @@ func TestConsumer_ConfigMap(t *testing.T) {
 			&kafka.ConfigMap{},
 		},
 
-		"initialOffset (end)": {
-			&kafkaconfig.Consumer{InitialOffset: kafkaconfig.OffsetEnd},
+		"offsetDefault": {
+			&kafkaconfig.Consumer{OffsetDefault: 12},
+			&kafka.ConfigMap{},
+		},
+
+		"offsetInitial (end)": {
+			&kafkaconfig.Consumer{OffsetInitial: kafkaconfig.OffsetEnd},
 			&kafka.ConfigMap{"default.topic.config": kafka.ConfigMap{"auto.offset.reset": "end"}},
 		},
 
-		"initialOffset (beginning)": {
-			&kafkaconfig.Consumer{InitialOffset: kafkaconfig.OffsetBeginning},
+		"offsetInitial (beginning)": {
+			&kafkaconfig.Consumer{OffsetInitial: kafkaconfig.OffsetBeginning},
 			&kafka.ConfigMap{"default.topic.config": kafka.ConfigMap{"auto.offset.reset": "beginning"}},
 		},
 
