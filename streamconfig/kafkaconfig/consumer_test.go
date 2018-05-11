@@ -31,7 +31,7 @@ func TestConsumer(t *testing.T) {
 		ID:                  "",
 		MaxInFlightRequests: 0,
 		OffsetInitial:       kafkaconfig.OffsetBeginning,
-		OffsetDefault:       5,
+		OffsetDefault:       &[]int64{5}[0],
 		SecurityProtocol:    kafkaconfig.ProtocolPlaintext,
 		SessionTimeout:      time.Duration(0),
 		SSL:                 kafkaconfig.SSL{KeyPath: ""},
@@ -146,7 +146,7 @@ func TestConsumer_ConfigMap(t *testing.T) {
 		},
 
 		"offsetDefault": {
-			&kafkaconfig.Consumer{OffsetDefault: 12},
+			&kafkaconfig.Consumer{OffsetDefault: &[]int64{12}[0]},
 			&kafka.ConfigMap{},
 		},
 

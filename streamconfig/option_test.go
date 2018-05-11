@@ -249,7 +249,7 @@ func TestOptions(t *testing.T) {
 		"KafkaOffsetHead": {
 			[]streamconfig.Option{streamconfig.KafkaOffsetHead(10)},
 			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{OffsetDefault: 10},
+				Kafka: kafkaconfig.Consumer{OffsetDefault: &[]int64{10}[0]},
 			},
 			streamconfig.Producer{
 				Kafka: kafkaconfig.Producer{},
@@ -259,7 +259,7 @@ func TestOptions(t *testing.T) {
 		"KafkaOffsetHead (MaxUint32)": {
 			[]streamconfig.Option{streamconfig.KafkaOffsetHead(math.MaxUint32)},
 			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{OffsetDefault: int64(math.MaxUint32)},
+				Kafka: kafkaconfig.Consumer{OffsetDefault: &[]int64{int64(math.MaxUint32)}[0]},
 			},
 			streamconfig.Producer{
 				Kafka: kafkaconfig.Producer{},
@@ -279,7 +279,7 @@ func TestOptions(t *testing.T) {
 		"KafkaOffsetTail": {
 			[]streamconfig.Option{streamconfig.KafkaOffsetTail(10)},
 			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{OffsetDefault: -10},
+				Kafka: kafkaconfig.Consumer{OffsetDefault: &[]int64{-10}[0]},
 			},
 			streamconfig.Producer{
 				Kafka: kafkaconfig.Producer{},
@@ -289,7 +289,7 @@ func TestOptions(t *testing.T) {
 		"KafkaOffsetTail (MaxUint32)": {
 			[]streamconfig.Option{streamconfig.KafkaOffsetTail(math.MaxUint32)},
 			streamconfig.Consumer{
-				Kafka: kafkaconfig.Consumer{OffsetDefault: -int64(math.MaxUint32)},
+				Kafka: kafkaconfig.Consumer{OffsetDefault: &[]int64{-int64(math.MaxUint32)}[0]},
 			},
 			streamconfig.Producer{
 				Kafka: kafkaconfig.Producer{},

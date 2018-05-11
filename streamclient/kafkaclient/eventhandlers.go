@@ -19,20 +19,20 @@ func (c *consumer) handleAssignedPartitions(e kafka.AssignedPartitions) {
 		tps[i] = e.Partitions[i]
 	}
 
-	// If OffsetDefault is set to anything other than zero, this consumer is
+	// If OffsetDefault is set to anything other than nil, this consumer is
 	// configured to receive data from a either a positive (starting from the
 	// beginning), or negative offset (starting from the end). In this case, we
 	// manually override the starting offset of the partition when we receive an
 	// assigned partition request, but only if no offset is stored yet at the
 	// Kafka brokers.
-	if c.c.Kafka.OffsetDefault != 0 {
+	if c.c.Kafka.OffsetDefault != nil {
 		// Set offsets, to support custom initial offsets. We start by setting the
 		// offset as usual, then we convert the offset to a "tail" type if we're
 		// actually dealing with a negative integer.
 		//
 		// see: https://git.io/vpa3B
-		offset := kafka.Offset(c.c.Kafka.OffsetDefault)
-		if c.c.Kafka.OffsetDefault < 0 {
+		offset := kafka.Offset(*c.c.Kafka.OffsetDefault)
+		if *c.c.Kafka.OffsetDefault < 0 {
 			offset = kafka.OffsetTail(-offset)
 		}
 
