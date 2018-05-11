@@ -53,6 +53,58 @@ func TestIntegrationNewProducer_WithOptions(t *testing.T) {
 	assert.Equal(t, "test", producer.Config().(streamconfig.Producer).Kafka.SSL.KeyPassword)
 }
 
+func TestIntegrationProducer_Close(t *testing.T) {
+	t.Parallel()
+	testutil.Integration(t)
+
+	topicAndGroup := testutil.Random(t)
+	options := kafkaclient.TestProducerConfig(t, topicAndGroup)
+
+	producer, err := kafkaclient.NewProducer(options...)
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- producer.Close() // Close is working as expected, and the producer is terminated.
+		ch <- producer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
+}
+
+func TestIntegrationProducer_Close_WithoutInterrupt(t *testing.T) {
+	t.Parallel()
+	testutil.Integration(t)
+
+	topic := testutil.Random(t)
+	options := kafkaclient.TestProducerConfig(t, topic, streamconfig.ManualInterruptHandling())
+
+	producer, err := kafkaclient.NewProducer(options...)
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- producer.Close() // Close is working as expected, and the producer is terminated.
+		ch <- producer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
+}
+
 func TestIntegrationProducer_Messages(t *testing.T) {
 	t.Parallel()
 	testutil.Integration(t)

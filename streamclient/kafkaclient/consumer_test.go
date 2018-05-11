@@ -39,7 +39,6 @@ func TestIntegrationNewConsumer_WithOptions(t *testing.T) {
 	topicAndGroup := testutil.Random(t)
 
 	opts := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
-		c.Kafka.Debug.Msg = true
 		c.Kafka.SSL.KeyPassword = "test"
 	})
 
@@ -50,8 +49,59 @@ func TestIntegrationNewConsumer_WithOptions(t *testing.T) {
 	defer func() { require.NoError(t, consumer.Close()) }()
 
 	assert.Equal(t, false, consumer.Config().(streamconfig.Consumer).Kafka.Debug.Broker)
-	assert.Equal(t, true, consumer.Config().(streamconfig.Consumer).Kafka.Debug.Msg)
 	assert.Equal(t, "test", consumer.Config().(streamconfig.Consumer).Kafka.SSL.KeyPassword)
+}
+
+func TestIntegrationConsumer_Close(t *testing.T) {
+	t.Parallel()
+	testutil.Integration(t)
+
+	topicAndGroup := testutil.Random(t)
+	options := kafkaclient.TestConsumerConfig(t, topicAndGroup)
+
+	consumer, err := kafkaclient.NewConsumer(options...)
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- consumer.Close() // Close is working as expected, and the consumer is terminated.
+		ch <- consumer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
+}
+
+func TestIntegrationConsumer_Close_WithoutInterrupt(t *testing.T) {
+	t.Parallel()
+	testutil.Integration(t)
+
+	topic := testutil.Random(t)
+	options := kafkaclient.TestConsumerConfig(t, topic, streamconfig.ManualInterruptHandling())
+
+	consumer, err := kafkaclient.NewConsumer(options...)
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- consumer.Close() // Close is working as expected, and the consumer is terminated.
+		ch <- consumer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
 }
 
 func TestIntegrationConsumer_Messages(t *testing.T) {

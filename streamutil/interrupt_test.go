@@ -1,8 +1,6 @@
 package streamutil_test
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,6 +9,7 @@ import (
 	"time"
 
 	"github.com/blendle/go-streamprocessor/streamutil"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -19,13 +18,14 @@ import (
 func TestInterrupt(t *testing.T) {
 	t.Parallel()
 
-	if os.Getenv("BE_TESTING_FATAL") == "1" {
+	if os.Getenv("RUN_WITH_EXEC") == "1" {
+		println("go")
+
 		select {
 		case s := <-streamutil.Interrupt():
 			println("interrupt received:", s.String())
 			return
-		case <-time.After(5 * time.Second):
-			os.Exit(1)
+		case <-time.After(1 * time.Second):
 		}
 
 		return
@@ -39,32 +39,49 @@ func TestInterrupt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.String(), func(t *testing.T) {
-			cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
-			cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
+			want := "interrupt received: " + tt.String()
 
-			var b bytes.Buffer
-			cmd.Stderr = bufio.NewWriter(&b)
-			require.NoError(t, cmd.Start())
-			time.Sleep(150 * time.Millisecond)
+			out, err := testutil.Exec(t, "go", func(tb testing.TB, cmd *exec.Cmd) {
+				require.NoError(t, cmd.Process.Signal(tt))
+			})
 
-			require.NoError(t, cmd.Process.Signal(tt))
-			require.NoError(t, cmd.Wait())
-
-			assert.Contains(t, b.String(), "interrupt received: "+tt.String())
+			require.Nil(t, err)
+			assert.Contains(t, out, want)
 		})
 	}
+}
+
+func TestInterrupt_NoSignal(t *testing.T) {
+	t.Parallel()
+
+	if os.Getenv("RUN_WITH_EXEC") == "1" {
+		select {
+		case <-streamutil.Interrupt():
+		case <-time.After(100 * time.Millisecond):
+			println("no signal")
+		}
+
+		return
+	}
+
+	out, err := testutil.Exec(t, "", nil)
+
+	require.Nil(t, err)
+	assert.Contains(t, out, "no signal")
 }
 
 func TestHandleInterrupts(t *testing.T) {
 	t.Parallel()
 
-	if os.Getenv("BE_TESTING_FATAL") == "1" {
+	if os.Getenv("RUN_WITH_EXEC") == "1" {
+		println("go")
+
 		ch := make(chan os.Signal)
 		logger, err := zap.NewDevelopment()
 		require.NoError(t, err)
 
 		fn := func() error {
-			println("closed!")
+			println("closed")
 			return nil
 		}
 
@@ -82,18 +99,12 @@ func TestHandleInterrupts(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.String(), func(t *testing.T) {
-			cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
-			cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
+			out, err := testutil.Exec(t, "go", func(tb testing.TB, cmd *exec.Cmd) {
+				require.NoError(t, cmd.Process.Signal(tt))
+			})
 
-			var b bytes.Buffer
-			cmd.Stderr = bufio.NewWriter(&b)
-			require.NoError(t, cmd.Start())
-			time.Sleep(150 * time.Millisecond)
-
-			require.NoError(t, cmd.Process.Signal(tt))
-			require.NoError(t, cmd.Wait())
-
-			assert.Contains(t, b.String(), fmt.Sprintf(`{"signal": "%s"}`, tt.String()))
+			require.Nil(t, err)
+			assert.Contains(t, out, fmt.Sprintf(`{"signal": "%s"}`, tt.String()))
 		})
 	}
 }

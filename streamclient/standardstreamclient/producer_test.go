@@ -13,6 +13,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -37,6 +38,50 @@ func TestNewProducer_WithOptions(t *testing.T) {
 	defer func() { require.NoError(t, producer.Close()) }()
 
 	assert.EqualValues(t, buffer, producer.Config().(streamconfig.Producer).Standardstream.Writer)
+}
+
+func TestProducer_Close(t *testing.T) {
+	t.Parallel()
+
+	producer, err := standardstreamclient.NewProducer()
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- producer.Close() // Close is working as expected, and the producer is terminated.
+		ch <- producer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
+}
+
+func TestProducer_Close_WithoutInterrupt(t *testing.T) {
+	t.Parallel()
+
+	producer, err := standardstreamclient.NewProducer(streamconfig.ManualInterruptHandling())
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- producer.Close() // Close is working as expected, and the producer is terminated.
+		ch <- producer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
 }
 
 func TestProducer_Messages(t *testing.T) {

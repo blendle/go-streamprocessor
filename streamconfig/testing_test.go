@@ -13,7 +13,10 @@ import (
 
 func TestTestNewConsumer(t *testing.T) {
 	c1, _ := streamconfig.NewConsumer()
+	c1.Logger = nil
+
 	c2 := streamconfig.TestNewConsumer(t, true)
+	c2.Logger = nil
 
 	assert.EqualValues(t, c1, c2)
 }
@@ -62,7 +65,10 @@ func TestTestNewConsumer_WithOptionsAndEnvironmentVariables(t *testing.T) {
 
 func TestTestNewProducer(t *testing.T) {
 	p1, _ := streamconfig.NewProducer()
+	p1.Logger = nil
+
 	p2 := streamconfig.TestNewProducer(t, true)
+	p2.Logger = nil
 
 	assert.EqualValues(t, p1, p2)
 }

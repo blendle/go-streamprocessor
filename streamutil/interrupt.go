@@ -40,6 +40,8 @@ func HandleInterrupts(signals chan os.Signal, closer func() error, logger *zap.L
 
 	go func() {
 		abort := make(chan os.Signal, 1)
+		defer close(abort)
+
 		signal.Notify(abort, os.Interrupt)
 		<-abort
 

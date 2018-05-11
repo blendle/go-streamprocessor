@@ -11,9 +11,9 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 )
 
 func TestConsumer(t *testing.T) {
@@ -24,7 +24,7 @@ func TestConsumer(t *testing.T) {
 		Kafka:           kafkaconfig.Consumer{},
 		Pubsub:          pubsubconfig.Consumer{},
 		Standardstream:  standardstreamconfig.Consumer{},
-		Logger:          zap.NewNop(),
+		Logger:          testutil.Logger(t),
 		HandleInterrupt: false,
 		Name:            "",
 		AllowEnvironmentBasedConfiguration: false,
@@ -307,7 +307,7 @@ func TestProducer(t *testing.T) {
 		Kafka:           kafkaconfig.Producer{},
 		Pubsub:          pubsubconfig.Producer{},
 		Standardstream:  standardstreamconfig.Producer{},
-		Logger:          zap.NewNop(),
+		Logger:          testutil.Logger(t),
 		HandleInterrupt: false,
 		Name:            "",
 		AllowEnvironmentBasedConfiguration: false,

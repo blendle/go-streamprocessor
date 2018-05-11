@@ -13,6 +13,7 @@ import (
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
 	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,6 +36,57 @@ func TestNewConsumer_WithOptions(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.EqualValues(t, f, consumer.Config().(streamconfig.Consumer).Standardstream.Reader)
+}
+
+func TestConsumer_Close(t *testing.T) {
+	t.Parallel()
+
+	f := standardstreamclient.TestBuffer(t)
+
+	consumer, err := standardstreamclient.NewConsumer(streamconfig.StandardstreamReader(f))
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- consumer.Close() // Close is working as expected, and the consumer is terminated.
+		ch <- consumer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
+}
+
+func TestConsumer_Close_WithoutInterrupt(t *testing.T) {
+	t.Parallel()
+
+	f := standardstreamclient.TestBuffer(t)
+
+	consumer, err := standardstreamclient.NewConsumer(
+		streamconfig.StandardstreamReader(f),
+		streamconfig.ManualInterruptHandling(),
+	)
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- consumer.Close() // Close is working as expected, and the consumer is terminated.
+		ch <- consumer.Close() // Close should return nil immediately, due to `sync.Once`.
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case err := <-ch:
+			assert.NoError(t, err)
+		case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
+			t.Fatal("timeout while waiting for close to finish")
+		}
+	}
 }
 
 func TestConsumer_Messages(t *testing.T) {
@@ -109,7 +161,7 @@ func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 func TestConsumer_Messages_ScannerError(t *testing.T) {
 	t.Parallel()
 
-	if os.Getenv("BE_TESTING_FATAL") == "1" {
+	if os.Getenv("RUN_WITH_EXEC") == "1" {
 		// This byte array is longer than is accepted by
 		// `standardstreamclient.maxCapacity`, which causes a Fatal error to occurs.
 		b := make([]byte, 512*1024)
@@ -119,23 +171,16 @@ func TestConsumer_Messages_ScannerError(t *testing.T) {
 		defer closer()
 
 		<-consumer.Messages()
-
-		// Give the errors channel a few milliseconds to receive the error, and
-		// terminate the program.
 		time.Sleep(5 * time.Millisecond)
 
 		return
 	}
 
-	// TODO: this should probably be easier to test, but I haven't found a way yet
-	//       to test Zap's `Fatal` log level without actually exiting the binary.
-	cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
-	cmd.Env = append(os.Environ(), "BE_TESTING_FATAL=1")
+	out, err := testutil.Exec(t, "", nil)
 
-	out, err := cmd.CombinedOutput()
-	require.NotNil(t, err, "output received: %s", string(out))
-
+	require.NotNil(t, err)
 	assert.False(t, err.(*exec.ExitError).Success())
+	assert.Contains(t, out, "unable to read message from stream: bufio.Scanner: token too long")
 }
 
 func TestConsumer_Errors(t *testing.T) {
