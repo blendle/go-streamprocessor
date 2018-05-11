@@ -1,7 +1,10 @@
 package streamconfig
 
 import (
+	"fmt"
 	"io"
+	"math"
+	"math/rand"
 	"time"
 
 	"github.com/blendle/go-streamprocessor/stream"
@@ -163,6 +166,23 @@ func KafkaDebug() Option {
 func KafkaGroupID(s string) Option {
 	return optionFunc(func(c *Consumer, _ *Producer) {
 		c.Kafka.GroupID = s
+	})
+}
+
+// KafkaGroupIDRandom sets the group ID for the consumer to a random ID. This
+// can be used to configure one-off consumers that should not share their state
+// in a consumer group. The passed in value is used as the seed for the random
+// number generator. For true randomness, pass in `time.Now().Unix()`.
+//
+// This option has no effect when applied to a producer.
+func KafkaGroupIDRandom(i int64) Option {
+	return optionFunc(func(c *Consumer, _ *Producer) {
+		// Note: we should probably not do this globally.
+		//
+		// see: https://nishanths.svbtle.com/do-not-seed-the-global-random
+		rand.Seed(i)
+
+		c.Kafka.GroupID = fmt.Sprintf("processor-%d", rand.Intn(math.MaxInt64))
 	})
 }
 
