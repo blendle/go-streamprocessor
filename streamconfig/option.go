@@ -353,6 +353,15 @@ func KafkaSSL(capath, certpath, crlpath, keypassword, keypath, keystorepassword,
 	})
 }
 
+// KafkaStatisticsInterval configures the producer or consumer to use the
+// specified statistics interval.
+func KafkaStatisticsInterval(d time.Duration) Option {
+	return optionFunc(func(c *Consumer, p *Producer) {
+		c.Kafka.StatisticsInterval = d
+		p.Kafka.StatisticsInterval = d
+	})
+}
+
 // KafkaTopic configures the producer or consumer to use the specified topic. In
 // case of the consumer, this option can be used multiple times to consume from
 // more than one topic. In case of the producer, the last usage of this option

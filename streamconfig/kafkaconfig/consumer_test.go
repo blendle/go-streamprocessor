@@ -19,6 +19,10 @@ var consumerDefaults = map[string]interface{}{
 	"go.application.rebalance.enable": true,
 }
 
+var consumerOmitempties = []string{
+	"statistics.interval.ms",
+}
+
 func TestConsumer(t *testing.T) {
 	t.Parallel()
 
@@ -35,6 +39,7 @@ func TestConsumer(t *testing.T) {
 		SecurityProtocol:    kafkaconfig.ProtocolPlaintext,
 		SessionTimeout:      time.Duration(0),
 		SSL:                 kafkaconfig.SSL{KeyPath: ""},
+		StatisticsInterval:  time.Duration(0),
 		Topics:              []string{},
 	}
 }
@@ -51,6 +56,7 @@ func TestConsumerDefaults(t *testing.T) {
 	assert.Equal(t, kafkaconfig.OffsetBeginning, config.OffsetInitial)
 	assert.Equal(t, 30*time.Second, config.SessionTimeout)
 	assert.Equal(t, kafkaconfig.SSL{}, config.SSL)
+	assert.Equal(t, 15*time.Minute, config.StatisticsInterval)
 }
 
 func TestConsumer_ConfigMap(t *testing.T) {
@@ -233,6 +239,16 @@ func TestConsumer_ConfigMap(t *testing.T) {
 			},
 		},
 
+		"statisticsInterval": {
+			&kafkaconfig.Consumer{StatisticsInterval: 2 * time.Second},
+			&kafka.ConfigMap{"statistics.interval.ms": 2000},
+		},
+
+		"statisticsInterval (no omitempty)": {
+			&kafkaconfig.Consumer{StatisticsInterval: 0 * time.Millisecond},
+			&kafka.ConfigMap{"statistics.interval.ms": 0},
+		},
+
 		"topics (skipped)": {
 			&kafkaconfig.Consumer{Topics: []string{"a", "b"}},
 			&kafka.ConfigMap{},
@@ -251,6 +267,20 @@ func TestConsumer_ConfigMap(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			cfg, _ := tt.cfg.ConfigMap()
+
+			// Quick fix to filter out values without the "omitempty" tag, which have
+			// their value set to the `zero` value. We check if the actual config has
+			// the required key set. If it has, _and_ its value is equal to the `zero`
+			// value, and the expected config does not have it set, we set the value
+			// for the expected config.
+			for _, k := range consumerOmitempties {
+				if v, err := cfg.Get(k, nil); err == nil {
+					if vv, _ := tt.cm.Get(k, nil); vv == nil {
+						err := tt.cm.SetKey(k, v)
+						require.NoError(t, err)
+					}
+				}
+			}
 
 			// The above table only compares the non-default values for readability.
 			// In this loop, we validate that the default values are set as expected,

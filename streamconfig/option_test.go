@@ -369,6 +369,16 @@ func TestOptions(t *testing.T) {
 			},
 		},
 
+		"KafkaStatisticsInterval": {
+			[]streamconfig.Option{streamconfig.KafkaStatisticsInterval(1 * time.Second)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{StatisticsInterval: 1 * time.Second},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{StatisticsInterval: 1 * time.Second},
+			},
+		},
+
 		"KafkaTopic": {
 			[]streamconfig.Option{streamconfig.KafkaTopic("test1")},
 			streamconfig.Consumer{

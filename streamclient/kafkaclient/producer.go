@@ -266,6 +266,8 @@ func (p *producer) checkReports() {
 			p.handleMessage(e)
 		case kafka.Error:
 			p.handleError(e)
+		case *kafka.Stats:
+			p.handleStats(e)
 		}
 	}
 }

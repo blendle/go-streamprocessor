@@ -1,6 +1,8 @@
 package kafkaclient
 
 import (
+	"encoding/json"
+
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -152,6 +154,30 @@ func (c *consumer) handleError(e kafka.Error) {
 // the raised errors.
 func (p *producer) handleError(e kafka.Error) {
 	p.errors <- errors.Wrap(e, "received error from event stream")
+}
+
+// handleStats handles all statistic events for the consumer. These statistics
+// are periodically delivered (based off of the `StatisticsInterval`
+// configuration value), and are then logged at level "INFO" (if the logger is
+// configured to log INFO-level messages).
+func (c *consumer) handleStats(e *kafka.Stats) {
+	c.logger.Info(
+		"Received Kafka statistics.",
+		zap.Any("statistics", json.RawMessage(e.String())),
+		zap.String("details", "https://github.com/edenhill/librdkafka/wiki/Statistics"),
+	)
+}
+
+// handleStats handles all statistic events for the producer. These statistics
+// are periodically delivered (based off of the `StatisticsInterval`
+// configuration value), and are then logged at level "INFO" (if the logger is
+// configured to log INFO-level messages).
+func (p *producer) handleStats(e *kafka.Stats) {
+	p.logger.Info(
+		"Received Kafka statistics.",
+		zap.Any("statistics", json.RawMessage(e.String())),
+		zap.String("details", "https://github.com/edenhill/librdkafka/wiki/Statistics"),
+	)
 }
 
 // handleMessage handles all Kafka messages by converting the message to a
