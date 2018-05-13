@@ -60,6 +60,7 @@ func TestProducerDefaults(t *testing.T) {
 	assert.Equal(t, 2097151, config.MaxQueueSizeKBytes)
 	assert.Equal(t, 1000000, config.MaxQueueSizeMessages)
 	assert.EqualValues(t, kafkaconfig.AckLeader, config.RequiredAcks)
+	assert.Equal(t, kafkaconfig.ProtocolPlaintext, config.SecurityProtocol)
 	assert.Equal(t, 30*time.Second, config.SessionTimeout)
 	assert.Equal(t, kafkaconfig.SSL{}, config.SSL)
 	assert.Equal(t, 15*time.Minute, config.StatisticsInterval)
