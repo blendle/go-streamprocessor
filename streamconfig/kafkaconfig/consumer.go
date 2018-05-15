@@ -166,6 +166,19 @@ type staticConsumer struct {
 	// Unassign() respectively. This is set to `true`, since we handle these
 	// events ourselves.
 	EnableEventRebalance bool `kafka:"go.application.rebalance.enable"`
+
+	// QueuedMinMessages dictates the minimum number of messages per
+	// topic+partition librdkafka tries to maintain in the local consumer queue.
+	//
+	// See: https://git.io/vp5eH
+	QueuedMinMessages int `kafka:"queued.min.messages"`
+
+	// SocketBlockingMax dictates the maximum time a broker socket operation may
+	// block. A lower value improves responsiveness at the expense of slightly
+	// higher CPU usage.
+	//
+	// See: https://git.io/vp5eH
+	SocketBlockingMax time.Duration `kafka:"socket.blocking.max.ms"`
 }
 
 // ConsumerDefaults holds the default values for Consumer.
@@ -187,6 +200,8 @@ var staticConsumerDefaults = &staticConsumer{
 	EnableAutoCommit:        true,
 	EnableAutoOffsetStore:   false,
 	EnableEventRebalance:    true,
+	QueuedMinMessages:       500000,
+	SocketBlockingMax:       50 * time.Millisecond,
 }
 
 // ConfigMap converts the current configuration into a format known to the

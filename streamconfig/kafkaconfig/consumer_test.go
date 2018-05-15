@@ -17,6 +17,8 @@ var consumerDefaults = map[string]interface{}{
 	"enable.auto.commit":              true,
 	"enable.auto.offset.store":        false,
 	"go.application.rebalance.enable": true,
+	"queued.min.messages":             500000,
+	"socket.blocking.max.ms":          50,
 }
 
 var consumerOmitempties = []string{
