@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# script/tests/shellcheck: Lint shell scripts
+
+set -e
+
+cd "$(dirname "$0")/../.."
+
+find script -type f -exec shellcheck {} +

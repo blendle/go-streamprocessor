@@ -19,6 +19,9 @@ if [ -z "$*" ] && ! nc -z -w1 127.0.0.1 9092 2>/dev/null; then
   exit $?
 fi
 
+echo "==      shellcheck"
+script/tests/shellcheck
+
 echo "==      gometalinter"
 script/tests/gometalinter
 
