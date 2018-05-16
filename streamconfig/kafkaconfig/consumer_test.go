@@ -54,6 +54,7 @@ func TestConsumerDefaults(t *testing.T) {
 	assert.Equal(t, 1*time.Second, config.HeartbeatInterval)
 	assert.Equal(t, 1000000, config.MaxInFlightRequests)
 	assert.Equal(t, kafkaconfig.OffsetBeginning, config.OffsetInitial)
+	assert.Equal(t, kafkaconfig.ProtocolPlaintext, config.SecurityProtocol)
 	assert.Equal(t, 30*time.Second, config.SessionTimeout)
 	assert.Equal(t, kafkaconfig.SSL{}, config.SSL)
 	assert.Equal(t, 15*time.Minute, config.StatisticsInterval)
