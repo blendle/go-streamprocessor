@@ -64,7 +64,7 @@ type Producer struct {
 	// queue to accumulate before constructing message batches (MessageSets) to
 	// transmit to brokers. A higher value allows larger and more effective (less
 	// overhead, improved compression) batches of messages to accumulate at the
-	// expense of increased message delivery latency. Defaults to 0.
+	// expense of increased message delivery latency. Defaults to 10 ms.
 	MaxQueueBufferDuration time.Duration `kafka:"queue.buffering.max.ms,omitempty" split_words:"true"`
 
 	// MaxQueueSizeKBytes is the maximum total message size sum allowed on the
@@ -130,7 +130,7 @@ var ProducerDefaults = Producer{
 	HeartbeatInterval:      1 * time.Second,
 	MaxDeliveryRetries:     2,
 	MaxInFlightRequests:    1000000,
-	MaxQueueBufferDuration: time.Duration(0),
+	MaxQueueBufferDuration: 10 * time.Millisecond,
 	MaxQueueSizeKBytes:     2097151,
 	MaxQueueSizeMessages:   1000000,
 	RequiredAcks:           AckLeader,
