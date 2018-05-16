@@ -177,6 +177,8 @@ func (c *consumer) consume() { // nolint:gocyclo
 			return
 		case event, ok := <-c.kafka.Events():
 			if !ok {
+				c.logger.Warn("Kafka events channel closed. Exiting consumer.")
+
 				return
 			}
 

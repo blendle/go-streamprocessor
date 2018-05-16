@@ -12,5 +12,20 @@ command -v dep >/dev/null 2>&1 || {
   chmod +x "$GOPATH/bin/dep"
 }
 
+command -v shellcheck >/dev/null 2>&1 || {
+  os=$(uname -s | awk '{print tolower($0)}')
+  if [ "$os" = "darwin" ]; then
+    >&2 echo "You need to install shellcheck before continuing."
+  fi
+
+  tmp=$(mktemp -d)
+  curl -Ls "https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz" | \
+    tar xJf - --strip 1 -C "$tmp"
+
+  mkdir -p "$GOPATH/bin"
+  cp "$tmp/shellcheck" "$GOPATH/bin/shellcheck"
+  chmod +x "$GOPATH/bin/shellcheck"
+}
+
 go get -u github.com/alecthomas/gometalinter
 gometalinter --install
