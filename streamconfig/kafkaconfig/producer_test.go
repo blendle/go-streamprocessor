@@ -18,6 +18,7 @@ var producerDefaults = map[string]interface{}{
 var producerOmitempties = []string{
 	"{topic}.request.required.acks",
 	"message.send.max.retries",
+	"statistics.interval.ms",
 }
 
 func TestProducer(t *testing.T) {
@@ -39,6 +40,7 @@ func TestProducer(t *testing.T) {
 		SecurityProtocol:       kafkaconfig.ProtocolPlaintext,
 		SessionTimeout:         time.Duration(0),
 		SSL:                    kafkaconfig.SSL{KeyPath: ""},
+		StatisticsInterval:     time.Duration(0),
 		Topic:                  "",
 	}
 }
@@ -60,6 +62,7 @@ func TestProducerDefaults(t *testing.T) {
 	assert.EqualValues(t, kafkaconfig.AckLeader, config.RequiredAcks)
 	assert.Equal(t, 30*time.Second, config.SessionTimeout)
 	assert.Equal(t, kafkaconfig.SSL{}, config.SSL)
+	assert.Equal(t, 15*time.Minute, config.StatisticsInterval)
 }
 
 func TestProducer_ConfigMap(t *testing.T) {
@@ -280,6 +283,16 @@ func TestProducer_ConfigMap(t *testing.T) {
 				"ssl.keystore.password":    "5678",
 				"ssl.keystore.location":    "/tmp5",
 			},
+		},
+
+		"statisticsInterval": {
+			&kafkaconfig.Producer{StatisticsInterval: 2 * time.Second},
+			&kafka.ConfigMap{"statistics.interval.ms": 2000},
+		},
+
+		"statisticsInterval (no omitempty)": {
+			&kafkaconfig.Producer{StatisticsInterval: 0 * time.Millisecond},
+			&kafka.ConfigMap{"statistics.interval.ms": 0},
 		},
 
 		"topic (skipped)": {

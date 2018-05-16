@@ -105,6 +105,14 @@ type Producer struct {
 	// the brokers.
 	SSL SSL `kafka:"ssl,omitempty"`
 
+	// StatisticsInterval is the time interval between statistics shared by Kafka
+	// on how the client and cluster is performing.
+	//
+	// See: https://github.com/edenhill/librdkafka/wiki/Statistics
+	//
+	// If set to 0, no statistics will be produced. Defaults to 15 minutes.
+	StatisticsInterval time.Duration `kafka:"statistics.interval.ms" split_words:"true"`
+
 	// Topic is the topic used to deliver messages to. This value is used as a
 	// default value, if the provided message does not define a topic of its own.
 	Topic string `kafka:"-"`
@@ -136,6 +144,7 @@ var ProducerDefaults = Producer{
 	RequiredAcks:           AckLeader,
 	SessionTimeout:         30 * time.Second,
 	SSL:                    SSL{},
+	StatisticsInterval:     15 * time.Minute,
 }
 
 var staticProducerDefaults = &staticProducer{

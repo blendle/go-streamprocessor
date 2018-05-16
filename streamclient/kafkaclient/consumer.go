@@ -163,7 +163,7 @@ func (c *consumer) Config() interface{} {
 	return c.c
 }
 
-func (c *consumer) consume() {
+func (c *consumer) consume() { // nolint:gocyclo
 	defer func() {
 		close(c.messages)
 		c.wg.Done()
@@ -204,6 +204,13 @@ func (c *consumer) consume() {
 			// terminate the running process.
 			case kafka.Error:
 				c.handleError(e)
+
+			// Kafka stats gives periodic insights into the Kafka client inner
+			// workings.
+			//
+			// See: https://github.com/edenhill/librdkafka/wiki/Statistics
+			case *kafka.Stats:
+				c.handleStats(e)
 
 			// On receiving a Kafka message, we process the received message and
 			// prepare it for delivery to the receiver of the consumer.messages
