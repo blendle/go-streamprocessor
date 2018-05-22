@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamutil"
 	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
@@ -123,8 +124,9 @@ func TestErrors(t *testing.T) {
 
 	ec1 := &errorCloserStub{errors: make(chan error)}
 	ec2 := &errorCloserStub{errors: make(chan error)}
+	var ec3 stream.ErrorCloser
 
-	ch := streamutil.Errors(ec1, ec2)
+	ch := streamutil.Errors(ec1, ec2, ec3)
 
 	go func() { ec1.errors <- errors.New("error 1") }()
 

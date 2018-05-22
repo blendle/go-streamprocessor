@@ -15,6 +15,10 @@ func Errors(errs ...stream.ErrorCloser) <-chan error {
 	errChan := make(chan error)
 
 	for _, e := range errs {
+		if e == nil {
+			continue
+		}
+
 		go func(c <-chan error) {
 			for {
 				errChan <- (<-c)
