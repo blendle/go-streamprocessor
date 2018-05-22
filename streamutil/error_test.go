@@ -112,3 +112,44 @@ func TestErrorsChan(t *testing.T) {
 		})
 	}
 }
+
+type errorCloserStub struct{ errors chan error }
+
+func (ec *errorCloserStub) Errors() <-chan error { return ec.errors }
+func (ec *errorCloserStub) Close() error         { return nil }
+
+func TestErrors(t *testing.T) {
+	t.Parallel()
+
+	ec1 := &errorCloserStub{errors: make(chan error)}
+	ec2 := &errorCloserStub{errors: make(chan error)}
+
+	ch := streamutil.Errors(ec1, ec2)
+
+	go func() { ec1.errors <- errors.New("error 1") }()
+
+	select {
+	case err := <-ch:
+		assert.Equal(t, err, errors.New("error 1"))
+	case <-time.After(time.Second):
+		t.Fatal("timeout while waiting for error to return")
+	}
+
+	go func() { ec1.errors <- errors.New("error 2") }()
+
+	select {
+	case err := <-ch:
+		assert.Equal(t, err, errors.New("error 2"))
+	case <-time.After(time.Second):
+		t.Fatal("timeout while waiting for error to return")
+	}
+
+	go func() { ec2.errors <- errors.New("error 3") }()
+
+	select {
+	case err := <-ch:
+		assert.Equal(t, err, errors.New("error 3"))
+	case <-time.After(time.Second):
+		t.Fatal("timeout while waiting for error to return")
+	}
+}
