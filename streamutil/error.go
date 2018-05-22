@@ -3,9 +3,27 @@ package streamutil
 import (
 	"errors"
 
+	"github.com/blendle/go-streamprocessor/stream"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
+
+// Errors takes a list of stream consumers and/or producers, and returns a
+// combined errors channel on which any errors reported by the processors are
+// delivered.
+func Errors(errs ...stream.ErrorCloser) <-chan error {
+	errChan := make(chan error)
+
+	for _, e := range errs {
+		go func(c <-chan error) {
+			for {
+				errChan <- (<-c)
+			}
+		}(e.Errors())
+	}
+
+	return errChan
+}
 
 // HandleErrors listens to the provided channel, and triggers a fatal error when
 // any error is received.
