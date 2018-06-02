@@ -22,7 +22,7 @@ type tags map[string][]byte
 // For simplicity and consistency, the field key cannot be changed. It will
 // always be set to `streamMessage`. If you want to change this field, you can
 // implement your own marshaller.
-func Message(m stream.Message) zap.Field {
+func Message(m stream.Message) zapcore.Field {
 	return zap.Object("streamMessage", msg(m))
 }
 
