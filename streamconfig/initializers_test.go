@@ -66,6 +66,16 @@ func TestNewConsumer_WithEnvironmentVariables(t *testing.T) {
 	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
 }
 
+func TestNewConsumer_WithEnvironmentVariables_CustomName(t *testing.T) {
+	_ = os.Setenv("HELLO_CONSUMER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("HELLO_CONSUMER_KAFKA_BROKERS") // nolint: errcheck
+
+	config, err := streamconfig.NewConsumer(streamconfig.Name("hello"))
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
+}
+
 func TestNewConsumer_WithOptionsAndEnvironmentVariables(t *testing.T) {
 	_ = os.Setenv("CONSUMER_KAFKA_BROKERS", "broker1")
 	defer os.Unsetenv("CONSUMER_KAFKA_BROKERS") // nolint: errcheck
@@ -144,6 +154,16 @@ func TestNewProducer_WithEnvironmentVariables(t *testing.T) {
 	defer os.Unsetenv("PRODUCER_KAFKA_BROKERS") // nolint: errcheck
 
 	config, err := streamconfig.NewProducer()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
+}
+
+func TestNewProducer_WithEnvironmentVariables_CustomName(t *testing.T) {
+	_ = os.Setenv("HELLO_WORLD_PRODUCER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("HELLO_WORLD_PRODUCER_KAFKA_BROKERS") // nolint: errcheck
+
+	config, err := streamconfig.NewProducer(streamconfig.Name("hello_world"))
 	require.NoError(t, err)
 
 	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)

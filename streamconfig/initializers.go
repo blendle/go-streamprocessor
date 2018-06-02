@@ -1,6 +1,8 @@
 package streamconfig
 
 import (
+	"strings"
+
 	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
@@ -30,7 +32,12 @@ func NewConsumer(options ...Option) (Consumer, error) {
 	// provided via environment variables. If `AllowEnvironmentBasedConfiguration`
 	// is set to false, this step is skipped.
 	if config.AllowEnvironmentBasedConfiguration {
-		err := envconfig.Process(config.Name, config)
+		env := "consumer"
+		if config.Name != "" {
+			env = strings.Join([]string{config.Name, env}, "_")
+		}
+
+		err := envconfig.Process(env, config)
 		if err != nil {
 			return *config, err
 		}
@@ -80,7 +87,12 @@ func NewProducer(options ...Option) (Producer, error) {
 	// provided via environment variables. If `AllowEnvironmentBasedConfiguration`
 	// is set to false, this step is skipped.
 	if config.AllowEnvironmentBasedConfiguration {
-		err := envconfig.Process(config.Name, config)
+		env := "producer"
+		if config.Name != "" {
+			env = strings.Join([]string{config.Name, env}, "_")
+		}
+
+		err := envconfig.Process(env, config)
 		if err != nil {
 			return *config, err
 		}
