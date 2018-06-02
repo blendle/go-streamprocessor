@@ -45,13 +45,6 @@ func TestProducerDefaults(t *testing.T) {
 	assert.True(t, config.AllowEnvironmentBasedConfiguration)
 }
 
-func TestProducerUsage(t *testing.T) {
-	p := streamconfig.Producer{Global: streamconfig.Global{Name: "test_config"}}
-	usage := p.Usage()
-
-	assert.Contains(t, string(usage), "TEST_CONFIG_KAFKA_MAX_DELIVERY_RETRIES")
-}
-
 func TestProducerEnvironmentVariables(t *testing.T) {
 	t.Parallel()
 

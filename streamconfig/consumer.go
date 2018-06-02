@@ -39,10 +39,3 @@ func (c Consumer) WithOptions(opts ...Option) Consumer {
 
 	return *cc
 }
-
-// Usage returns a byte array with a table-based explanation on how to set the
-// configuration values using environment variables. This can be used to explain
-// usage details to the user of the application.
-func (c Consumer) Usage() []byte {
-	return usage(c.Name, c)
-}

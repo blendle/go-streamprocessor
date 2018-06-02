@@ -45,13 +45,6 @@ func TestConsumerDefaults(t *testing.T) {
 	assert.True(t, config.AllowEnvironmentBasedConfiguration)
 }
 
-func TestConsumerUsage(t *testing.T) {
-	c := streamconfig.Consumer{Global: streamconfig.Global{Name: "test_config"}}
-	usage := c.Usage()
-
-	assert.Contains(t, string(usage), "TEST_CONFIG_KAFKA_GROUP_ID")
-}
-
 func TestConsumerEnvironmentVariables(t *testing.T) {
 	t.Parallel()
 
