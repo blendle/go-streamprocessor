@@ -411,7 +411,7 @@ func TestOptions(t *testing.T) {
 			},
 			streamconfig.Producer{
 				Standardstream: standardstreamconfig.Producer{
-					Writer: standardstreamconfig.Writer{Writer: standardstreamclient.TestBuffer(t, "")},
+					Writer: standardstreamclient.TestBuffer(t, ""),
 				},
 			},
 		},
