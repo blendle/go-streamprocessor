@@ -29,50 +29,50 @@ func TestOptions(t *testing.T) {
 		"DisableEnvironmentConfig": {
 			[]streamconfig.Option{streamconfig.DisableEnvironmentConfig()},
 			streamconfig.Consumer{
-				AllowEnvironmentBasedConfiguration: false,
+				Global: streamconfig.Global{AllowEnvironmentBasedConfiguration: false},
 			},
 			streamconfig.Producer{
-				AllowEnvironmentBasedConfiguration: false,
+				Global: streamconfig.Global{AllowEnvironmentBasedConfiguration: false},
 			},
 		},
 
 		"ManualErrorHandling": {
 			[]streamconfig.Option{streamconfig.ManualErrorHandling()},
 			streamconfig.Consumer{
-				HandleErrors: false,
+				Global: streamconfig.Global{HandleErrors: false},
 			},
 			streamconfig.Producer{
-				HandleErrors: false,
+				Global: streamconfig.Global{HandleErrors: false},
 			},
 		},
 
 		"ManualInterruptHandling": {
 			[]streamconfig.Option{streamconfig.ManualInterruptHandling()},
 			streamconfig.Consumer{
-				HandleInterrupt: false,
+				Global: streamconfig.Global{HandleInterrupt: false},
 			},
 			streamconfig.Producer{
-				HandleInterrupt: false,
+				Global: streamconfig.Global{HandleInterrupt: false},
 			},
 		},
 
 		"Logger": {
 			[]streamconfig.Option{streamconfig.Logger(zap.NewNop())},
 			streamconfig.Consumer{
-				Logger: zap.NewNop(),
+				Global: streamconfig.Global{Logger: zap.NewNop()},
 			},
 			streamconfig.Producer{
-				Logger: zap.NewNop(),
+				Global: streamconfig.Global{Logger: zap.NewNop()},
 			},
 		},
 
 		"Name": {
 			[]streamconfig.Option{streamconfig.Name("test1")},
 			streamconfig.Consumer{
-				Name: "test1",
+				Global: streamconfig.Global{Name: "test1"},
 			},
 			streamconfig.Producer{
-				Name: "test1",
+				Global: streamconfig.Global{Name: "test1"},
 			},
 		},
 
@@ -411,7 +411,7 @@ func TestOptions(t *testing.T) {
 			},
 			streamconfig.Producer{
 				Standardstream: standardstreamconfig.Producer{
-					Writer: standardstreamclient.TestBuffer(t, ""),
+					Writer: standardstreamconfig.Writer{Writer: standardstreamclient.TestBuffer(t, "")},
 				},
 			},
 		},

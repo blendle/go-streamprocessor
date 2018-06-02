@@ -32,7 +32,7 @@ func TestTestNewConsumer_WithOptions(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	c1 := streamconfig.Consumer{Logger: logger}
+	c1 := streamconfig.Consumer{Global: streamconfig.Global{Logger: logger}}
 	c2 := streamconfig.TestNewConsumer(t, false, streamconfig.Logger(logger))
 
 	assert.EqualValues(t, c1, c2)
@@ -84,7 +84,7 @@ func TestTestNewProducer_WithOptions(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
-	p1 := streamconfig.Producer{Logger: logger}
+	p1 := streamconfig.Producer{Global: streamconfig.Global{Logger: logger}}
 	p2 := streamconfig.TestNewProducer(t, false, streamconfig.Logger(logger))
 
 	assert.EqualValues(t, p1, p2)
