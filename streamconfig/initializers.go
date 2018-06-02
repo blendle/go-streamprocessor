@@ -24,13 +24,7 @@ func NewConsumer(options ...Option) (Consumer, error) {
 	// After we've defined the default values, we overwrite any currently defined
 	// value with any custom configuration values passed into the `NewConsumer`
 	// function.
-	for _, option := range options {
-		if option == nil {
-			continue
-		}
-
-		option.apply(config, nil)
-	}
+	*config = config.WithOptions(options...)
 
 	// Finally, we set/overwrite any value with any custom configuration values
 	// provided via environment variables. If `AllowEnvironmentBasedConfiguration`
@@ -80,13 +74,7 @@ func NewProducer(options ...Option) (Producer, error) {
 	// After we've defined the default values, we overwrite any currently defined
 	// value with any custom configuration values passed into the `NewProducer`
 	// function.
-	for _, option := range options {
-		if option == nil {
-			continue
-		}
-
-		option.apply(nil, config)
-	}
+	*config = config.WithOptions(options...)
 
 	// Finally, we set/overwrite any value with any custom configuration values
 	// provided via environment variables. If `AllowEnvironmentBasedConfiguration`
