@@ -18,6 +18,10 @@ var ErrUnknownProducerClient = errors.New("unable to determine required producer
 // NewProducer returns a new streamclient producer, based on the context from
 // which this function is called.
 func NewProducer(options ...streamconfig.Option) (stream.Producer, error) {
+	if _, ok := os.LookupEnv("DRY_RUN"); ok {
+		return standardstreamclient.NewProducer(options...)
+	}
+
 	c, err := (&streamconfig.Producer{}).WithOptions(options...).FromEnv()
 	if err != nil {
 		return nil, err
@@ -32,9 +36,5 @@ func NewProducer(options ...streamconfig.Option) (stream.Producer, error) {
 		return kafkaclient.NewProducer(options...)
 	}
 
-	if os.Getenv("DRY_RUN") != "" {
-		return standardstreamclient.NewProducer(options...)
-	}
-
-	return nil, errors.New("unable to determine required producer streamclient")
+	return nil, ErrUnknownProducerClient
 }

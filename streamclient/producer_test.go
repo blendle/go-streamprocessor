@@ -89,5 +89,5 @@ func TestNewProducer_Env_DryRun_Overridden(t *testing.T) {
 	producer, err := streamclient.NewProducer()
 	require.NoError(t, err)
 
-	assert.Equal(t, "*inmemclient.producer", reflect.TypeOf(producer).String())
+	assert.Equal(t, "*standardstreamclient.producer", reflect.TypeOf(producer).String())
 }
