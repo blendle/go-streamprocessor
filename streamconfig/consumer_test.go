@@ -387,3 +387,28 @@ func TestNewConsumer_WithOptionsWithoutEnvironmentVariables(t *testing.T) {
 
 	assert.EqualValues(t, []string{"broker2"}, config.Kafka.Brokers)
 }
+
+func TestConsumer_FromEnv(t *testing.T) {
+	_ = os.Setenv("CONSUMER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("CONSUMER_KAFKA_BROKERS") // nolint: errcheck
+
+	config := streamconfig.Consumer{Kafka: kafkaconfig.Consumer{}}
+
+	config, err := config.FromEnv()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
+}
+
+func TestConsumer_FromEnv_CustomName(t *testing.T) {
+	_ = os.Setenv("HELLO_CONSUMER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("HELLO_CONSUMER_KAFKA_BROKERS") // nolint: errcheck
+
+	config := streamconfig.Consumer{Kafka: kafkaconfig.Consumer{}}
+	config.Name = "hello"
+
+	config, err := config.FromEnv()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
+}

@@ -11,25 +11,32 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig"
 )
 
+// ErrUnknownConsumerClient is returned when the desired stream client cannot be
+// inferred from the environment context.
+var ErrUnknownConsumerClient = errors.New("unable to determine required consumer streamclient")
+
 // NewConsumer returns a new streamclient consumer, based on the context from
 // which this function is called.
 func NewConsumer(options ...streamconfig.Option) (stream.Consumer, error) {
-	switch os.Getenv("STREAMCLIENT_CONSUMER") {
-	case "standardstream":
+	c, err := (&streamconfig.Consumer{}).WithOptions(options...).FromEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	switch c.Type {
+	case Standardstream:
 		return standardstreamclient.NewConsumer(options...)
-	case "inmem":
+	case Inmem:
 		return inmemclient.NewConsumer(options...)
-	case "kafka":
+	case Kafka:
 		return kafkaclient.NewConsumer(options...)
-	case "pubsub":
-		return nil, errors.New("pubsub consumer not implemented yet")
 	}
 
 	if stdinPipePresent() {
 		return standardstreamclient.NewConsumer(options...)
 	}
 
-	return nil, errors.New("unable to determine required consumer streamclient")
+	return nil, ErrUnknownConsumerClient
 }
 
 func stdinPipePresent() bool {

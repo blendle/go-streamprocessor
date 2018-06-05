@@ -49,12 +49,9 @@ func NewConsumer(options ...Option) (Consumer, error) {
 	// provided via environment variables. If `AllowEnvironmentBasedConfiguration`
 	// is set to false, this step is skipped.
 	if config.AllowEnvironmentBasedConfiguration {
-		env := "consumer"
-		if config.Name != "" {
-			env = strings.Join([]string{config.Name, env}, "_")
-		}
+		var err error
 
-		err := envconfig.Process(env, config)
+		*config, err = config.FromEnv()
 		if err != nil {
 			return *config, err
 		}
@@ -97,4 +94,17 @@ func (c Consumer) WithOptions(opts ...Option) Consumer {
 	}
 
 	return *cc
+}
+
+// FromEnv populates the Consumer based on the environment variables set with
+// the prefix based on the consumer name.
+func (c Consumer) FromEnv() (Consumer, error) {
+	cc := &c
+
+	env := "consumer"
+	if c.Name != "" {
+		env = strings.Join([]string{c.Name, env}, "_")
+	}
+
+	return *cc, envconfig.Process(env, cc)
 }

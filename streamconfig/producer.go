@@ -49,12 +49,9 @@ func NewProducer(options ...Option) (Producer, error) {
 	// provided via environment variables. If `AllowEnvironmentBasedConfiguration`
 	// is set to false, this step is skipped.
 	if config.AllowEnvironmentBasedConfiguration {
-		env := "producer"
-		if config.Name != "" {
-			env = strings.Join([]string{config.Name, env}, "_")
-		}
+		var err error
 
-		err := envconfig.Process(env, config)
+		*config, err = config.FromEnv()
 		if err != nil {
 			return *config, err
 		}
@@ -97,4 +94,17 @@ func (p Producer) WithOptions(opts ...Option) Producer {
 	}
 
 	return *pp
+}
+
+// FromEnv populates the Producer based on the environment variables set with
+// the prefix based on the producer name.
+func (p Producer) FromEnv() (Producer, error) {
+	pp := &p
+
+	env := "producer"
+	if p.Name != "" {
+		env = strings.Join([]string{p.Name, env}, "_")
+	}
+
+	return *pp, envconfig.Process(env, pp)
 }
