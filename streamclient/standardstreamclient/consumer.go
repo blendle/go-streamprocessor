@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/blendle/go-streamprocessor/stream"
 	"github.com/blendle/go-streamprocessor/streamconfig"
@@ -161,7 +162,7 @@ func (c *consumer) consume() {
 		b := make([]byte, len(scanner.Bytes()))
 		copy(b, scanner.Bytes())
 
-		c.messages <- stream.Message{Value: b}
+		c.messages <- stream.Message{Value: b, Timestamp: time.Now()}
 	}
 
 	if err := scanner.Err(); err != nil {
