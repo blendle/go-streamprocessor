@@ -27,7 +27,7 @@ type Consumer struct {
 	//
 	// Defaults to `true`, meaning the consumer will auto-close after consuming
 	// all existing messages in the `inmemstore`.
-	ConsumeOnce bool
+	ConsumeOnce bool `split_words:"true"`
 }
 
 // ConsumerDefaults holds the default values for Consumer.
