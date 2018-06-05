@@ -106,6 +106,17 @@ func TestConsumer_Messages(t *testing.T) {
 	assert.False(t, ok, "consumer did not close after last message")
 }
 
+func TestConsumer_Message_Timestamp(t *testing.T) {
+	t.Parallel()
+
+	buffer := standardstreamclient.TestBuffer(t, "")
+	consumer, closer := standardstreamclient.TestConsumer(t, buffer)
+	defer closer()
+
+	msg := <-consumer.Messages()
+	assert.NotZero(t, msg.Timestamp)
+}
+
 func TestConsumer_Messages_Ordering(t *testing.T) {
 	t.Parallel()
 
