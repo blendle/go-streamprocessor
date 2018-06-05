@@ -54,8 +54,8 @@ func TestIntegrationNewConsumer_Env(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.env, func(t *testing.T) {
-			_ = os.Setenv("STREAMCLIENT_CONSUMER", tt.env)
-			defer os.Unsetenv("STREAMCLIENT_CONSUMER") // nolint: errcheck
+			_ = os.Setenv("CONSUMER_CLIENT_TYPE", tt.env)
+			defer os.Unsetenv("CONSUMER_CLIENT_TYPE") // nolint: errcheck
 
 			consumer, err := streamclient.NewConsumer(tt.opts)
 			require.NoError(t, err)
@@ -65,9 +65,9 @@ func TestIntegrationNewConsumer_Env(t *testing.T) {
 	}
 }
 
-func TestNewConsumer_Pubsub(t *testing.T) {
-	_ = os.Setenv("STREAMCLIENT_CONSUMER", "pubsub")
-	defer os.Unsetenv("STREAMCLIENT_CONSUMER") // nolint: errcheck
+func TestNewConsumer_Unknown(t *testing.T) {
+	_ = os.Setenv("CONSUMER_CLIENT_TYPE", "pubsub")
+	defer os.Unsetenv("CONSUMER_CLIENT_TYPE") // nolint: errcheck
 
 	_, err := streamclient.NewConsumer()
 	assert.Error(t, err)
@@ -96,9 +96,4 @@ func TestNewConsumer_PipedData(t *testing.T) {
 	if e, ok := err.(*exec.ExitError); ok {
 		assert.True(t, e.Success(), fmt.Sprintf("%s\n\n%s", e.String(), string(b)))
 	}
-}
-
-func TestNewConsumer_Unknown(t *testing.T) {
-	_, err := streamclient.NewConsumer()
-	assert.Error(t, err)
 }

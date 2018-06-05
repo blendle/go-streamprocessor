@@ -424,3 +424,28 @@ func TestNewProducer_WithOptionsWithoutEnvironmentVariables(t *testing.T) {
 
 	assert.EqualValues(t, []string{"broker2"}, config.Kafka.Brokers)
 }
+
+func TestProducer_FromEnv(t *testing.T) {
+	_ = os.Setenv("PRODUCER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("PRODUCER_KAFKA_BROKERS") // nolint: errcheck
+
+	config := streamconfig.Producer{Kafka: kafkaconfig.Producer{}}
+
+	config, err := config.FromEnv()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
+}
+
+func TestProducer_FromEnv_CustomName(t *testing.T) {
+	_ = os.Setenv("HELLO_PRODUCER_KAFKA_BROKERS", "broker1")
+	defer os.Unsetenv("HELLO_PRODUCER_KAFKA_BROKERS") // nolint: errcheck
+
+	config := streamconfig.Producer{Kafka: kafkaconfig.Producer{}}
+	config.Name = "hello"
+
+	config, err := config.FromEnv()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, []string{"broker1"}, config.Kafka.Brokers)
+}

@@ -11,18 +11,25 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig"
 )
 
+// ErrUnknownProducerClient is returned when the desired stream client cannot be
+// inferred from the environment context.
+var ErrUnknownProducerClient = errors.New("unable to determine required producer streamclient")
+
 // NewProducer returns a new streamclient producer, based on the context from
 // which this function is called.
 func NewProducer(options ...streamconfig.Option) (stream.Producer, error) {
-	switch os.Getenv("STREAMCLIENT_PRODUCER") {
-	case "standardstream":
+	c, err := (&streamconfig.Producer{}).WithOptions(options...).FromEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	switch c.Type {
+	case Standardstream:
 		return standardstreamclient.NewProducer(options...)
-	case "inmem":
+	case Inmem:
 		return inmemclient.NewProducer(options...)
-	case "kafka":
+	case Kafka:
 		return kafkaclient.NewProducer(options...)
-	case "pubsub":
-		return nil, errors.New("pubsub producer not implemented yet")
 	}
 
 	if os.Getenv("DRY_RUN") != "" {
