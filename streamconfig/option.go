@@ -170,8 +170,7 @@ func KafkaGroupID(s string) Option {
 
 // KafkaGroupIDRandom sets the group ID for the consumer to a random ID. This
 // can be used to configure one-off consumers that should not share their state
-// in a consumer group. The passed in value is used as the seed for the random
-// number generator. For true randomness, pass in `time.Now().Unix()`.
+// in a consumer group.
 //
 // This option has no effect when applied to a producer.
 func KafkaGroupIDRandom() Option {
