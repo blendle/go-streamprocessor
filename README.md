@@ -16,6 +16,7 @@ This package contains shared logic for Go-based stream processors.
   * [Error Handling](#error-handling)
   * [Multiple Clients](#multiple-clients)
 * [Stream Options](#stream-options)
+  * [Built-in Usage Documentation](#built-in-usage-documentation)
 
 ## Description
 
@@ -52,10 +53,20 @@ application.
 
 It is important to note that not all stream client implementations support all
 of the `Message` fields. For example, the `standardstream` client implementation
-only supports the `Value` field, whereas the `kafka` implementation supports all
-of the fields. You need to take this into account while developing your
-application, and either show an error when you depend on a field that isn't set,
-or use alternative solutions to deal with such a situation.
+only supports the `Value` and `Timestamp` fields, whereas the `kafka`
+implementation supports all of the fields. "support" in this case means that any
+unsupported message fields won't be used by some producers, or won't be
+populated by some consumers. You need to take this into account while developing
+your application, and either show an error when you depend on a field that isn't
+set, or use alternative solutions to deal with such a situation.
+
+The supported fields right now for the available clients:
+
+* `kafka` supports _all_ fields
+* `inmem` supports _all_ fields
+* `standardstream` supports the `Value` field. The `Timestamp` field is also
+  supported by the consumer; it is set to "now" whenever a message is consumed.
+  The producer ignores the this field.
 
 ### Stream Clients
 
@@ -399,9 +410,10 @@ $ echo '<long string causing buffer overflow>' | env DRY_RUN=1 go run main.go
 received error: unable to read message from stream: bufio.Scanner: token too long
 ```
 
-In this case, we traded correctness for some complexity. If you need to use
-a single consumer or producer, there's no need to handle errors manually, but
-anything more than one can result in data loss without manual error handling.
+In this case, we gained a higher guarantee of correctness in exchange for some
+added complexity. If you need to use a single consumer or producer, there's no
+need to handle errors manually, but anything more than one can result in data
+loss without manual error handling.
 
 ### Multiple Clients
 
@@ -503,3 +515,122 @@ each client individually.
 | `KafkaSSL(capath, cert, crl, kpassword, key, kstorepassword, kstore string)` | *   | `KAFKA_SSL_*`                        | Configures the producer or consumer to use the specified SSL config.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `KafkaStatisticsInterval(d time.Duration)`                                   | *   | `KAFKA_STATISTICS_INTERVAL=1h`       | Configures the producer or consumer to use the specified statistics interval.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `KafkaTopic(s string)`                                                       | *   | `KAFKA_TOPIC=hello`                  | Configures the producer or consumer to use the specified topic. In case of the consumer, this option can be used multiple times to consume from more than one topic. In case of the producer, the last usage of this option will set the final topic to produce to.                                                                                                                                                                                                                                                                                                                                                          |
+
+### Built-in Usage Documentation
+
+When integrating this library into your application, you might want to expose
+the above mentioned environment variables to the user.
+
+While this functionality is not final yet, there is already a way to show some
+rough documentation when the user types `yourapp --help`.
+
+Here's a diff of the previous example to show how to do this:
+
+```diff
+diff --git a/main.go b/main.go
+index 8bd5433..be4d28e 100644
+--- a/main.go
++++ b/main.go
+@@ -2,6 +2,7 @@ package main
+
+ import (
+     "fmt"
++    "os"
+
+     "github.com/blendle/go-streamprocessor/streamclient"
+     "github.com/blendle/go-streamprocessor/streamconfig"
+@@ -9,6 +10,26 @@ import (
+ )
+
+ func main() {
++    about := streamutil.About{
++        Name: "My Application",
++        URI:  "https://www.example.com",
++        Usage: "This is a simple stream processor that accepts from one stream\n" +
++            "and produces the received message to two other streams.",
++        Config: map[string]string{
++            "MY_APP_ENV": "Set this variable to be reminded of its value!",
++        },
++        Consumers: []string{"consumer"},
++        Producers: []string{"producer", "producer2"},
++    }
++
++    if streamutil.Usage(os.Stdout, about) {
++        return
++    }
++
++    if v, ok := os.LookupEnv("MY_APP_ENV"); ok {
++        fmt.Printf(`you set "MY_APP_ENV" to "%s"`+"\n", v)
++    }
++
+     consumer, err := streamclient.NewConsumer(streamconfig.ManualErrorHandling())
+     if err != nil {
+         panic(err)
+```
+
+You can still use your application as before:
+
+```shell
+$ echo -e 'hello\nworld' | env DRY_RUN=1 MY_APP_ENV=hello go run main.go
+you set "MY_APP_ENV" to "hello"
+hello
+world
+```
+
+Or, you can pass `--help` to show the help documentation, and exit early:
+
+```shell
+go run main.go --help
+```
+
+```markdown
+My Application
+==============
+
+This is a simple stream processor that accepts from one stream
+and produces the received message to two other streams.
+
+🐚 ONLINE DOCUMENTATION
+-----------------------
+
+For more details about this processor, see the following URL:
+
+    https://www.example.com
+
+🐝 USAGE
+--------
+
+This stream processor is configured via environment variables. The list of
+available variables is split between these 4 sections:
+
+* PROCESSOR CONFIGURATION – how to configure the business logic of this
+  processor via environment variables.
+
+* CONSUMER – how to configure the default consumer
+
+* PRODUCER – how to configure the default producer
+
+* PRODUCER2 – how to configure the producer2
+
+⚙️  PROCESSOR CONFIGURATION
+--------------------------
+
+MY_APP_ENV
+    Set this variable to be reminded of its value!
+
+⚙️  CONSUMER
+-----------
+
+...
+
+⚙️  PRODUCER
+-----------
+
+...
+
+⚙️  PRODUCER2
+------------
+
+...
+
+```
