@@ -35,6 +35,7 @@ func TestConsumer(t *testing.T) {
 		GroupID:             "",
 		HeartbeatInterval:   time.Duration(0),
 		ID:                  "",
+		IgnoreErrors:        []kafka.ErrorCode{kafka.ErrBadMsg},
 		MaxInFlightRequests: 0,
 		OffsetInitial:       kafkaconfig.OffsetBeginning,
 		OffsetDefault:       &[]int64{5}[0],
@@ -50,10 +51,28 @@ func TestConsumerDefaults(t *testing.T) {
 	t.Parallel()
 
 	config := kafkaconfig.ConsumerDefaults
+	errs := []kafka.ErrorCode{
+		kafka.ErrTransport,
+		kafka.ErrAllBrokersDown,
+		kafka.ErrDestroy,
+		kafka.ErrFail,
+		kafka.ErrResolve,
+		kafka.ErrLeaderNotAvailable,
+		kafka.ErrNotLeaderForPartition,
+		kafka.ErrRequestTimedOut,
+		kafka.ErrBrokerNotAvailable,
+		kafka.ErrReplicaNotAvailable,
+		kafka.ErrNetworkException,
+		kafka.ErrGroupCoordinatorNotAvailable,
+		kafka.ErrNotCoordinatorForGroup,
+		kafka.ErrNotEnoughReplicas,
+		kafka.ErrNotEnoughReplicasAfterAppend,
+	}
 
 	assert.Equal(t, 5*time.Second, config.CommitInterval)
 	assert.Equal(t, kafkaconfig.Debug{}, config.Debug)
 	assert.Equal(t, 1*time.Second, config.HeartbeatInterval)
+	assert.Equal(t, errs, config.IgnoreErrors)
 	assert.Equal(t, 1000000, config.MaxInFlightRequests)
 	assert.Equal(t, kafkaconfig.OffsetBeginning, config.OffsetInitial)
 	assert.Equal(t, kafkaconfig.ProtocolPlaintext, config.SecurityProtocol)

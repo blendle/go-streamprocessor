@@ -125,35 +125,67 @@ func (c *consumer) handleOffsetCommitted(e kafka.OffsetsCommitted) {
 }
 
 // handleError handles all error events for the consumer. If an error event is
-// received, we terminate the application, as this brings us into an unknown and
-// potentially unrecoverable state.
+// received, we either terminate the application, as this brings us into an
+// unknown and potentially unrecoverable state, or we log, but ignore an error,
+// if the error code is part of the configured `IgnoreErrors` list.
 //
-// NOTE: the rdkafka documentation states the following:
+// The rdkafka documentation states the following:
 //
 //   > These errors are normally just informational since the client will
 //   > try its best to automatically recover (eventually).
 //
-// We'll monitor this and see if we need to change this in the future. If you
-// want to handle this situation manually, use the `Events()` method to receive
-// the raised errors.
+// See `IgnoreErrors` for the errors we ignore by default. Use
+// `streamconfig.KafkaHandleTransientErrors()` to handle _all_ errors, even the
+// ones that can be resolved automatically.
+//
+// If you want to handle (non-ignored) errors manually, set
+// `streamconfig.ManualErrorHandling()`, and use the `Events()` method to
+// receive the raised errors.
 func (c *consumer) handleError(e kafka.Error) {
-	c.errors <- errors.Wrap(e, "received error from event stream")
+	handleError(e, c.c.Kafka.IgnoreErrors, c.errors, c.logger)
 }
 
 // handleError handles all error events for the producer. If an error event is
-// received, we terminate the application, as this brings us into an unknown and
-// potentially unrecoverable state.
+// received, we either terminate the application, as this brings us into an
+// unknown and potentially unrecoverable state, or we log, but ignore an error,
+// if the error code is part of the configured `IgnoreErrors` list.
 //
-// NOTE: the rdkafka documentation states the following:
+// The rdkafka documentation states the following:
 //
 //   > These errors are normally just informational since the client will
 //   > try its best to automatically recover (eventually).
 //
-// We'll monitor this and see if we need to change this in the future. If you
-// want to handle this situation manually, use the `Events()` method to receive
-// the raised errors.
+// See `IgnoreErrors` for the errors we ignore by default. Use
+// `streamconfig.KafkaHandleTransientErrors()` to handle _all_ errors, even the
+// ones that can be resolved automatically.
+//
+// If you want to handle (non-ignored) errors manually, set
+// `streamconfig.ManualErrorHandling()`, and use the `Events()` method to
+// receive the raised errors.
 func (p *producer) handleError(e kafka.Error) {
-	p.errors <- errors.Wrap(e, "received error from event stream")
+	handleError(e, p.c.Kafka.IgnoreErrors, p.errors, p.logger)
+}
+
+func handleError(err kerr, ignores []kafka.ErrorCode, ch chan error, logger *zap.Logger) {
+	for i := range ignores {
+		if ignores[i] != err.Code() {
+			continue
+		}
+
+		logger.Warn(
+			"Received transient error from Kafka. Ignoring.",
+			zap.Error(err),
+		)
+
+		return
+	}
+
+	ch <- errors.Wrap(err, "received error from event stream")
+}
+
+type kerr interface {
+	Error() string
+	Code() kafka.ErrorCode
 }
 
 // handleStats handles all statistic events for the consumer. These statistics

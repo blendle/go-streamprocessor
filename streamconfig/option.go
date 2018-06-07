@@ -10,6 +10,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
 )
@@ -176,6 +177,16 @@ func KafkaGroupID(s string) Option {
 func KafkaGroupIDRandom() Option {
 	return optionFunc(func(c *Consumer, _ *Producer) {
 		c.Kafka.GroupID = fmt.Sprintf("processor-%s", uuid.Must(uuid.NewV4()))
+	})
+}
+
+// KafkaHandleTransientErrors passes _all_ errors to the errors channel,
+// including the ones that are considered "transient", and the consumer or
+// producer can resolve themselves eventually.
+func KafkaHandleTransientErrors() Option {
+	return optionFunc(func(c *Consumer, p *Producer) {
+		c.Kafka.IgnoreErrors = []kafka.ErrorCode{}
+		p.Kafka.IgnoreErrors = []kafka.ErrorCode{}
 	})
 }
 

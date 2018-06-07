@@ -48,6 +48,11 @@ type Producer struct {
 	// request logging.
 	ID string `kafka:"client.id,omitempty" envconfig:"client_id"`
 
+	// IgnoreErrors determines what Kafka related errors are considered "safe to
+	// ignore". These errors will not be transmitted over the Producer's errors
+	// channel, as the underlying library will handle those errors gracefully.
+	IgnoreErrors []kafka.ErrorCode
+
 	// MaxDeliveryRetries dictates how many times to retry sending a failing
 	// MessageSet. Note: retrying may cause reordering. Defaults to 2 retries. Use
 	// `streamconfig.KafkaOrderedDelivery()` to guarantee order delivery.
@@ -132,10 +137,32 @@ type staticProducer struct {
 
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
-	BatchMessageSize:       10000,
-	CompressionCodec:       CompressionSnappy,
-	Debug:                  Debug{},
-	HeartbeatInterval:      1 * time.Second,
+	BatchMessageSize:  10000,
+	CompressionCodec:  CompressionSnappy,
+	Debug:             Debug{},
+	HeartbeatInterval: 1 * time.Second,
+	IgnoreErrors: []kafka.ErrorCode{
+		// see: https://git.io/vhESH
+		kafka.ErrTransport,
+		kafka.ErrAllBrokersDown,
+
+		// based on the above link, manually determined if something should be
+		// considered "transient". Open question here: https://git.io/vhEdV. See
+		// list of potential errors and their description here: https://git.io/vhEdi
+		kafka.ErrDestroy,
+		kafka.ErrFail,
+		kafka.ErrResolve,
+		kafka.ErrLeaderNotAvailable,
+		kafka.ErrNotLeaderForPartition,
+		kafka.ErrRequestTimedOut,
+		kafka.ErrBrokerNotAvailable,
+		kafka.ErrReplicaNotAvailable,
+		kafka.ErrNetworkException,
+		kafka.ErrGroupCoordinatorNotAvailable,
+		kafka.ErrNotCoordinatorForGroup,
+		kafka.ErrNotEnoughReplicas,
+		kafka.ErrNotEnoughReplicasAfterAppend,
+	},
 	MaxDeliveryRetries:     2,
 	MaxInFlightRequests:    1000000,
 	MaxQueueBufferDuration: 10 * time.Millisecond,
