@@ -48,6 +48,11 @@ type Consumer struct {
 	// request logging.
 	ID string `kafka:"client.id,omitempty" envconfig:"client_id"`
 
+	// IgnoreErrors determines what Kafka related errors are considered "safe to
+	// ignore". These errors will not be transmitted over the Consumer's errors
+	// channel, as the underlying library will handle those errors gracefully.
+	IgnoreErrors []kafka.ErrorCode
+
 	// MaxInFlightRequests dictates the maximum number of in-flight requests per
 	// broker connection. This is a generic property applied to all broker
 	// communication, however it is primarily relevant to produce requests. In
@@ -183,9 +188,31 @@ type staticConsumer struct {
 
 // ConsumerDefaults holds the default values for Consumer.
 var ConsumerDefaults = Consumer{
-	CommitInterval:      5 * time.Second,
-	Debug:               Debug{},
-	HeartbeatInterval:   1 * time.Second,
+	CommitInterval:    5 * time.Second,
+	Debug:             Debug{},
+	HeartbeatInterval: 1 * time.Second,
+	IgnoreErrors: []kafka.ErrorCode{
+		// see: https://git.io/vhESH
+		kafka.ErrTransport,
+		kafka.ErrAllBrokersDown,
+
+		// based on the above link, manually determined if something should be
+		// considered "transient". Open question here: https://git.io/vhEdV. See
+		// list of potential errors and their description here: https://git.io/vhEdi
+		kafka.ErrDestroy,
+		kafka.ErrFail,
+		kafka.ErrResolve,
+		kafka.ErrLeaderNotAvailable,
+		kafka.ErrNotLeaderForPartition,
+		kafka.ErrRequestTimedOut,
+		kafka.ErrBrokerNotAvailable,
+		kafka.ErrReplicaNotAvailable,
+		kafka.ErrNetworkException,
+		kafka.ErrGroupCoordinatorNotAvailable,
+		kafka.ErrNotCoordinatorForGroup,
+		kafka.ErrNotEnoughReplicas,
+		kafka.ErrNotEnoughReplicasAfterAppend,
+	},
 	MaxInFlightRequests: 1000000,
 	OffsetInitial:       OffsetBeginning,
 	SecurityProtocol:    ProtocolPlaintext,

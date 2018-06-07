@@ -12,6 +12,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
 	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -156,6 +157,16 @@ func TestOptions(t *testing.T) {
 			},
 			streamconfig.Producer{
 				Kafka: kafkaconfig.Producer{},
+			},
+		},
+
+		"KafkaHandleTransientErrors": {
+			[]streamconfig.Option{streamconfig.KafkaHandleTransientErrors()},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{IgnoreErrors: []kafka.ErrorCode{}},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{IgnoreErrors: []kafka.ErrorCode{}},
 			},
 		},
 

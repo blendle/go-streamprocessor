@@ -31,6 +31,7 @@ func TestProducer(t *testing.T) {
 		Debug:                  kafkaconfig.Debug{All: true},
 		HeartbeatInterval:      time.Duration(0),
 		ID:                     "",
+		IgnoreErrors:           []kafka.ErrorCode{kafka.ErrBadMsg},
 		MaxDeliveryRetries:     0,
 		MaxInFlightRequests:    0,
 		MaxQueueBufferDuration: time.Duration(0),
@@ -49,11 +50,29 @@ func TestProducerDefaults(t *testing.T) {
 	t.Parallel()
 
 	config := kafkaconfig.ProducerDefaults
+	errs := []kafka.ErrorCode{
+		kafka.ErrTransport,
+		kafka.ErrAllBrokersDown,
+		kafka.ErrDestroy,
+		kafka.ErrFail,
+		kafka.ErrResolve,
+		kafka.ErrLeaderNotAvailable,
+		kafka.ErrNotLeaderForPartition,
+		kafka.ErrRequestTimedOut,
+		kafka.ErrBrokerNotAvailable,
+		kafka.ErrReplicaNotAvailable,
+		kafka.ErrNetworkException,
+		kafka.ErrGroupCoordinatorNotAvailable,
+		kafka.ErrNotCoordinatorForGroup,
+		kafka.ErrNotEnoughReplicas,
+		kafka.ErrNotEnoughReplicasAfterAppend,
+	}
 
 	assert.Equal(t, 10000, config.BatchMessageSize)
 	assert.Equal(t, kafkaconfig.Debug{}, config.Debug)
 	assert.Equal(t, kafkaconfig.CompressionSnappy, config.CompressionCodec)
 	assert.Equal(t, 1*time.Second, config.HeartbeatInterval)
+	assert.Equal(t, errs, config.IgnoreErrors)
 	assert.Equal(t, 2, config.MaxDeliveryRetries)
 	assert.Equal(t, 1000000, config.MaxInFlightRequests)
 	assert.Equal(t, 10*time.Millisecond, config.MaxQueueBufferDuration)
