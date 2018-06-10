@@ -18,6 +18,12 @@ type Consumer interface {
 	// was _not_ processed, and should be delivered again in the future.
 	Nack(Message) error
 
+	// Backlog returns an integer, indicating the number of messages still to be
+	// consumed by the consumer. If the stream client implementation does not have
+	// the concept of stream persistence, or consumer identity, this will always
+	// return `0`. An error is returned if the backlog could not be determined.
+	Backlog() (int, error)
+
 	// Config returns the final configuration used by the consumer as an
 	// interface. To access the configuration, cast the interface to a
 	// `streamconfig.Consumer` struct.
