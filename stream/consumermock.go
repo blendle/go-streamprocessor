@@ -36,6 +36,11 @@ func (c *ConsumerMock) Close() error {
 	return nil
 }
 
+// Backlog implements the Consumer interface for ConsumerMock.
+func (c ConsumerMock) Backlog() (int, error) {
+	return 0, nil
+}
+
 // Config implements the Consumer interface for ConsumerMock.
 func (c ConsumerMock) Config() interface{} {
 	return c.Configuration

@@ -27,7 +27,30 @@ func TestConsumer(tb testing.TB, topicAndGroup string, options ...streamconfig.O
 	return consumer, func() { require.NoError(tb, consumer.Close()) }
 }
 
-// TestProducer returns a new kafka consumer to be used in test cases. It also
+// TestConsumerWithAssignments is the same as `TestConsumer`, except that it
+// waits for topic assignments to finish. If no topic assignment happens within
+// a hard-coded period of 5 seconds, an error is triggered.
+func TestConsumerWithAssignments(tb testing.TB, topicAndGroup string, options ...streamconfig.Option) (stream.Consumer, func()) {
+	c, closer := TestConsumer(tb, topicAndGroup, options...)
+
+	kc := c.(*consumer)
+	for i := 0; i < 50; i++ {
+		tp, err := kc.kafka.Assignment()
+		require.NoError(tb, err)
+
+		if len(tp) > 0 {
+			return c, closer
+		}
+
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	tb.Fatal("timeout while waiting for topic assignment")
+
+	return nil, nil
+}
+
+// TestProducer returns a new Kafka consumer to be used in test cases. It also
 // returns a function that should be deferred to clean up resources.
 //
 // You pass the topic and group name of the consumer as a single argument.

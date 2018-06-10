@@ -109,6 +109,56 @@ func TestConsumer_Messages_PerMessageMemoryAllocation(t *testing.T) {
 	}
 }
 
+func TestConsumer_Backlog(t *testing.T) {
+	t.Parallel()
+
+	store := inmemstore.New()
+	_ = store.Add(stream.Message{})
+	_ = store.Add(stream.Message{})
+
+	// We pass the `InmemListen` option, which makes this consumer behave more
+	// like a regular consumer, continuously listening for new messages. Old
+	// messages are discarded once read, which allows us to track the number of
+	// messages that still need to be consumed.
+	consumer, closer := inmemclient.TestConsumer(t, store, streamconfig.InmemListen())
+	defer closer()
+
+	time.Sleep(100 * time.Millisecond)
+
+	for _, want := range []int{2, 1, 0} {
+		got, err := consumer.Backlog()
+		require.NoError(t, err)
+		assert.Equal(t, want, got)
+
+		if want > 0 {
+			<-consumer.Messages()
+			time.Sleep(time.Millisecond) // wait for the message to be deleted
+		}
+	}
+}
+
+func TestConsumer_Backlog_ConsumeOnce(t *testing.T) {
+	t.Parallel()
+
+	store := inmemstore.New()
+	_ = store.Add(stream.Message{})
+	_ = store.Add(stream.Message{})
+
+	consumer, closer := inmemclient.TestConsumer(t, store)
+	defer closer()
+
+	for i := 0; i < 3; i++ {
+		got, err := consumer.Backlog()
+		require.NoError(t, err)
+
+		// When `ConsumeOnce` is enabled for the inmem consumer, there's no notion
+		// of an offset, so `0` is always returned.
+		assert.Equal(t, 0, got)
+
+		<-consumer.Messages()
+	}
+}
+
 func TestConsumer_Errors(t *testing.T) {
 	t.Parallel()
 

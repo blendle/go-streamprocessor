@@ -121,6 +121,23 @@ func (c *consumer) Close() error {
 	return nil
 }
 
+// Backlog returns the number of messages still in the store. Note that this
+// value always returns `0`, unless you explicitly set the
+// `streamconfig.InmemStream()` option for the consumer, allowing it to
+// automatically delete messages in the store once they are consumed.
+func (c *consumer) Backlog() (int, error) {
+	// If `ConsumeOnce` is set to true, there's no notion of a backlog for the
+	// consumer, as we don't keep track of the current offset.
+	if c.c.Inmem.ConsumeOnce {
+		return 0, nil
+	}
+
+	// If `ConsumeOnce` is set to false, consumed messages are deleted from the
+	// in-memory store, so we can use the current size of the store as the backlog
+	// of messages still to be consumed.
+	return len(c.c.Inmem.Store.Messages()), nil
+}
+
 // Config returns a read-only representation of the consumer configuration as an
 // interface. To access the underlying configuration struct, cast the interface
 // to `streamconfig.Consumer`.
@@ -146,7 +163,7 @@ func (c *consumer) consume() {
 		return
 	}
 
-	// If `ConsumeOnce` is set to true, we'll start an infinite loop that listens
+	// If `ConsumeOnce` is set to false, we'll start an infinite loop that listens
 	// to new messages in the inmem store, and send them to the consumer channel.
 	// Once a message is read from the store, it's also deleted from the store, so
 	// that that message is not delivered twice.
@@ -164,9 +181,16 @@ func (c *consumer) consume() {
 			return
 		default:
 			for _, msg := range c.c.Inmem.Store.Messages() {
-				c.messages <- msg
-				if err := c.c.Inmem.Store.Del(msg); err != nil {
-					c.errors <- errors.Wrap(err, "unable to delete message")
+				select {
+				case <-c.quit:
+					c.logger.Info("Received quit signal while waiting to deliver " +
+						"message to messages channel. Exiting consumer.")
+
+					return
+				case c.messages <- msg:
+					if err := c.c.Inmem.Store.Del(msg); err != nil {
+						c.errors <- errors.Wrap(err, "unable to delete message")
+					}
 				}
 			}
 		}

@@ -174,6 +174,29 @@ func TestIntegrationConsumer_Messages_Ordering(t *testing.T) {
 	assert.Equal(t, messageCount, i)
 }
 
+func TestIntegrationConsumer_Backlog(t *testing.T) {
+	t.Parallel()
+	testutil.Integration(t)
+
+	topicAndGroup := testutil.Random(t)
+	kafkaclient.TestProduceMessages(t, topicAndGroup, "hello world", "hello universe!")
+
+	for _, want := range []int{2, 1, 0} {
+		consumer, closer := kafkaclient.TestConsumerWithAssignments(t, topicAndGroup)
+
+		got, err := consumer.Backlog()
+		require.NoError(t, err)
+		assert.Equal(t, want, got)
+
+		if want > 0 {
+			err := consumer.Ack(<-consumer.Messages())
+			require.NoError(t, err)
+		}
+
+		closer()
+	}
+}
+
 func TestIntegrationConsumer_Errors(t *testing.T) {
 	t.Parallel()
 	testutil.Integration(t)
@@ -342,6 +365,22 @@ func TestIntegrationConsumer_OffsetTail(t *testing.T) {
 	closer()
 
 	assert.Equal(t, "good", string(message.Value))
+}
+
+func TestIntegrationConsumer_OffsetTail_Last(t *testing.T) {
+	t.Parallel()
+	testutil.Integration(t)
+
+	topicOrGroup := testutil.Random(t)
+
+	kafkaclient.TestProduceMessages(t, topicOrGroup, "hello", "hi", "good", "bye")
+
+	consumer, closer := kafkaclient.TestConsumer(t, topicOrGroup, streamconfig.KafkaOffsetTail(1))
+	defer closer()
+
+	message := streamclient.TestMessageFromConsumer(t, consumer)
+
+	assert.Equal(t, "bye", string(message.Value))
 }
 
 func TestIntegrationConsumer_OffsetHead(t *testing.T) {
