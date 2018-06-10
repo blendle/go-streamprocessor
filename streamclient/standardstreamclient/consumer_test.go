@@ -194,6 +194,25 @@ func TestConsumer_Messages_ScannerError(t *testing.T) {
 	assert.Contains(t, out, "unable to read message from stream: bufio.Scanner: token too long")
 }
 
+func TestConsumer_Backlog(t *testing.T) {
+	t.Parallel()
+
+	buffer := standardstreamclient.TestBuffer(t, "hello world", "hello universe!")
+	consumer, closer := standardstreamclient.TestConsumer(t, buffer)
+	defer closer()
+
+	for i := 0; i < 3; i++ {
+		got, err := consumer.Backlog()
+		require.NoError(t, err)
+
+		// The standardstreamclient does not support backlog reporting, `0` is
+		// always returned, no matter the position in the stream.
+		assert.Equal(t, 0, got)
+
+		<-consumer.Messages()
+	}
+}
+
 func TestConsumer_Errors(t *testing.T) {
 	t.Parallel()
 

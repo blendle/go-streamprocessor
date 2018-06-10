@@ -128,6 +128,12 @@ func (c *consumer) Close() (err error) {
 	return nil
 }
 
+// Backlog is a no-op implementation, since we currently don't support reading
+// the position of the consumer when consuming from a file descriptor.
+func (c *consumer) Backlog() (int, error) {
+	return 0, nil
+}
+
 // Config returns a read-only representation of the consumer configuration as an
 // interface. To access the underlying configuration struct, cast the interface
 // to `streamconfig.Consumer`.
