@@ -113,8 +113,8 @@ func TestConsumer_Backlog(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.New()
-	store.Add(stream.Message{})
-	store.Add(stream.Message{})
+	_ = store.Add(stream.Message{})
+	_ = store.Add(stream.Message{})
 
 	// We pass the `InmemListen` option, which makes this consumer behave more
 	// like a regular consumer, continuously listening for new messages. Old
@@ -141,8 +141,8 @@ func TestConsumer_Backlog_ConsumeOnce(t *testing.T) {
 	t.Parallel()
 
 	store := inmemstore.New()
-	store.Add(stream.Message{})
-	store.Add(stream.Message{})
+	_ = store.Add(stream.Message{})
+	_ = store.Add(stream.Message{})
 
 	consumer, closer := inmemclient.TestConsumer(t, store)
 	defer closer()

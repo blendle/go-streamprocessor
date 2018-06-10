@@ -189,7 +189,8 @@ func TestIntegrationConsumer_Backlog(t *testing.T) {
 		assert.Equal(t, want, got)
 
 		if want > 0 {
-			consumer.Ack(<-consumer.Messages())
+			err := consumer.Ack(<-consumer.Messages())
+			require.NoError(t, err)
 		}
 
 		closer()
