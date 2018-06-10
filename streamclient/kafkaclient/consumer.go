@@ -156,6 +156,47 @@ func (c *consumer) Close() (err error) {
 	return err
 }
 
+// Backlog returns the combined total of "lag" all toppar's have that this
+// consumer consumes from. For example, if this consumer is consuming from
+// topic "foo" and is assigned to partitions 0, 2, and 3, then the backlog will
+// be the log-end offset, minus the current offset, for all three partitions,
+// added together.
+func (c *consumer) Backlog() (int, error) {
+	var n int
+
+	// Get the current assigned partitions.
+	toppars, err := c.kafka.Assignment()
+	if err != nil {
+		return n, err
+	}
+
+	// Get the current offset for each partition, assigned to this consumer group.
+	toppars, err = c.kafka.Committed(toppars, 5000)
+	if err != nil {
+		return n, err
+	}
+
+	// Loop over the topic partitions, get the high watermark for each toppar, and
+	// subtract the current offset from that number, to get the total "lag". We
+	// combine this value for each toppar to get the final backlog integer.
+	var l, h int64
+	for i := range toppars {
+		l, h, err = c.kafka.QueryWatermarkOffsets(*toppars[i].Topic, toppars[i].Partition, 5000)
+		if err != nil {
+			return n, err
+		}
+
+		o := int64(toppars[i].Offset)
+		if toppars[i].Offset == kafka.OffsetInvalid {
+			o = l
+		}
+
+		n = n + int(h-o)
+	}
+
+	return n, nil
+}
+
 // Config returns a read-only representation of the consumer configuration as an
 // interface. To access the underlying configuration struct, cast the interface
 // to `streamconfig.Consumer`.
