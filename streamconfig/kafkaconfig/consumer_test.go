@@ -67,6 +67,7 @@ func TestConsumerDefaults(t *testing.T) {
 		kafka.ErrNotCoordinatorForGroup,
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
+		kafka.ErrUnknownMemberID,
 	}
 
 	assert.Equal(t, 5*time.Second, config.CommitInterval)

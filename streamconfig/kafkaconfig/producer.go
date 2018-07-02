@@ -162,6 +162,7 @@ var ProducerDefaults = Producer{
 		kafka.ErrNotCoordinatorForGroup,
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
+		kafka.ErrUnknownMemberID,
 	},
 	MaxDeliveryRetries:     2,
 	MaxInFlightRequests:    1000000,
