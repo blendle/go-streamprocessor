@@ -89,6 +89,31 @@ func TestConsumer_Close_WithoutInterrupt(t *testing.T) {
 	}
 }
 
+func TestConsumer_Close_WithBlockedConsumer(t *testing.T) {
+	t.Parallel()
+
+	f := standardstreamclient.TestBuffer(t)
+
+	// We write a single message, which will block the consumer, since we don't
+	// listen to the messages channel.
+	_, _ = f.Write([]byte("test\n"))
+
+	consumer, err := standardstreamclient.NewConsumer(streamconfig.StandardstreamReader(f))
+	require.NoError(t, err)
+
+	ch := make(chan error)
+	go func() {
+		ch <- consumer.Close()
+	}()
+
+	select {
+	case err := <-ch:
+		assert.NoError(t, err)
+	case <-time.After(testutil.MultipliedDuration(t, 3*time.Second)):
+		t.Fatal("timeout while waiting for close to finish")
+	}
+}
+
 func TestConsumer_Messages(t *testing.T) {
 	t.Parallel()
 

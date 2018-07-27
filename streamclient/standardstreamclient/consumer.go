@@ -31,6 +31,7 @@ type consumer struct {
 	errors   chan error
 	messages chan stream.Message
 	signals  chan os.Signal
+	quit     chan bool
 	once     *sync.Once
 }
 
@@ -108,6 +109,10 @@ func (c *consumer) Close() (err error) {
 			return
 		}
 
+		// Trigger the quit channel, which terminates our internal goroutine to
+		// process messages, and closes the messages channel.
+		c.quit <- true
+
 		// Wait until the WaitGroup counter is zero. This makes sure we block the
 		// close call until the reader has been closed, to prevent reading errors.
 		c.wg.Wait()
@@ -168,7 +173,11 @@ func (c *consumer) consume() {
 		b := make([]byte, len(scanner.Bytes()))
 		copy(b, scanner.Bytes())
 
-		c.messages <- stream.Message{Value: b, Timestamp: time.Now()}
+		select {
+		case <-c.quit:
+			return
+		case c.messages <- stream.Message{Value: b, Timestamp: time.Now()}:
+		}
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -187,6 +196,7 @@ func newConsumer(options []streamconfig.Option) (*consumer, error) {
 		logger:   config.Logger,
 		errors:   make(chan error),
 		messages: make(chan stream.Message),
+		quit:     make(chan bool, 1),
 		once:     &sync.Once{},
 		signals:  make(chan os.Signal, 3),
 	}
