@@ -8,11 +8,11 @@ cd "$(dirname "$0")/../.."
 
 if [ -z "$*" ] && ! nc -z -w1 127.0.0.1 9092 2>/dev/null; then
   echo >&2 "No response received from 127.0.0.1:9092." \
-           "Unable to run integration tests."
+    "Unable to run integration tests."
   echo >&2
-  echo >&2 "Running script with \"-short ./...\" arguments."
+  echo >&2 'Running script with "-short ./..." arguments.'
   echo >&2
-  echo >&2 "To run integration tests, first run \"docker-compose up\"."
+  echo >&2 'To run integration tests, first run "docker-compose up".'
   echo >&2
 
   $0 -short ./...
@@ -26,13 +26,13 @@ coverage="$(go tool cover -func="$tmp")"
 percent="$(echo "$coverage" | tail -n1 | awk '{print $3}' | sed -e 's/^\([0-9]*\).*$/\1/g')"
 
 if [ "$percent" -le "$min" ]; then
-  >&2 echo "$coverage"
-  >&2 echo
-  >&2 echo "FAILED: test coverage $percent is below configured minimum: $min"
-  >&2 echo
-  >&2 echo "Run the following command for more insights:"
-  >&2 echo
-  >&2 echo "  go test -coverprofile=coverage.out ${*:-./...}; go tool cover -html=coverage.out"
+  echo >&2 "$coverage"
+  echo >&2
+  echo >&2 "FAILED: test coverage $percent is below configured minimum: $min"
+  echo >&2
+  echo >&2 "Run the following command for more insights:"
+  echo >&2
+  echo >&2 "  go test -coverprofile=coverage.out ${*:-./...}; go tool cover -html=coverage.out"
 
   exit 1
 fi

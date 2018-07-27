@@ -11,10 +11,10 @@ matches=$(find . \( -name vendor -prune \) \
   -exec grep -i '^// [a-z]* \.\.\.$' {} \; || true)
 
 if [ -n "$matches" ]; then
-  >&2 echo "Invalid code comments detected:"
-  >&2 echo
-  >&2 echo "$matches"
-  >&2 echo
+  echo >&2 "Invalid code comments detected:"
+  echo >&2
+  echo >&2 "$matches"
+  echo >&2
   exit 1
 fi
 
