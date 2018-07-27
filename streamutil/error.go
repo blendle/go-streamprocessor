@@ -21,7 +21,12 @@ func Errors(errs ...stream.ErrorCloser) <-chan error {
 
 		go func(c <-chan error) {
 			for {
-				errChan <- (<-c)
+				err, ok := <-c
+				if !ok {
+					return
+				}
+
+				errChan <- err
 			}
 		}(e.Errors())
 	}
