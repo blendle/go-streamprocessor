@@ -38,7 +38,7 @@ func Exec(tb testing.TB, wait string, runner func(tb testing.TB, cmd *exec.Cmd))
 	var out1, out2 []string
 	var wg sync.WaitGroup
 
-	cmd := exec.Command(os.Args[0], "-test.run="+tb.Name()) // nolint:gas
+	cmd := exec.Command(os.Args[0], "-test.run="+tb.Name()) // nolint: gosec
 	cmd.Env = append(os.Environ(), "RUN_WITH_EXEC=1")
 
 	stderr, err := cmd.StderrPipe()
