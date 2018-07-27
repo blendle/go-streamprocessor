@@ -234,7 +234,7 @@ func testKafkaProducer(tb testing.TB) (*kafka.Producer, func()) {
 	}
 
 	if testutil.Verbose(tb) {
-		_ = config.SetKey("debug", "cgrp,topic")
+		_ = config.SetKey("debug", "cgrp,topic") // nolint
 	}
 
 	producer, err := kafka.NewProducer(config)
@@ -259,10 +259,10 @@ func testKafkaConsumer(tb testing.TB, topic string, events bool) (*kafka.Consume
 	kconfig, err := config.Kafka.ConfigMap()
 	require.NoError(tb, err)
 
-	_ = kconfig.SetKey("client.id", "testKafkaConsumer")
-	_ = kconfig.SetKey("enable.partition.eof", true)
-	_ = kconfig.SetKey("go.events.channel.enable", events)
-	_ = kconfig.SetKey("go.application.rebalance.enable", false)
+	_ = kconfig.SetKey("client.id", "testKafkaConsumer")         // nolint
+	_ = kconfig.SetKey("enable.partition.eof", true)             // nolint
+	_ = kconfig.SetKey("go.events.channel.enable", events)       // nolint
+	_ = kconfig.SetKey("go.application.rebalance.enable", false) // nolint
 
 	consumer, err := kafka.NewConsumer(kconfig)
 	require.NoError(tb, err)
