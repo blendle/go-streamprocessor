@@ -18,7 +18,7 @@ if [ ! -d "$libpath" ]; then
   mkdir -p "$libpath/librdkafka"
   cd "$libpath/librdkafka"
 
-  curl -sL "https://github.com/edenhill/librdkafka/archive/$LIBRDKAFKA_VERSION.tar.gz" | \
+  curl -sL "https://github.com/edenhill/librdkafka/archive/$LIBRDKAFKA_VERSION.tar.gz" |
     tar -xz --strip-components=1 -f -
 
   ./configure --prefix="$dir/$libpath"
