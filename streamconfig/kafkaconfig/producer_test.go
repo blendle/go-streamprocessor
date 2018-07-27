@@ -66,6 +66,7 @@ func TestProducerDefaults(t *testing.T) {
 		kafka.ErrNotCoordinatorForGroup,
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
+		kafka.ErrUnknownMemberID,
 	}
 
 	assert.Equal(t, 10000, config.BatchMessageSize)

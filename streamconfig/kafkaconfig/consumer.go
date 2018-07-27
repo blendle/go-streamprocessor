@@ -152,7 +152,7 @@ type staticConsumer struct {
 	// message in this store. Instead, we add each message to this store
 	// synchronously whenever the message is "Acked" by the application.
 	//
-	// Finally, on quiting, or when receiving a rebalance request, we make sure to
+	// Finally, on closing, or when receiving a rebalance request, we make sure to
 	// call commit one final time synchronously, to drain the offset store of any
 	// offsets that still need to be committed to Kafka. If any error occurs
 	// during this final offset commitment, we terminate hard, making sure we have
@@ -212,6 +212,7 @@ var ConsumerDefaults = Consumer{
 		kafka.ErrNotCoordinatorForGroup,
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
+		kafka.ErrUnknownMemberID,
 	},
 	MaxInFlightRequests: 1000000,
 	OffsetInitial:       OffsetBeginning,

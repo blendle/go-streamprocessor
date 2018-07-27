@@ -147,7 +147,7 @@ func (c *consumer) Close() (err error) {
 		// Let's flush all logs still in the buffer, since this consumer is no
 		// longer useful after this point. We ignore any errors returned by sync, as
 		// it is known to return unexpected errors. See: https://git.io/vpJFk
-		_ = c.logger.Sync() // nolint: gas
+		_ = c.logger.Sync() // nolint
 
 		// Finally, close the signals channel, as it's no longer needed
 		close(c.signals)
@@ -218,7 +218,7 @@ func (c *consumer) consume() { // nolint:gocyclo
 			return
 		case event, ok := <-c.kafka.Events():
 			if !ok {
-				c.logger.Warn("Kafka events channel closed. Exiting consumer.")
+				c.logger.Info("Kafka events channel closed. Exiting consumer.")
 
 				return
 			}
@@ -357,11 +357,12 @@ func newMessageFromKafka(m *kafka.Message) *stream.Message {
 		Offset:        offset,
 	}
 
-	// We set the message's opaque field (which is still nil at this point), and
-	// populate it with the `TopicPartition` details of the Kafka message. This
-	// allows us to acknowledge this message at a later point in time, without
-	// having to hold on to the Kafka message itself.
-	_ = stream.SetMessageOpaque(msg, opaque{toppar: &m.TopicPartition})
+	// We set the message's opaque field (which is still nil at this point, so we
+	// can ignore the "not nil" error), and populate it with the `TopicPartition`
+	// details of the Kafka message. This allows us to acknowledge this message at
+	// a later point in time, without having to hold on to the Kafka message
+	// itself.
+	_ = stream.SetMessageOpaque(msg, opaque{toppar: &m.TopicPartition}) // nolint
 
 	return msg
 }

@@ -32,5 +32,6 @@ gometalinter \
   --disable=dupl \
   --disable=testify \
   --disable=test \
+  --disable=gochecknoglobals \
   --linter='lll:lll -e func -g -l {maxlinelength}:PATH:LINE:MESSAGE' \
   "${@:-./...}"
