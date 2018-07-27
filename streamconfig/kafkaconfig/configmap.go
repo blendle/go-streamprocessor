@@ -42,7 +42,7 @@ func configMap(ifaces ...interface{}) *kafka.ConfigMap {
 }
 
 func setKey(cfg *kafka.ConfigMap, ks []string, iface interface{}) {
-	_ = cfg.SetKey(strings.Join(ks, "."), iface) // nolint: gosec
+	_ = cfg.SetKey(strings.Join(ks, "."), iface) // nolint
 }
 
 func parse(cfg *kafka.ConfigMap, iface interface{}, ks []string) {

@@ -165,8 +165,8 @@ func Usage(out io.Writer, about About) bool {
 		tabs := tabwriter.NewWriter(b, 1, 0, 4, ' ', 0)
 		conf := &streamconfig.Consumer{}
 
-		_ = envconfig.Usagef(c, conf, tabs, envconfig.DefaultTableFormat) // nolint: gosec
-		_ = tabs.Flush()                                                  // nolint: gosec
+		_ = envconfig.Usagef(c, conf, tabs, envconfig.DefaultTableFormat) // nolint
+		_ = tabs.Flush()                                                  // nolint
 
 		cc := strings.Replace(c, "_", " ", -1)
 		consumers = append(consumers, name{
@@ -183,8 +183,8 @@ func Usage(out io.Writer, about About) bool {
 		tabs := tabwriter.NewWriter(b, 1, 0, 4, ' ', 0)
 		conf := &streamconfig.Producer{}
 
-		_ = envconfig.Usagef(p, conf, tabs, envconfig.DefaultTableFormat) // nolint: gosec
-		_ = tabs.Flush()                                                  // nolint: gosec
+		_ = envconfig.Usagef(p, conf, tabs, envconfig.DefaultTableFormat) // nolint
+		_ = tabs.Flush()                                                  // nolint
 
 		pp := strings.Replace(p, "_", " ", -1)
 		producers = append(producers, name{
