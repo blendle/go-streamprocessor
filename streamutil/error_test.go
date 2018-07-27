@@ -117,9 +117,9 @@ func TestErrorsChan(t *testing.T) {
 type errorCloserStub struct{ errors chan error }
 
 func (ec *errorCloserStub) Errors() <-chan error { return ec.errors }
-func (ec *errorCloserStub) Close() error         { return nil }
+func (ec *errorCloserStub) Close() error         { close(ec.errors); return nil }
 
-func TestErrors(t *testing.T) {
+func TestErrors(t *testing.T) { // nolint: gocyclo
 	t.Parallel()
 
 	ec1 := &errorCloserStub{errors: make(chan error)}
@@ -153,5 +153,24 @@ func TestErrors(t *testing.T) {
 		assert.Equal(t, err, errors.New("error 3"))
 	case <-time.After(time.Second):
 		t.Fatal("timeout while waiting for error to return")
+	}
+
+	// Send explicit nil error
+	go func() { ec1.errors <- nil }()
+
+	select {
+	case err := <-ch:
+		assert.Nil(t, err)
+	case <-time.After(time.Second):
+		t.Fatal("timeout while waiting for error to return")
+	}
+
+	// Don't send nil error if channel is closed
+	go func() { require.NoError(t, ec1.Close()) }()
+
+	select {
+	case err := <-ch:
+		t.Fatal("unexpected error returned: ", err)
+	case <-time.After(10 * time.Millisecond):
 	}
 }
