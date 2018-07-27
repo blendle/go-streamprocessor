@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# script/tests/shfmt: Check shell script formatting
+
+set -e
+
+cd "$(dirname "$0")/../.."
+
+shfmt -i 2 -p -d script
