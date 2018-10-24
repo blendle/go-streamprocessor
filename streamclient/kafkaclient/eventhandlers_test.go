@@ -3,11 +3,10 @@ package kafkaclient
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest"
 )
 
 func TestHandleError(t *testing.T) {
@@ -28,7 +27,7 @@ func TestHandleError(t *testing.T) {
 
 			err := testErr{errors.New(tt.err.String()), tt.err}
 			ch := make(chan error, 100)
-			logger := zap.NewNop()
+			logger := zaptest.NewLogger(t)
 
 			handleError(err, tt.ignores, ch, logger)
 

@@ -15,7 +15,6 @@ import (
 	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 )
 
 func TestIntegrationNewProducer(t *testing.T) {
@@ -234,8 +233,6 @@ func BenchmarkIntegrationProducer_Messages(b *testing.B) {
 	testutil.Integration(b)
 
 	topic := testutil.Random(b)
-	logger, err := zap.NewDevelopment()
-	require.NoError(b, err, logger)
 
 	// We use the default (production-like) config in this benchmark, to simulate
 	// real-world usage as best as possible.
