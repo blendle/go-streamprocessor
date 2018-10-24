@@ -8,7 +8,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest"
 )
 
 func TestTestNewConsumer(t *testing.T) {
@@ -29,9 +29,7 @@ func TestTestNewConsumer_WithoutDefaults(t *testing.T) {
 }
 
 func TestTestNewConsumer_WithOptions(t *testing.T) {
-	logger, err := zap.NewDevelopment()
-	require.NoError(t, err)
-
+	logger := zaptest.NewLogger(t)
 	c1 := streamconfig.Consumer{Global: streamconfig.Global{Logger: logger}}
 	c2 := streamconfig.TestNewConsumer(t, false, streamconfig.Logger(logger))
 
@@ -81,9 +79,7 @@ func TestTestNewProducer_WithoutDefaults(t *testing.T) {
 }
 
 func TestTestNewProducer_WithOptions(t *testing.T) {
-	logger, err := zap.NewDevelopment()
-	require.NoError(t, err)
-
+	logger := zaptest.NewLogger(t)
 	p1 := streamconfig.Producer{Global: streamconfig.Global{Logger: logger}}
 	p2 := streamconfig.TestNewProducer(t, false, streamconfig.Logger(logger))
 
