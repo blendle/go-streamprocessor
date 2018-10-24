@@ -180,7 +180,15 @@ func handleError(err kerr, ignores []kafka.ErrorCode, ch chan error, logger *zap
 		return
 	}
 
-	ch <- errors.Wrap(err, "received error from event stream")
+	select {
+	case ch <- errors.Wrap(err, "received error from event stream"):
+	default:
+		logger.Error(
+			"Unable to deliver Kafka error. "+
+				"Either you are not listening to the errors channel, or this is a bug.",
+			zap.Error(err),
+		)
+	}
 }
 
 type kerr interface {
