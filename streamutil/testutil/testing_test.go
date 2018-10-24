@@ -11,6 +11,8 @@ import (
 	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest"
 )
 
 func TestIntegration_Test(t *testing.T) {
@@ -33,7 +35,8 @@ func TestExec(t *testing.T) {
 }
 
 func TestLogger(t *testing.T) {
-	assert.Equal(t, "*zap.Logger", reflect.TypeOf(testutil.Logger(t)).String())
+	assert.Equal(t, "*zap.Logger",
+		reflect.TypeOf(zaptest.NewLogger(t, zaptest.Level(zapcore.ErrorLevel))).String())
 }
 
 func TestVerbose_TEST_DEBUG(t *testing.T) {
