@@ -41,8 +41,8 @@ type Global struct {
 
 // GlobalDefaults provide a default of global preferences.
 var GlobalDefaults = Global{
-	HandleErrors:    true,
-	HandleInterrupt: true,
-	Name:            "",
+	HandleErrors:                       true,
+	HandleInterrupt:                    true,
+	Name:                               "",
 	AllowEnvironmentBasedConfiguration: true,
 }

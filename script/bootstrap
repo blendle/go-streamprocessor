@@ -6,14 +6,14 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+os=$(uname -s | awk '{print tolower($0)}')
+
 if [ -n "$CI" ] || ! command -v dep >/dev/null 2>&1; then
-  os=$(uname -s | awk '{print tolower($0)}')
   curl -L "https://github.com/golang/dep/releases/download/v0.5.0/dep-$os-amd64" >"$GOPATH/bin/dep"
   chmod +x "$GOPATH/bin/dep"
 fi
 
 if [ -n "$CI" ] || ! command -v shellcheck >/dev/null 2>&1; then
-  os=$(uname -s | awk '{print tolower($0)}')
   if [ "$os" = "darwin" ]; then
     echo >&2 "You need to install shellcheck before continuing."
   fi
@@ -28,11 +28,21 @@ if [ -n "$CI" ] || ! command -v shellcheck >/dev/null 2>&1; then
 fi
 
 if [ -n "$CI" ] || ! command -v shfmt >/dev/null 2>&1; then
-  os=$(uname -s | awk '{print tolower($0)}')
   curl -L "https://github.com/mvdan/sh/releases/download/v2.5.0/shfmt_v2.5.0_${os}_amd64" >"$GOPATH/bin/shfmt"
 
   chmod +x "$GOPATH/bin/shfmt"
 fi
 
-go get -u github.com/alecthomas/gometalinter
-gometalinter --install
+if [ -n "$CI" ] || ! command -v gometalinter >/dev/null 2>&1; then
+  if [ "$os" = "darwin" ]; then
+    echo >&2 "You need to install gometalinter before continuing."
+  fi
+
+  tmp=$(mktemp -d)
+  curl -Ls "https://github.com/alecthomas/gometalinter/releases/download/v2.0.11/gometalinter-2.0.11-$os-amd64.tar.gz" |
+    tar xzf - --strip 1 -C "$tmp"
+
+  mkdir -p "$GOPATH/bin"
+  cp "${tmp}/"* "$GOPATH/bin/"
+  chmod +x "$GOPATH/bin/"*
+fi

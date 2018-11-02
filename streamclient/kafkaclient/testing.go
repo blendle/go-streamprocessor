@@ -11,7 +11,7 @@ import (
 	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest"
 )
 
 // TestConsumer returns a new kafka consumer to be used in test cases. It also
@@ -172,24 +172,21 @@ func TestOffsets(tb testing.TB, message stream.Message) []kafka.TopicPartition {
 func TestConsumerConfig(tb testing.TB, topicAndGroup string, options ...streamconfig.Option) []streamconfig.Option {
 	var allOptions []streamconfig.Option
 
-	opts := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
-		c.Kafka = kafkaconfig.TestConsumer(tb)
-		c.Kafka.GroupID = topicAndGroup
-		c.Kafka.Topics = []string{topicAndGroup}
-	})
-
 	if testutil.Verbose(tb) {
-		logger, err := zap.NewDevelopment()
-		require.NoError(tb, err)
-
 		verbose := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
-			c.Logger = logger.Named("TestConsumer")
 			c.Kafka.Debug.CGRP = true
 			c.Kafka.Debug.Topic = true
 		})
 
 		allOptions = append(allOptions, verbose)
 	}
+
+	opts := streamconfig.ConsumerOptions(func(c *streamconfig.Consumer) {
+		c.Logger = zaptest.NewLogger(tb).Named("testConsumer")
+		c.Kafka = kafkaconfig.TestConsumer(tb)
+		c.Kafka.GroupID = topicAndGroup
+		c.Kafka.Topics = []string{topicAndGroup}
+	})
 
 	return append(append(allOptions, opts), options...)
 }
@@ -200,11 +197,7 @@ func TestProducerConfig(tb testing.TB, topic string, options ...streamconfig.Opt
 	var allOptions []streamconfig.Option
 
 	if testutil.Verbose(tb) {
-		logger, err := zap.NewDevelopment()
-		require.NoError(tb, err)
-
 		verbose := streamconfig.ProducerOptions(func(p *streamconfig.Producer) {
-			p.Logger = logger.Named("TestProducer")
 			p.Kafka.Debug.CGRP = true
 			p.Kafka.Debug.Topic = true
 		})
@@ -213,6 +206,7 @@ func TestProducerConfig(tb testing.TB, topic string, options ...streamconfig.Opt
 	}
 
 	opts := streamconfig.ProducerOptions(func(p *streamconfig.Producer) {
+		p.Logger = zaptest.NewLogger(tb).Named("testProducer")
 		p.Kafka.ID = "testProducer"
 		p.Kafka.SessionTimeout = 1 * time.Second
 		p.Kafka.HeartbeatInterval = 150 * time.Millisecond

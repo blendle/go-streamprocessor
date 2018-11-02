@@ -83,7 +83,9 @@
     "internal/bufferpool",
     "internal/color",
     "internal/exit",
+    "internal/ztest",
     "zapcore",
+    "zaptest",
   ]
   pruneopts = ""
   revision = "ff33455a0e382e8a81d14dd7c922020b6b5e7982"
@@ -101,6 +103,7 @@
     "github.com/stretchr/testify/require",
     "go.uber.org/zap",
     "go.uber.org/zap/zapcore",
+    "go.uber.org/zap/zaptest",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

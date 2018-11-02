@@ -11,9 +11,10 @@ import (
 	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
 	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
-	"github.com/blendle/go-streamprocessor/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest"
 )
 
 func TestConsumer(t *testing.T) {
@@ -26,9 +27,9 @@ func TestConsumer(t *testing.T) {
 		Standardstream: standardstreamconfig.Consumer{},
 
 		Global: streamconfig.Global{
-			Logger:          testutil.Logger(t),
-			HandleInterrupt: false,
-			Name:            "",
+			Logger:                             zaptest.NewLogger(t, zaptest.Level(zapcore.ErrorLevel)),
+			HandleInterrupt:                    false,
+			Name:                               "",
 			AllowEnvironmentBasedConfiguration: false,
 		},
 	}

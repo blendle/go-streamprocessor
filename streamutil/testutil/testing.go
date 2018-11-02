@@ -99,12 +99,19 @@ func Integration(tb testing.TB) {
 
 // Logger returns a Zap logger instance to use during testing. It returns logs
 // in a user-friendly format, reporting anything above warn level.
+//
+// DEPRECATED: this is now supported by Zap itself, since version `1.9.0`.
+//
+//             See: https://github.com/uber-go/zap/pull/518
+//
 func Logger(tb testing.TB) *zap.Logger {
 	cfg := zap.NewDevelopmentConfig()
 	cfg.Level.SetLevel(zap.ErrorLevel)
 
 	log, err := cfg.Build()
 	require.NoError(tb, err)
+
+	log.Error("testing.Logger is deprecated, please use zaptest.NewLogger")
 
 	return log
 }
