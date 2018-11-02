@@ -2,12 +2,12 @@
 
 
 [[projects]]
-  digest = "1:82b6c6a7f7f55495200481260dc7d81b3568d2f7e27310d3e6e4df2b7b8b7659"
+  digest = "1:d091b4c15112c3a24dc5b1b03290a0076fececdc9944c06cb4b8ff039f80d00a"
   name = "github.com/confluentinc/confluent-kafka-go"
   packages = ["kafka"]
   pruneopts = ""
-  revision = "5e4d04e05fc319ce5996a867aafef29059f26862"
-  version = "v0.11.4"
+  revision = "460e8e43b282a1a68219df600ef63442b81faf5f"
+  version = "v0.11.6"
 
 [[projects]]
   digest = "1:0deddd908b6b4b768cfc272c16ee61e7088a60f7fe2f06c547bd3d8e1f8b8e77"
