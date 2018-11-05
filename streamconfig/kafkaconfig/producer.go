@@ -171,7 +171,7 @@ var ProducerDefaults = Producer{
 	MaxQueueBufferDuration: 10 * time.Millisecond,
 	MaxQueueSizeKBytes:     2097151,
 	MaxQueueSizeMessages:   1000000,
-	RequiredAcks:           AckLeader,
+	RequiredAcks:           AckAll,
 	SecurityProtocol:       ProtocolPlaintext,
 	SessionTimeout:         30 * time.Second,
 	SSL:                    SSL{},
