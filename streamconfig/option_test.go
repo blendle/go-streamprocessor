@@ -330,6 +330,16 @@ func TestOptions(t *testing.T) {
 			},
 		},
 
+		"KafkaRetryBackoff": {
+			[]streamconfig.Option{streamconfig.KafkaRetryBackoff(1 * time.Minute)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{RetryBackoff: 1 * time.Minute},
+			},
+		},
+
 		"KafkaSecurityProtocol": {
 			[]streamconfig.Option{streamconfig.KafkaSecurityProtocol(kafkaconfig.ProtocolSSL)},
 			streamconfig.Consumer{

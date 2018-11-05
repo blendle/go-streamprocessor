@@ -94,6 +94,9 @@ type Producer struct {
 	// Defaults to `AckLeader`.
 	RequiredAcks Ack `kafka:"{topic}.request.required.acks" split_words:"true"`
 
+	// RetryBackoff sets the backoff time before retrying a protocol request.
+	RetryBackoff time.Duration `kafka:"retry.backoff.ms" split_words:"true"`
+
 	// SecurityProtocol is the protocol used to communicate with brokers.
 	SecurityProtocol Protocol `kafka:"security.protocol,omitempty" split_words:"true"`
 
@@ -172,6 +175,7 @@ var ProducerDefaults = Producer{
 	MaxQueueSizeKBytes:     2097151,
 	MaxQueueSizeMessages:   1000000,
 	RequiredAcks:           AckAll,
+	RetryBackoff:           15 * time.Second,
 	SecurityProtocol:       ProtocolPlaintext,
 	SessionTimeout:         30 * time.Second,
 	SSL:                    SSL{},

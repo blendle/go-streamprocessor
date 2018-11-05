@@ -324,6 +324,17 @@ func KafkaRequireAllAck() Option {
 	})
 }
 
+// KafkaRetryBackoff configures the producer to use the configured retry
+// backoff before retrying a connection failure. See `KafkaMaxDeliveryRetries`
+// to configure the amount of retries to execute before returning an error.
+//
+// This option has no effect when applied to a consumer.
+func KafkaRetryBackoff(d time.Duration) Option {
+	return optionFunc(func(_ *Consumer, p *Producer) {
+		p.Kafka.RetryBackoff = d
+	})
+}
+
 // KafkaSecurityProtocol configures the producer or consumer to use the
 // specified security protocol.
 func KafkaSecurityProtocol(s kafkaconfig.Protocol) Option {

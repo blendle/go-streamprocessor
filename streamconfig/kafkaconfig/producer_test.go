@@ -19,6 +19,7 @@ var producerOmitempties = []string{
 	"{topic}.request.required.acks",
 	"message.send.max.retries",
 	"statistics.interval.ms",
+	"retry.backoff.ms",
 }
 
 func TestProducer(t *testing.T) {
@@ -38,6 +39,7 @@ func TestProducer(t *testing.T) {
 		MaxQueueSizeKBytes:     0,
 		MaxQueueSizeMessages:   0,
 		RequiredAcks:           kafkaconfig.AckLeader,
+		RetryBackoff:           10 * time.Second,
 		SecurityProtocol:       kafkaconfig.ProtocolPlaintext,
 		SessionTimeout:         time.Duration(0),
 		SSL:                    kafkaconfig.SSL{KeyPath: ""},
@@ -80,6 +82,7 @@ func TestProducerDefaults(t *testing.T) {
 	assert.Equal(t, 2097151, config.MaxQueueSizeKBytes)
 	assert.Equal(t, 1000000, config.MaxQueueSizeMessages)
 	assert.EqualValues(t, kafkaconfig.AckAll, config.RequiredAcks)
+	assert.EqualValues(t, 15*time.Second, config.RetryBackoff)
 	assert.Equal(t, kafkaconfig.ProtocolPlaintext, config.SecurityProtocol)
 	assert.Equal(t, 30*time.Second, config.SessionTimeout)
 	assert.Equal(t, kafkaconfig.SSL{}, config.SSL)
@@ -231,6 +234,11 @@ func TestProducer_ConfigMap(t *testing.T) {
 		"requiredAcks (all)": {
 			&kafkaconfig.Producer{RequiredAcks: kafkaconfig.AckAll},
 			&kafka.ConfigMap{"default.topic.config": kafka.ConfigMap{"request.required.acks": -1}},
+		},
+
+		"RetryBackoff": {
+			&kafkaconfig.Producer{RetryBackoff: 1 * time.Second},
+			&kafka.ConfigMap{"retry.backoff.ms": 1000},
 		},
 
 		"securityProtocol (plaintext)": {
