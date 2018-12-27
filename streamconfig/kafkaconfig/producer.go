@@ -54,8 +54,7 @@ type Producer struct {
 	IgnoreErrors []kafka.ErrorCode
 
 	// MaxDeliveryRetries dictates how many times to retry sending a failing
-	// MessageSet. Note: retrying may cause reordering. Defaults to 2 retries. Use
-	// `streamconfig.KafkaOrderedDelivery()` to guarantee order delivery.
+	// MessageSet. Defaults to 5 retries.
 	MaxDeliveryRetries int `kafka:"message.send.max.retries" split_words:"true"`
 
 	// MaxInFlightRequests dictates the maximum number of in-flight requests per
@@ -63,6 +62,9 @@ type Producer struct {
 	// communication, however it is primarily relevant to produce requests. In
 	// particular, note that other mechanisms limit the number of outstanding
 	// consumer fetch request per broker to one.
+	//
+	// Note: having more than one in flight request may cause reordering. Use
+	// `streamconfig.KafkaOrderedDelivery()` to guarantee order delivery.
 	MaxInFlightRequests int `kafka:"max.in.flight.requests.per.connection,omitempty" split_words:"true"` // nolint: lll
 
 	// MaxQueueBufferDuration is the delay to wait for messages in the producer
@@ -91,6 +93,9 @@ type Producer struct {
 	//
 	// Defaults to `AckLeader`.
 	RequiredAcks Ack `kafka:"{topic}.request.required.acks" split_words:"true"`
+
+	// RetryBackoff sets the backoff time before retrying a protocol request.
+	RetryBackoff time.Duration `kafka:"retry.backoff.ms" split_words:"true"`
 
 	// SecurityProtocol is the protocol used to communicate with brokers.
 	SecurityProtocol Protocol `kafka:"security.protocol,omitempty" split_words:"true"`
@@ -164,12 +169,13 @@ var ProducerDefaults = Producer{
 		kafka.ErrNotEnoughReplicasAfterAppend,
 		kafka.ErrUnknownMemberID,
 	},
-	MaxDeliveryRetries:     2,
+	MaxDeliveryRetries:     5,
 	MaxInFlightRequests:    1000000,
 	MaxQueueBufferDuration: 10 * time.Millisecond,
 	MaxQueueSizeKBytes:     2097151,
 	MaxQueueSizeMessages:   1000000,
-	RequiredAcks:           AckLeader,
+	RequiredAcks:           AckAll,
+	RetryBackoff:           15 * time.Second,
 	SecurityProtocol:       ProtocolPlaintext,
 	SessionTimeout:         30 * time.Second,
 	SSL:                    SSL{},
