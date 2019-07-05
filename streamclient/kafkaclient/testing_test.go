@@ -76,8 +76,7 @@ func TestIntegrationTestMessageFromTopic(t *testing.T) {
 	topicAndGroup := testutil.Random(t)
 
 	config := &kafka.ConfigMap{
-		"metadata.broker.list":  kafkaconfig.TestBrokerAddress,
-		"produce.offset.report": false,
+		"metadata.broker.list": kafkaconfig.TestBrokerAddress,
 	}
 
 	producer, err := kafka.NewProducer(config)
@@ -103,8 +102,7 @@ func TestIntegrationTestMessagesFromTopic(t *testing.T) {
 	topicAndGroup := testutil.Random(t)
 
 	config := &kafka.ConfigMap{
-		"metadata.broker.list":  kafkaconfig.TestBrokerAddress,
-		"produce.offset.report": false,
+		"metadata.broker.list": kafkaconfig.TestBrokerAddress,
 	}
 	producer, err := kafka.NewProducer(config)
 	require.NoError(t, err)
@@ -209,9 +207,8 @@ func TestIntegrationTestOffsets(t *testing.T) {
 	topicAndGroup := testutil.Random(t)
 
 	config := &kafka.ConfigMap{
-		"metadata.broker.list":  kafkaconfig.TestBrokerAddress,
-		"produce.offset.report": false,
-		"message.timeout.ms":    60000,
+		"metadata.broker.list": kafkaconfig.TestBrokerAddress,
+		"message.timeout.ms":   60000,
 	}
 	producer, err := kafka.NewProducer(config)
 	require.NoError(t, err)

@@ -177,13 +177,6 @@ type staticConsumer struct {
 	//
 	// See: https://git.io/vp5eH
 	QueuedMinMessages int `kafka:"queued.min.messages"`
-
-	// SocketBlockingMax dictates the maximum time a broker socket operation may
-	// block. A lower value improves responsiveness at the expense of slightly
-	// higher CPU usage.
-	//
-	// See: https://git.io/vp5eH
-	SocketBlockingMax time.Duration `kafka:"socket.blocking.max.ms"`
 }
 
 // ConsumerDefaults holds the default values for Consumer.
@@ -223,13 +216,11 @@ var ConsumerDefaults = Consumer{
 }
 
 var staticConsumerDefaults = &staticConsumer{
-	EnableEventsChannel:     true,
-	EnableEventPartitionEOF: false,
-	EnableAutoCommit:        true,
-	EnableAutoOffsetStore:   false,
-	EnableEventRebalance:    true,
-	QueuedMinMessages:       500000,
-	SocketBlockingMax:       50 * time.Millisecond,
+	EnableEventsChannel:   true,
+	EnableAutoCommit:      true,
+	EnableAutoOffsetStore: false,
+	EnableEventRebalance:  true,
+	QueuedMinMessages:     500000,
 }
 
 // ConfigMap converts the current configuration into a format known to the

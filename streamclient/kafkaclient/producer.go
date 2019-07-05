@@ -118,7 +118,7 @@ func (p *producer) Close() (err error) {
 		// before we abort the flush operation. If any messages are still not
 		// delivered after the timeout expires, we return an error, indicating that
 		// something went wrong.
-		i := p.kafka.Flush(5000)
+		i := p.kafka.Flush(10000)
 		if i > 0 {
 			err = fmt.Errorf("failed to flush all messages, %d left", i)
 			return

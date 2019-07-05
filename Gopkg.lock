@@ -2,12 +2,12 @@
 
 
 [[projects]]
-  digest = "1:d091b4c15112c3a24dc5b1b03290a0076fececdc9944c06cb4b8ff039f80d00a"
+  digest = "1:aaaf33c312d07806c150cabe356f2038a36f40d78d587fca2da1690b6727bde8"
   name = "github.com/confluentinc/confluent-kafka-go"
   packages = ["kafka"]
   pruneopts = ""
-  revision = "460e8e43b282a1a68219df600ef63442b81faf5f"
-  version = "v0.11.6"
+  revision = "ecccefd9ca31c656bd33471dc0d9293fcf3de99b"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:0deddd908b6b4b768cfc272c16ee61e7088a60f7fe2f06c547bd3d8e1f8b8e77"
@@ -25,12 +25,12 @@
   revision = "dd1402a4d99de9ac2f396cd6fcb957bc2c695ec1"
 
 [[projects]]
-  digest = "1:7365acd48986e205ccb8652cc746f09c8b7876030d53710ea6ef7d0bd0dcd7ca"
+  digest = "1:1d7e1867c49a6dd9856598ef7c3123604ea3daabf5b83f303ff457bcbc410b1d"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = ""
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
@@ -48,23 +48,23 @@
   revision = "8ccf5352a842c034b1a69f28c863aff9b1cdb116"
 
 [[projects]]
-  digest = "1:c587772fb8ad29ad4db67575dad25ba17a51f072ff18a22b4f0257a4d9c24f75"
+  digest = "1:381bcbeb112a51493d9d998bbba207a529c73dbb49b3fd789e48c63fac1f192c"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
     "require",
   ]
   pruneopts = ""
-  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
-  version = "v1.2.2"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
 
 [[projects]]
-  digest = "1:74f86c458e82e1c4efbab95233e0cf51b7cc02dc03193be9f62cd81224e10401"
+  digest = "1:e6ff7840319b6fda979a918a8801005ec2049abca62af19211d96971d8ec3327"
   name = "go.uber.org/atomic"
   packages = ["."]
   pruneopts = ""
-  revision = "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
-  version = "v1.3.2"
+  revision = "df976f2515e274675050de7b3f42545de80594fd"
+  version = "v1.4.0"
 
 [[projects]]
   digest = "1:22c7effcb4da0eacb2bb1940ee173fac010e9ef3c691f5de4b524d538bd980f5"
@@ -75,7 +75,7 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:246f378f80fba6fcf0f191c486b6613265abd2bc0f2fa55a36b928c67352021e"
+  digest = "1:984e93aca9088b440b894df41f2043b6a3db8f9cf30767032770bfc4796993b0"
   name = "go.uber.org/zap"
   packages = [
     ".",
@@ -88,8 +88,8 @@
     "zaptest",
   ]
   pruneopts = ""
-  revision = "ff33455a0e382e8a81d14dd7c922020b6b5e7982"
-  version = "v1.9.1"
+  revision = "27376062155ad36be76b0f12cf1572a221d3a48c"
+  version = "v1.10.0"
 
 [solve-meta]
   analyzer-name = "dep"
