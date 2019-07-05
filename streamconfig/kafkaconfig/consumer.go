@@ -206,6 +206,7 @@ var ConsumerDefaults = Consumer{
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
 		kafka.ErrUnknownMemberID,
+		kafka.ErrMaxPollExceeded,
 	},
 	MaxInFlightRequests: 1000000,
 	OffsetInitial:       OffsetBeginning,

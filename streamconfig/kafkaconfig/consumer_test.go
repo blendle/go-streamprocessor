@@ -67,6 +67,7 @@ func TestConsumerDefaults(t *testing.T) {
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
 		kafka.ErrUnknownMemberID,
+		kafka.ErrMaxPollExceeded,
 	}
 
 	assert.Equal(t, 5*time.Second, config.CommitInterval)
