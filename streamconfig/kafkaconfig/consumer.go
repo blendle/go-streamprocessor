@@ -60,6 +60,21 @@ type Consumer struct {
 	// consumer fetch request per broker to one.
 	MaxInFlightRequests int `kafka:"max.in.flight.requests.per.connection,omitempty" split_words:"true"` // nolint: lll
 
+	// MaxPollInterval determines the maximum allowed time between calls to
+	// consume messages. If this interval is exceeded the consumer is
+	// considered failed and the group will rebalance in order to reassign the
+	// partitions to another consumer group member.
+	//
+	// Warning: Offset commits may be not possible at this point.
+	//
+	// Note: It is recommended to set `EnableAutoOffsetStore` to `false` for
+	// long-time processing applications and then explicitly store offsets
+	// (using offsets_store()) after message processing, to make sure offsets
+	// are not auto-committed prior to processing has finished.
+	//
+	// The interval is checked two times per second.
+	MaxPollInterval time.Duration `kafka:"max.poll.interval.ms,omitempty" split_words:"true"`
+
 	// OffsetDefault sets an offset starting point from which to consume messages.
 	// If this value is set to zero (0), the value is ignored, and the
 	// `OffsetInitial` is used instead (see its description for more details). If

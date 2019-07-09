@@ -36,6 +36,7 @@ func TestConsumer(t *testing.T) {
 		ID:                  "",
 		IgnoreErrors:        []kafka.ErrorCode{kafka.ErrBadMsg},
 		MaxInFlightRequests: 0,
+		MaxPollInterval:     time.Duration(0),
 		OffsetInitial:       kafkaconfig.OffsetBeginning,
 		OffsetDefault:       &[]int64{5}[0],
 		SecurityProtocol:    kafkaconfig.ProtocolPlaintext,
