@@ -18,7 +18,6 @@ var consumerDefaults = map[string]interface{}{
 	"enable.auto.offset.store":        false,
 	"go.application.rebalance.enable": true,
 	"queued.min.messages":             500000,
-	"socket.blocking.max.ms":          50,
 }
 
 var consumerOmitempties = []string{
@@ -37,6 +36,7 @@ func TestConsumer(t *testing.T) {
 		ID:                  "",
 		IgnoreErrors:        []kafka.ErrorCode{kafka.ErrBadMsg},
 		MaxInFlightRequests: 0,
+		MaxPollInterval:     time.Duration(0),
 		OffsetInitial:       kafkaconfig.OffsetBeginning,
 		OffsetDefault:       &[]int64{5}[0],
 		SecurityProtocol:    kafkaconfig.ProtocolPlaintext,
@@ -68,6 +68,7 @@ func TestConsumerDefaults(t *testing.T) {
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
 		kafka.ErrUnknownMemberID,
+		kafka.ErrMaxPollExceeded,
 	}
 
 	assert.Equal(t, 5*time.Second, config.CommitInterval)

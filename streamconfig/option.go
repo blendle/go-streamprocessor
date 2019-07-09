@@ -224,6 +224,15 @@ func KafkaMaxInFlightRequests(i int) Option {
 	})
 }
 
+// KafkaMaxPollInterval sets the maximum allowed poll timeout.
+//
+// This option has no effect when applied to a producer.
+func KafkaMaxPollInterval(d time.Duration) Option {
+	return optionFunc(func(c *Consumer, _ *Producer) {
+		c.Kafka.MaxPollInterval = d
+	})
+}
+
 // KafkaMaxQueueBufferDuration sets the MaxQueueBufferDuration.
 //
 // This option has no effect when applied to a consumer.

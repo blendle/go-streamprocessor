@@ -91,7 +91,7 @@ type Producer struct {
 	// AckAll: broker will block until message is committed by all in sync
 	// replicas (ISRs).
 	//
-	// Defaults to `AckLeader`.
+	// Defaults to `AckAll`.
 	RequiredAcks Ack `kafka:"{topic}.request.required.acks" split_words:"true"`
 
 	// RetryBackoff sets the backoff time before retrying a protocol request.

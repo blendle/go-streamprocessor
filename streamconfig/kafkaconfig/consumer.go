@@ -60,6 +60,21 @@ type Consumer struct {
 	// consumer fetch request per broker to one.
 	MaxInFlightRequests int `kafka:"max.in.flight.requests.per.connection,omitempty" split_words:"true"` // nolint: lll
 
+	// MaxPollInterval determines the maximum allowed time between calls to
+	// consume messages. If this interval is exceeded the consumer is
+	// considered failed and the group will rebalance in order to reassign the
+	// partitions to another consumer group member.
+	//
+	// Warning: Offset commits may be not possible at this point.
+	//
+	// Note: It is recommended to set `EnableAutoOffsetStore` to `false` for
+	// long-time processing applications and then explicitly store offsets
+	// (using offsets_store()) after message processing, to make sure offsets
+	// are not auto-committed prior to processing has finished.
+	//
+	// The interval is checked two times per second.
+	MaxPollInterval time.Duration `kafka:"max.poll.interval.ms,omitempty" split_words:"true"`
+
 	// OffsetDefault sets an offset starting point from which to consume messages.
 	// If this value is set to zero (0), the value is ignored, and the
 	// `OffsetInitial` is used instead (see its description for more details). If
@@ -177,13 +192,6 @@ type staticConsumer struct {
 	//
 	// See: https://git.io/vp5eH
 	QueuedMinMessages int `kafka:"queued.min.messages"`
-
-	// SocketBlockingMax dictates the maximum time a broker socket operation may
-	// block. A lower value improves responsiveness at the expense of slightly
-	// higher CPU usage.
-	//
-	// See: https://git.io/vp5eH
-	SocketBlockingMax time.Duration `kafka:"socket.blocking.max.ms"`
 }
 
 // ConsumerDefaults holds the default values for Consumer.
@@ -213,6 +221,7 @@ var ConsumerDefaults = Consumer{
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
 		kafka.ErrUnknownMemberID,
+		kafka.ErrMaxPollExceeded,
 	},
 	MaxInFlightRequests: 1000000,
 	OffsetInitial:       OffsetBeginning,
@@ -223,13 +232,11 @@ var ConsumerDefaults = Consumer{
 }
 
 var staticConsumerDefaults = &staticConsumer{
-	EnableEventsChannel:     true,
-	EnableEventPartitionEOF: false,
-	EnableAutoCommit:        true,
-	EnableAutoOffsetStore:   false,
-	EnableEventRebalance:    true,
-	QueuedMinMessages:       500000,
-	SocketBlockingMax:       50 * time.Millisecond,
+	EnableEventsChannel:   true,
+	EnableAutoCommit:      true,
+	EnableAutoOffsetStore: false,
+	EnableEventRebalance:  true,
+	QueuedMinMessages:     500000,
 }
 
 // ConfigMap converts the current configuration into a format known to the

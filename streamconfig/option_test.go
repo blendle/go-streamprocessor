@@ -210,6 +210,16 @@ func TestOptions(t *testing.T) {
 			},
 		},
 
+		"KafkaMaxPollInterval": {
+			[]streamconfig.Option{streamconfig.KafkaMaxPollInterval(1 * time.Second)},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{MaxPollInterval: 1 * time.Second},
+			},
+			streamconfig.Producer{
+				Kafka: kafkaconfig.Producer{},
+			},
+		},
+
 		"KafkaMaxQueueBufferDuration": {
 			[]streamconfig.Option{streamconfig.KafkaMaxQueueBufferDuration(1 * time.Second)},
 			streamconfig.Consumer{

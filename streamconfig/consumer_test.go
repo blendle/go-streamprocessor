@@ -127,6 +127,13 @@ func TestConsumerEnvironmentVariables(t *testing.T) {
 			},
 		},
 
+		"Kafka.MaxPollInterval": {
+			map[string]string{"CONSUMER_KAFKA_MAX_POLL_INTERVAL": "300s"},
+			streamconfig.Consumer{
+				Kafka: kafkaconfig.Consumer{MaxPollInterval: 300 * time.Second},
+			},
+		},
+
 		"Kafka.OffsetDefault (positive)": {
 			map[string]string{"CONSUMER_KAFKA_OFFSET_DEFAULT": "10"},
 			streamconfig.Consumer{

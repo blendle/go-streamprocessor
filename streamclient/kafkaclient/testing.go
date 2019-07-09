@@ -147,7 +147,7 @@ func TestProduceMessages(tb testing.TB, topic string, values ...interface{}) {
 
 		select {
 		case <-producer.Events():
-		case <-time.After(testutil.MultipliedDuration(tb, 5*time.Second)):
+		case <-time.After(testutil.MultipliedDuration(tb, 10*time.Second)):
 			require.Fail(tb, "Timeout while waiting for message to be delivered.")
 		}
 	}
@@ -235,7 +235,7 @@ func testKafkaProducer(tb testing.TB) (*kafka.Producer, func()) {
 	require.NoError(tb, err)
 
 	closer := func() {
-		i := producer.Flush(testutil.MultipliedInt(tb, 1000))
+		i := producer.Flush(testutil.MultipliedInt(tb, 4000))
 		require.Zero(tb, i, "expected all messages to be flushed")
 
 		producer.Close()
