@@ -27,17 +27,3 @@ if [ -n "$CI" ] || ! command -v shfmt >/dev/null 2>&1; then
 
   chmod +x "$GOPATH/bin/shfmt"
 fi
-
-if [ -n "$CI" ] || ! command -v gometalinter >/dev/null 2>&1; then
-  if [ "$os" = "darwin" ]; then
-    echo >&2 "You need to install gometalinter before continuing."
-  fi
-
-  tmp=$(mktemp -d)
-  curl -Ls "https://github.com/alecthomas/gometalinter/releases/download/v2.0.11/gometalinter-2.0.11-$os-amd64.tar.gz" |
-    tar xzf - --strip 1 -C "$tmp"
-
-  mkdir -p "$GOPATH/bin"
-  cp "${tmp}/"* "$GOPATH/bin/"
-  chmod +x "$GOPATH/bin/"*
-fi

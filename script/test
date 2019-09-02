@@ -25,9 +25,6 @@ script/tests/shfmt
 echo "==      shellcheck"
 script/tests/shellcheck
 
-echo "==      gometalinter"
-script/tests/gometalinter
-
 echo "==      go-test"
 script/tests/go-test "$@"
 
