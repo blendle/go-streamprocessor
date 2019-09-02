@@ -3,7 +3,7 @@ module github.com/blendle/go-streamprocessor
 go 1.12
 
 require (
-	github.com/confluentinc/confluent-kafka-go v1.0.0
+	github.com/confluentinc/confluent-kafka-go v1.1.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/kelseyhightower/envconfig v0.0.0-20180517194557-dd1402a4d99d
 	github.com/kr/pretty v0.1.0 // indirect
