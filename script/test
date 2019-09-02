@@ -25,6 +25,9 @@ script/tests/shfmt
 echo "==      shellcheck"
 script/tests/shellcheck
 
+echo "==      golangci-lint"
+script/tests/golangci-lint
+
 echo "==      go-test"
 script/tests/go-test "$@"
 
