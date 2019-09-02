@@ -26,8 +26,7 @@ type Producer struct {
 
 	// CompressionCodec sets the compression codec to use for compressing message
 	// sets. This is the default value for all topics, may be overridden by the
-	// topic configuration property compression.codec. Set tot `Snappy` by
-	// default.
+    // topic configuration property compression.codec. Set to `LZ4` by default.
 	CompressionCodec Compression `kafka:"compression.codec,omitempty" split_words:"true"`
 
 	// Debug allows tweaking of the default debug values.
@@ -144,7 +143,7 @@ type staticProducer struct {
 // ProducerDefaults holds the default values for Producer.
 var ProducerDefaults = Producer{
 	BatchMessageSize:  10000,
-	CompressionCodec:  CompressionSnappy,
+	CompressionCodec:  CompressionLZ4,
 	Debug:             Debug{},
 	HeartbeatInterval: 1 * time.Second,
 	IgnoreErrors: []kafka.ErrorCode{
