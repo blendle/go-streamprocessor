@@ -23,7 +23,7 @@ env:
   - LD_LIBRARY_PATH="$GOPATH/src/github.com/blendle/go-streamprocessor/tmp-build/$LIBRDKAFKA_VERSION/lib"
   - DYLD_LIBRARY_PATH="$GOPATH/src/github.com/blendle/go-streamprocessor/tmp-build/$LIBRDKAFKA_VERSION/lib"
   - PATH="$PATH:$GOPATH/bin"
-  - DOCKER_COMPOSE_VERSION=1.21.0
+  - DOCKER_COMPOSE_VERSION=1.24.1
 
 before_install:
 - sudo rm /usr/local/bin/docker-compose
