@@ -3,7 +3,7 @@ sudo: required
 language: go
 
 go:
-- "1.11.1"
+- "1.12.9"
 
 services:
 - docker
@@ -17,6 +17,7 @@ cache:
 
 env:
   global:
+  - GO111MODULE=on
   - LIBRDKAFKA_VERSION=v1.0.0
   - PKG_CONFIG_PATH="$GOPATH/src/github.com/blendle/go-streamprocessor/tmp-build/$LIBRDKAFKA_VERSION/lib/pkgconfig"
   - LD_LIBRARY_PATH="$GOPATH/src/github.com/blendle/go-streamprocessor/tmp-build/$LIBRDKAFKA_VERSION/lib"
