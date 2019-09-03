@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/streamutil/testutil"
+	"github.com/blendle/go-streamprocessor/v3/streamutil/testutil"
 )
 
 // TestBrokerAddress is the address used to connect to the testing broker.

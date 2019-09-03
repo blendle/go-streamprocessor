@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
-	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
+	"github.com/blendle/go-streamprocessor/v3/streamclient/inmemclient"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamstore/inmemstore"
 	"github.com/stretchr/testify/assert"
 )
 

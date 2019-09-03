@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/stream"
-	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamutil"
+	"github.com/blendle/go-streamprocessor/v3/stream"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamutil"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )

@@ -4,11 +4,11 @@ import (
 	"errors"
 	"os"
 
-	"github.com/blendle/go-streamprocessor/stream"
-	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
-	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
-	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
-	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/v3/stream"
+	"github.com/blendle/go-streamprocessor/v3/streamclient/inmemclient"
+	"github.com/blendle/go-streamprocessor/v3/streamclient/kafkaclient"
+	"github.com/blendle/go-streamprocessor/v3/streamclient/standardstreamclient"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig"
 )
 
 // ErrUnknownProducerClient is returned when the desired stream client cannot be

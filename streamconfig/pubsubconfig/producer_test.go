@@ -3,7 +3,7 @@ package pubsubconfig_test
 import (
 	"testing"
 
-	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig/pubsubconfig"
 )
 
 func TestProducer(t *testing.T) {
