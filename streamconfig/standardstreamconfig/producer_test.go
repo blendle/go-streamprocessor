@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig/standardstreamconfig"
 	"github.com/stretchr/testify/assert"
 )
 

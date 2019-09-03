@@ -3,7 +3,7 @@ package kafkaconfig_test
 import (
 	"testing"
 
-	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig/kafkaconfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

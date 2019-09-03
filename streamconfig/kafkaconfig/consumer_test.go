@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig/kafkaconfig"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/stream"
-	"github.com/blendle/go-streamprocessor/streamclient"
-	"github.com/blendle/go-streamprocessor/streamclient/kafkaclient"
-	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streamutil/testutil"
+	"github.com/blendle/go-streamprocessor/v3/stream"
+	"github.com/blendle/go-streamprocessor/v3/streamclient"
+	"github.com/blendle/go-streamprocessor/v3/streamclient/kafkaclient"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig/kafkaconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

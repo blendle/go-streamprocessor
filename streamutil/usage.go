@@ -8,7 +8,7 @@ import (
 	"text/tabwriter"
 	"text/template"
 
-	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig"
 	"github.com/kelseyhightower/envconfig"
 )
 

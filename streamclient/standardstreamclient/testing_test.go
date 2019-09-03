@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/blendle/go-streamprocessor/streamclient/standardstreamclient"
-	"github.com/blendle/go-streamprocessor/streamconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamclient/standardstreamclient"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

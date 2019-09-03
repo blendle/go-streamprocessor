@@ -3,10 +3,10 @@ package streamconfig
 import (
 	"testing"
 
-	"github.com/blendle/go-streamprocessor/streamconfig/inmemconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/kafkaconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/pubsubconfig"
-	"github.com/blendle/go-streamprocessor/streamconfig/standardstreamconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig/inmemconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig/kafkaconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig/pubsubconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig/standardstreamconfig"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/stretchr/testify/require"
 )

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/blendle/go-streamprocessor/stream"
+	"github.com/blendle/go-streamprocessor/v3/stream"
 )
 
 // Store hold the in-memory representation of a data storage service.

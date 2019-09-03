@@ -3,7 +3,7 @@ package streamutil
 import (
 	"errors"
 
-	"github.com/blendle/go-streamprocessor/stream"
+	"github.com/blendle/go-streamprocessor/v3/stream"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

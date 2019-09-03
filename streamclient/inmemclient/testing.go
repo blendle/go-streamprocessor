@@ -3,9 +3,9 @@ package inmemclient
 import (
 	"testing"
 
-	"github.com/blendle/go-streamprocessor/stream"
-	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
+	"github.com/blendle/go-streamprocessor/v3/stream"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamstore/inmemstore"
 	"github.com/stretchr/testify/require"
 )
 

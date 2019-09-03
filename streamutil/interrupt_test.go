@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/streamutil"
-	"github.com/blendle/go-streamprocessor/streamutil/testutil"
+	"github.com/blendle/go-streamprocessor/v3/streamutil"
+	"github.com/blendle/go-streamprocessor/v3/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"

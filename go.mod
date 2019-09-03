@@ -1,4 +1,4 @@
-module github.com/blendle/go-streamprocessor
+module github.com/blendle/go-streamprocessor/v3
 
 go 1.12
 

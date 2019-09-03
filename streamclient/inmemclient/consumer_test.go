@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blendle/go-streamprocessor/stream"
-	"github.com/blendle/go-streamprocessor/streamclient/inmemclient"
-	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamstore/inmemstore"
-	"github.com/blendle/go-streamprocessor/streamutil/testutil"
+	"github.com/blendle/go-streamprocessor/v3/stream"
+	"github.com/blendle/go-streamprocessor/v3/streamclient/inmemclient"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamstore/inmemstore"
+	"github.com/blendle/go-streamprocessor/v3/streamutil/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

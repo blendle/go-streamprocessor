@@ -5,9 +5,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/blendle/go-streamprocessor/stream"
-	"github.com/blendle/go-streamprocessor/streamconfig"
-	"github.com/blendle/go-streamprocessor/streamutil"
+	"github.com/blendle/go-streamprocessor/v3/stream"
+	"github.com/blendle/go-streamprocessor/v3/streamconfig"
+	"github.com/blendle/go-streamprocessor/v3/streamutil"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"go.uber.org/zap"
 )
