@@ -102,6 +102,8 @@ func (p *producer) Errors() <-chan error {
 // producer on the first call.
 func (p *producer) Close() (err error) {
 	p.once.Do(func() {
+		p.logger.Info("Request received to close producer.", zap.Stack("stacktrace"))
+
 		// Trigger the quit channel, which terminates our internal goroutine to
 		// process messages, and closes the messages channel. We do this first, to
 		// prevent sending any left-over messages to a closed rdkafka producer
