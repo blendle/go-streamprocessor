@@ -111,6 +111,8 @@ func (c *consumer) Nack(m stream.Message) error {
 // but it will only effectively close the consumer on the first call.
 func (c *consumer) Close() (err error) {
 	c.once.Do(func() {
+		c.logger.Info("Request received to close consumer.", zap.Stack("stacktrace"))
+
 		// This synchronous call closes the Kafka consumer and also sends any
 		// still-to-be-committed offsets to the Broker before returning. This is
 		// done first, so that no new messages are delivered to us, before we close
