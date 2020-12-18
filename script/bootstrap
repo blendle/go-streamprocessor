@@ -14,7 +14,7 @@ if [ -n "$CI" ] || ! command -v shellcheck >/dev/null 2>&1; then
   fi
 
   tmp=$(mktemp -d)
-  curl -Ls "https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz" |
+  curl -Ls "https://github.com/koalaman/shellcheck/releases/download/stable/shellcheck-stable.linux.x86_64.tar.xz" |
     tar xJf - --strip 1 -C "$tmp"
 
   mkdir -p "$GOPATH/bin"
