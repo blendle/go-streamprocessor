@@ -1,6 +1,6 @@
 module github.com/blendle/go-streamprocessor/v3
 
-go 1.12
+go 1.15
 
 require (
 	github.com/confluentinc/confluent-kafka-go v1.1.0
