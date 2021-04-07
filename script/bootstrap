@@ -29,5 +29,5 @@ if [ -n "$CI" ] || ! command -v shfmt >/dev/null 2>&1; then
 fi
 
 if [ -n "$CI" ] || ! command -v golangci-lint >/dev/null 2>&1; then
-  curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.17.1
+  curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.39.0
 fi
