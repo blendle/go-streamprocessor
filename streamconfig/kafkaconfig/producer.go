@@ -26,7 +26,7 @@ type Producer struct {
 
 	// CompressionCodec sets the compression codec to use for compressing message
 	// sets. This is the default value for all topics, may be overridden by the
-    // topic configuration property compression.codec. Set to `LZ4` by default.
+	// topic configuration property compression.codec. Set to `LZ4` by default.
 	CompressionCodec Compression `kafka:"compression.codec,omitempty" split_words:"true"`
 
 	// Debug allows tweaking of the default debug values.
@@ -70,8 +70,8 @@ type Producer struct {
 	// queue to accumulate before constructing message batches (MessageSets) to
 	// transmit to brokers. A higher value allows larger and more effective (less
 	// overhead, improved compression) batches of messages to accumulate at the
-    // expense of increased message delivery latency. Defaults to 500 ms to
-    // strike a balance between latency and throughput.
+	// expense of increased message delivery latency. Defaults to 500 ms to
+	// strike a balance between latency and throughput.
 	MaxQueueBufferDuration time.Duration `kafka:"queue.buffering.max.ms,omitempty" split_words:"true"`
 
 	// MaxQueueSizeKBytes is the maximum total message size sum allowed on the
@@ -163,8 +163,7 @@ var ProducerDefaults = Producer{
 		kafka.ErrBrokerNotAvailable,
 		kafka.ErrReplicaNotAvailable,
 		kafka.ErrNetworkException,
-		kafka.ErrGroupCoordinatorNotAvailable,
-		kafka.ErrNotCoordinatorForGroup,
+		kafka.ErrCoordinatorNotAvailable,
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
 		kafka.ErrUnknownMemberID,
