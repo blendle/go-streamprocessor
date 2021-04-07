@@ -18,7 +18,7 @@ cache:
 env:
   global:
   - GO111MODULE=on
-  - LIBRDKAFKA_VERSION=v1.5.0
+  - LIBRDKAFKA_VERSION=v1.5.2
   - PKG_CONFIG_PATH="$GOPATH/src/github.com/blendle/go-streamprocessor/tmp-build/$LIBRDKAFKA_VERSION/lib/pkgconfig"
   - LD_LIBRARY_PATH="$GOPATH/src/github.com/blendle/go-streamprocessor/tmp-build/$LIBRDKAFKA_VERSION/lib"
   - DYLD_LIBRARY_PATH="$GOPATH/src/github.com/blendle/go-streamprocessor/tmp-build/$LIBRDKAFKA_VERSION/lib"
