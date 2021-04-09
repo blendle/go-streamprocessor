@@ -163,8 +163,6 @@ var ProducerDefaults = Producer{
 		kafka.ErrBrokerNotAvailable,
 		kafka.ErrReplicaNotAvailable,
 		kafka.ErrNetworkException,
-		kafka.ErrGroupCoordinatorNotAvailable,
-		kafka.ErrNotCoordinatorForGroup,
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
 		kafka.ErrUnknownMemberID,

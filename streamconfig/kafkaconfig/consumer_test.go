@@ -63,8 +63,6 @@ func TestConsumerDefaults(t *testing.T) {
 		kafka.ErrBrokerNotAvailable,
 		kafka.ErrReplicaNotAvailable,
 		kafka.ErrNetworkException,
-		kafka.ErrGroupCoordinatorNotAvailable,
-		kafka.ErrNotCoordinatorForGroup,
 		kafka.ErrNotEnoughReplicas,
 		kafka.ErrNotEnoughReplicasAfterAppend,
 		kafka.ErrUnknownMemberID,
